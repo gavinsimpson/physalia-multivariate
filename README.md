@@ -27,6 +27,10 @@ as design- and model-based permutations and the exchangeability of samples in
 tests. We will also discuss the use of vegan to go beyond simply fitting a
 constrained ordination model, to diagnostics, plotting, etc.
 
+## Slides
+
+* [Monday](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.html)
+
 ## Target audience and assumed background
 
 This course is suitable for PhD students (including senior thesis-based masters
