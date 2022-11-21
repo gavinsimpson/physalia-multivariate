@@ -1,0 +1,68 @@
+---
+title: Vltava forest data
+author: Gavin Simpson
+date: Novermber 21, 2022
+output: html_document
+---
+# Vltava river valley forest vegetation
+
+Vegetation plots, located at even distances along transects following the steep valley slopes of Vltava river valley, collected during 2001-2003. Each transect starts at the valley bottom and ends up at the upper part of the valley slope. Altogether 97 plots located in 27 transects were collected, each of the size 10x15 m. In each plot, all tree, shrub and herb species were recorded and their abundances were estimated using 9-degree ordinal Braun-Blanquette scale (these values were consequently transformed into percentage scale).
+
+```{r, results = "hide"}
+library("vegan")
+
+v_url <- "https://bit.ly/vltava-spp"
+vltava <- read.delim (url(v_url), row.names = 1)
+head(vltava)
+```
+
+We fit 4 clustering methods:
+
+```{r transform}
+vltava_sqrt <- sqrt(vltava)
+dis <- vegdist(decostand(vltava, method = "hellinger"),
+    method = "euclidean")
+
+cl_single   <- hclust (dis, method = 'single')
+cl_complete <- hclust (dis, 'complete')
+cl_average  <- hclust (dis, "average")
+cl_ward     <- hclust (dis, "ward.D2")
+```
+
+Plot the dendrograms
+
+```{r}
+layout(matrix(1:4, ncol = 2))
+plot(cl_single)
+plot(cl_complete)
+plot(cl_average)
+plot(cl_ward)
+layout(1)
+```
+
+Now look at *k*-means
+
+```{r}
+set.seed(42)
+vltava_hell <- decostand(vltava,
+    method = "hellinger")
+cas_km <- cascadeKM(vltava_hell, 1, 10)
+```
+
+We can plot this
+
+```{r}
+plot(cas_km)
+```
+
+## Diversity
+
+Refer back to the slides and compute the following diversity measure
+
+* richness
+
+* Shannon-Wiener
+
+* Simpson's
+
+* Hills N2

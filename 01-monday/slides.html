@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Dissimilarity, cluster analysis, diversity</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Gavin Simpson" />
+    <meta name="date" content="2022-11-21" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: inverse, middle, left, my-title-slide, title-slide
+
+.title[
+# Dissimilarity, cluster analysis, diversity
+]
+.author[
+### Gavin Simpson
+]
+.date[
+### November 21, 2022
+]
+
+---
+
+class: inverse middle center big-subsection
+
+
+
+# Welcome
+
+---
+
+# Logistics
+
+---
+
+# Today's topics
+
+* Multivariate data
+
+* Diversity
+
+* Dissimilarity
+
+* Cluster analysis
+
+---
+
+# Multivariate data
+
+---
+
+# Multivariate data
+
+Multivariate != multiple regression
+
+Multivariate means we have two or more *response* variables
+
+We are interested in learning about the common patterns or modes of variation among those multiple response variables
+
+Multivariate data require special statistical methods
+
+---
+
+# Multivariate data in biology
+
+Community composition &amp;mdash; many species as the responses
+
+In modern biology we have OTUs and ASVs
+
+In chemistry we have metabolites or spectra or masses or &amp;hellip;
+
+All of these constitute multivariate data
+
+---
+
+# Species composition
+
+Species composition is the set of species in a site or a sample
+
+Typically comes with a measure of abundance
+
+"abundance" could also be whether each species is present or absent in the sample
+
+Relative abundance expresses the abundance of each species as its proportion out of the total abundance in each sample
+
+---
+class: inverse middle center big-subsection
+
+# Dissimilarity
+
+---
+
+# Measuring association &amp;mdash; binary data
+
+.row[
+
+.col-6[
+
+&lt;table&gt;
+    &lt;tr&gt;
+        &lt;td&gt;&amp;nbsp;&lt;/td&gt;
+        &lt;td colspan=3&gt;Object &lt;i&gt;j&lt;/i&gt;&lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td rowspan=3&gt;Object &lt;i&gt;i&lt;/i&gt;&lt;/td&gt;
+        &lt;td&gt; &amp;nbsp; &lt;/td&gt;
+        &lt;td&gt; + &lt;/td&gt;
+        &lt;td&gt; - &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt; + &lt;/td&gt;
+        &lt;td&gt; a &lt;/td&gt;
+        &lt;td&gt; c &lt;/td&gt;
+    &lt;/tr&gt;
+    &lt;tr&gt;
+        &lt;td&gt; - &lt;/td&gt;
+        &lt;td&gt; b &lt;/td&gt;
+        &lt;td&gt; d &lt;/td&gt;
+    &lt;/tr&gt;
+&lt;/table&gt;
+
+]
+
+.col-6[
+Dissimilarity based on the number of species present only in `\(i\)` ( `\(b\)` ), or `\(j\)` ( `\(c\)` ), or in present in both ( `\(a\)` ), or absent in both ( `\(d\)` ).
+
+
+]
+]
+
+.row[
+
+.col-6[
+
+Jaccard similarity
+
+`$$s_{ij} = \frac{a}{a + b + c}$$`
+
+Jaccard dissimilarity
+
+`$$d_{ij} = \frac{b + c}{a + b + c}$$`
+]
+
+.col-6[
+Simple matching coefficient
+
+`$$s_{ij} = \frac{a + d}{a + b + c + d}$$`
+
+Simple matching coefficient
+
+`$$d_{ij} = \frac{b + c}{a + b + c + d}$$`
+]
+]
+
+---
+
+# Dissimilarity
+
+.row[
+
+.col-6[
+
+![](slides_files/figure-html/dissimilarity-1.svg)&lt;!-- --&gt;
+]
+
+.col-6[
+
+`$$d_{ij} = \sqrt{\sum\limits^m_{k=1}(x_{ik} - x_{jk})^2}$$`
+
+`$$d_{ij} = \sum\limits^m_{k=1}|x_{ik} - x_{jk}|$$`
+
+`$$d_{ij} = \frac{\sum\limits^m_{k=1}|x_{ik} - x_{jk}|}{\sum\limits^m_{k=1}(x_{ik} + x_{jk})}$$`
+]
+]
+
+---
+
+# Measuring association &amp;mdash; quantitative data
+
+* Euclidean distance dominated by large values.
+* Manhattan distance less affected by large values.
+* Bray-Curtis sensitive to extreme values.
+* Similarity ratio (Steinhaus-Marczewski `\(\equiv\)` Jaccard) less dominated by extremes.
+* Chord distance, used for proportional data; _signal-to-noise_ measure.
+
+.row[
+
+.col-6[
+Similarity ratio
+
+`\(d_{ij} = \frac{\sum\limits^m_{k=1}x_{ik}x_{jk}}{\left(\sum\limits^m_{k=1}x_{ik}^2 + \sum\limits^m_{k=1}x_{jk}^2 - \sum\limits^m_{k=1}x_{ik}x_{jk}\right)^2}\)`
+
+]
+
+.col-6[
+Chord distance
+
+`\(d_{ij} = \sqrt{\sum\limits^m_{k=1}(\sqrt{p_{ik}} - \sqrt{p_{jk}})^2}\)`
+]
+]
+
+---
+
+# Measuring association &amp;mdash; mixed data
+
+.row[
+
+.col-8[
+.small[
+* `\(s_{ijk}\)` is similarity between sites `\(i\)` and `\(j\)` for the `\(k\)`th variable.
+* Weights `\(w_{ijk}\)` are typically 0 or 1 depending on whether the comparison is valid for variable `\(k\)`. Can also use variable weighting with `\(w_{ijk}\)` between 0 and 1.
+* `\(w_{ijk}\)` is zero if the `\(k\)`th variable is missing for one or both of `\(i\)` or `\(j\)`.
+* For binary variables `\(s_{ijk}\)` is the Jaccard coefficient.
+* For categorical data `\(s_{ijk}\)` is 1 of `\(i\)` and `\(k\)` have same category, 0 otherwise.
+* For quantitative data `\(s_{ijk} = (1 - |x_{ik} - x_{jk}|) / R_k\)`
+]
+]
+
+.col-4[
+
+Gower's coefficient
+
+`$$s_{ij} = \frac{\sum\limits^m_{i=1} w_{ijk}s_{ijk}}{\sum\limits^m_{i=1} w_{ijk}}$$`
+]
+]
+
+---
+
+# Transformations
+
+* Can transform the variables (e.g. species) or the samples to improve the gradient separation of the dissimilarity coefficient.
+* No transformation of variables or samples leads to a situation of quantity domination &amp;mdash; big values dominate `\(d_{ij}\)`.
+* Normalise samples &amp;mdash;gives all samples equal weight.
+* Normalise variables;
+    * gives all variables equal weight,
+    * inflates the influence of rare species.
+* Double (_Wisconsin_) transformation; normalise variables then samples.
+* Noy-Meir _et al_. (1975) _J. Ecology_ **63**; 779--800.
+* Faith _et al_. (1987) _Vegetatio_ **69**; 57--68.
+
+---
+
+# Dissimilarity
+
+Two key functions
+
+1. `vegdist()`
+2. `decostand()`
+
+
+```r
+data(varespec)
+
+euc_dij &lt;- vegdist(varespec, method = "euclidean")
+
+bc_dij &lt;- vegdist(varespec)
+
+hell_dij &lt;- vegdist(decostand(varespec, method = "hellinger"),
+                    method = "euclidean")
+```
+
+---
+class: inverse middle center big-subsection
+
+# Cluster analysis
+
+---
+
+# Basic aim of cluster analysis
+
+* Partition a set of data (objects, samples) into groups known as clusters.
+* Partitions formed that minimise a stated mathematical criterion, e.g. sum of squares (SS)
+    * Minimise within groups SS &amp;rarr; maximising between group SS
+* Cluster analysis is a compromise however:
+    * With 50 objects there are `\(10^{80}\)` possible ways of partitioning the objects
+* Compromise is made in selecting a clustering scheme that reduces the number of partitions to a reasonable value.
+* Commonest approaches impose a hierarchy and then either fuse (_agglomerative_) or split (_divisive_) samples and clusters.
+
+---
+
+# A taxonomy of clusterings
+
+* Clustering techniques can be characterised in many ways:
+
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt;Formal&lt;/td&gt;
+&lt;td&gt;Informal&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Hierarchical&lt;/td&gt;
+&lt;td&gt;Non-hierarchical&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Quantitative&lt;/td&gt;
+&lt;td&gt;Qualitative&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Agglomerative&lt;/td&gt;
+&lt;td&gt;Divisive&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Polythetic&lt;/td&gt;
+&lt;td&gt;Monothetic&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Sharp&lt;/td&gt;
+&lt;td&gt;Fuzzy&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Supervised&lt;/td&gt;
+&lt;td&gt;Unsupervised&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;Useful&lt;/td&gt;
+&lt;td&gt;Not useful&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+---
+
+# A cautionary tale
+
+* Cluster analysis _per se_ is _unsupervised_; we want to find groups in our data.
+* We will define _classification_ as a _supervised_ procedure where we know _a priori_ what the groups are.
+
+---
+
+# A cautionary tale
+
+&gt; The availability of computer packages of classification techniques has led to the waste of more valuable scientific time than any other "statistical" innovation (with the possible exception of multiple regression techniques).
+&gt;  R.M. Cormack (1970) _J. Roy. Stat. Soc. A_ **134(3)**; 321--367. 
+
+---
+class: inverse middle center big-subsection
+
+# Hierarchical cluster analysis
+
+---
+
+# Agglomerative hierarchical clustering
+
+* Agglomerative methods start with all observations in separate clusters and fuse the two most similar observations.
+* Fusion continues, with the two most similar observations and/or clusters being fused at each step.
+* Five main stages in this analysis:
+    * calculate matrix of _(dis)similarities_ `\(d_{ij}\)` between all pairs of `\(m\)` objects,
+    * fuse objects into groups using chosen _clustering strategy_,
+    * display the results graphically via a _dendrogram_ or superimposed on to an ordination,
+    * check for distortion,
+    * validate the results
+
+---
+
+# Clustering strategies
+
+* Different strategies can be used to determine the dissimilarity (_distance_) between a sample and a cluster or two clusters.
+
+* Single link or nearest neighbour;
+    * the distance between the closest members of two clusters,
+    * finds the minimum spanning tree, the shortest tree connecting all points,
+    * can produce _chaining_, producing groups of unequal size.
+
+* Complete link or furthest neighbour;
+    * the distance between the farthest members of two clusters,
+    * produces compact clusters of roughly equal size,
+    * may make compact groups even when none exist
+
+---
+
+# Clustering strategies
+
+* Centroid;
+    * the distance between the centroids (the centre of gravity) of two clusters,
+    * centroid is the point that is the average of the coordinates (variables) of all objects in the cluster
+    * can produce reversals
+
+* Unweighted group average
+    * the average of the distances between the samples in one cluster and the samples of another,
+    * intermediate between single and complete link methods,
+    * maximises the \alert{cophenetic correlation},
+    * may make compact clusters where none exist,
+
+---
+
+# Clustering strategies
+* Minimum variance (Ward's method)
+    * fuse two groups if and only if neither group will combine with any other group to produce a lower within group \alert{sum of squares}
+    * forms compact clusters of equal size; even where none exist,
+
+---
+
+# Clustering strategies
+
+![](slides_files/figure-html/clustering-strategies-figure-1.svg)&lt;!-- --&gt;
+
+---
+
+# Prehistoric dogs from Thailand
+
+* Archaeological digs at prehistoric sites in Thailand have produced a collection of canine mandibles, covering period 3500BC to today
+* Origins of the prehistoric dog uncertain
+    * Could possibly descend from the golden jackal or the wolf
+    * Wolf not native to Thailand; nearest indigenous wolves in western China or Indian subcontinent
+* Data are mean values of each of six measurements of specimens from 7 canine groups
+
+---
+
+# Prehistoric dogs from Thailand
+
+![](slides_files/figure-html/canine-1.svg)&lt;!-- --&gt;
+
+---
+
+# Graphical display; dendrograms
+
+.row[
+
+.col-7[
+* The height is the dissimilarity at which the fusion was made.
+* The length of the _stem_ represents the dissimilarities between clusters.
+* _Nodes_ represent clusters; internal or terminal.
+* Configuration of nodes and stems is known as the tree _topology_.
+* Can flip two adjacent stems without affecting topology.
+* Form a clustering by cutting the dendrogram.
+
+]
+
+.col-5[
+
+![](slides_files/figure-html/canine-minimum-1.svg)&lt;!-- --&gt;
+]
+]
+
+---
+
+# Graphical display; heatmap
+
+.row[
+.col-7[
+
+* A heatmap is another graphical display of data structure.
+* Begin by reordering the rows (sites) and columns (variables) of data matrix.
+* Reorder using cluster analysis on rows and columns separately.
+* Central panel shows the values of the variables for each site as a shading.
+
+]
+
+.col-5[
+![](slides_files/figure-html/heatmap-1.svg)&lt;!-- --&gt;
+]
+]
+
+---
+
+# Test for distortion
+
+.row[
+.col-8[
+
+* The hierarchical cluster analysis represents the underlying original dissimilarities
+* Check the dendrogram for distortion
+* Calculate the _cophenetic_ distances; the heights on the dendrogram where samples are fused
+* Calculate the Pearson correlation between the original dissimilarities and cophenetic distances; _cophenetic correlation_
+* Cophenetic correlation = 0.712
+
+]
+
+.col-4[
+
+![](slides_files/figure-html/cophenetic-1.svg)&lt;!-- --&gt;
+]
+]
+
+---
+class: inverse middle center big-subsection
+
+# _k_-means clustering
+
+---
+
+# _k_-means clustering
+
+* Hierarchical clustering has a legacy of history: once formed, clusters cannot be changed even if it would be sensible to do so.
+* `\(k\)`-means is an iterative procedure that produces a non-hierarchical cluster analysis.
+* If algorithm started from a hierarchical cluster analysis, it will be optimised.
+* Best suited with _centroid_, _group-average_ or _minimum variance_ linkage methods.
+* Computationally difficult; cannot be sure that an optimal solution is found.
+
+---
+
+# _k_-means clustering
+
+* Given `\(n\)` objects in an `\(m\)`-dimensional space, find a partition into `\(k\)` groups (clusters) such that the objects within each cluster are more similar to one another than to objects in the other clusters.
+* `\(k\)`-means minimises the within group sums of squares (WSS).
+* `\(k\)` is chosen by the user; a scree plot of the WSS for `\(k = 1,\dots,a\)` where `\(a\)` is some small number.
+* Even with modest `\(n\)` cannot evaluate all possible partitions to find one with lowest WSS.
+* As such, algorithms have been developed that rearrange existing partitions and keep the new one only if it is an improvement.
+
+---
+
+# _k_-means clustering
+
+&lt;table&gt;
+&lt;tr&gt;
+&lt;td&gt; `\(n\)` &lt;/td&gt;
+&lt;td&gt; `\(k\)` &lt;/td&gt;
+&lt;td&gt;Number of possible partitions&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;15&lt;/td&gt;
+&lt;td&gt;3&lt;/td&gt;
+&lt;td&gt;2,375,101&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;20&lt;/td&gt;
+&lt;td&gt;4&lt;/td&gt;
+&lt;td&gt;45,232,115,901&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;25&lt;/td&gt;
+&lt;td&gt;8&lt;/td&gt;
+&lt;td&gt;690,223,721,118,368,580&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;100&lt;/td&gt;
+&lt;td&gt;5&lt;/td&gt;
+&lt;td&gt; `\(10^{68}\)` &lt;/td&gt;
+&lt;/tr&gt;
+&lt;/table&gt;
+
+---
+
+# _k_-means clustering algorithm
+
+* `\(k\)`-means algorithm proceeds as follows:
+    1. Find some initial partition of the individuals into `\(k\)` groups. May be provided by previous hierarchical cluster analysis,
+    2. Calculate the change in the clustering criterion (e.g. WSS) by moving each individual from its current cluster to another,
+    3. Make the change that leads to the greatest improvement in the value of the clustering criterion,
+    4. Repeat steps 2 and 3 until no move of an individual leads to an improvement in the clustering criterion.
+* If variables are on different scales, they should be standardised before applying `\(k\)`-means.
+* Display results on an ordination; no hierarchy so no dendrogram.
+
+---
+
+# k-means clustering: Ponds
+
+* Cluster 30 shallow ponds and pools from south east UK on basis of water chemistry.
+* Run `\(k\)`-means for `\(k = 1,\dots,10\)` and collect WSS.
+* No clear elbow in scree plot of WSS; change of slope at `\(k = 4\)`.
+* Display results of `\(k\)`-means with `\(k = 4\)` on an NMDS of the Ponds data set.
+
+---
+
+# k-means clustering: Ponds
+
+![](slides_files/figure-html/ponds-k-means-1.svg)&lt;!-- --&gt;![](slides_files/figure-html/ponds-k-means-2.svg)&lt;!-- --&gt;
+
+---
+class: inverse middle center big-subsection
+
+# Indicator species analysis
+
+---
+
+# Detection of indicator species
+
+* A basic concept and tradition in ecology and biogeography.
+* Species characteristic of e.g. particular habitat, geographical region, vegetation type.
+* Adds ecological meaning to groups of sites delineated by cluster analysis.
+* _Indicator species_ are species that are indicative of particular groups of sites.
+* _Good_ indicator species should be found mostly in a single group _and_ be present be present at most sites in that group.
+* This is an important duality: _faithfulness_ and _constancy_.
+
+---
+
+# INDVAL
+
+* _INDVAL_ method of Dufrene and Legendre (1997; _Ecological Monographs_ 67, 345--366) is a well respected approach for identifying indicator species.
+* INDVAL can derive indicator species for any clustering of objects.
+* Indicator species values based only on within-species abundances and occurrence comparisons. Values not affected by abundances of other species.
+* Significance of indicator values for each species is determined via a randomisation procedure.
+
+---
+
+# INDVAL
+
+* _Specificity_ is `\(A_{ij} = \mu_{\mathrm{species}_{ij}} / \mu_{\mathrm{species}_i}\)`.
+* _Fidelity_ is `\(B_{ij} = \mu_{\mathrm{sites}_{ij}} / \mu_{\mathrm{sites}_i}\)`.
+* `\(A_{ij}\)` is maximum when species `\(i\)` is present only in group `\(j\)`.
+* `\(B_{ij}\)` is maximum when species `\(i\)` is present in all sites within group `\(j\)`.
+* `\(\mathrm{INDVAL}_{ij} = (A_{ij} \times B_{ij} \times 100)\%\)`.
+* Indicator value for species `\(i\)` is the largest value of `\(\mathrm{INDVAL}_{ij}\)` observed over all `\(j\)` groups: `\(\mathrm{INDVAL}_i = \mathrm{max}(\mathrm{INDVAL}_{ij})\)`.
+* `\(\mathrm{INDVAL}_i\)` will be 100% when individuals of species `\(i\)` are observed at all sites belonging only to group `\(j\)`.
+* A random reallocation of sites among groups is used to test the significance of `\(\mathrm{INDVAL}_i\)`.
+
+---
+class: inverse middle center big-subsection
+
+# Interpretting clusters
+
+---
+
+# Silhouette widths
+
+* Deciding how many clusters should be retained is problematic
+* Little good theory to guide the choice
+* Silhouette plots offer a simple graphical means for assessing quality of a clustering
+* Silhouette width `\(s_i\)` of object `\(i\)` is
+    `$$s_i = \frac{b_i - a_i}{\mathrm{max}(a_i, b_i)}$$`
+* `\(a_i\)` is average distance of object `\(i\)` to all other objects in same cluster
+* `\(b_i\)` is smallest distance of object `\(i\)` to another cluster
+* Hence, maximal value of `\(s_i\)` will be found where the intra-cluster distance `\(a\)` is much smaller that the inter-cluster distance `\(b\)`
+
+
+---
+
+# Silhouette widths: Ponds `\(k\)`-means
+
+.row[
+
+.col-7[
+* `silhouette()` in the _cluster_ package
+* Provide a vector of cluster memberships and the dissimilarity matrix used to cluster the data
+* Returns object containing the nearest neighbouring cluster and the silhouette width `\(s_i\)` for each observation.
+* Low values of `\(s_i\)` indicate observation lies between two clusters
+* High values of `\(s_i\)`, close to 1, indicate well-clustered objects
+]
+
+.col-5[
+
+![](slides_files/figure-html/ponds-km-silhouette-1.svg)&lt;!-- --&gt;
+]
+]
+
+---
+
+# Calinski-Harabasz criterion
+
+Calinski, T. and Harabasz, J. (1974) A dendrite method for cluster analysis. _Commun. Stat._ **3**: 1--27.
+
+* The Calinski-Harabasz (1974) criterion is suggested as a simple means to determine the number of clusters to retain for analysis
+* Function `cascadeKM()` in _vegan_ for `\(k\)`-means
+* Criterion computed as
+    `$$\frac{\mathrm{SSB}/(k-1)}{\mathrm{SSW}/(n-k)}$$`
+* `\(\mathrm{SSW}\)` \&amp; `\(\mathrm{SSB}\)` within cluster and between cluster sums of squares
+* `\(k\)` is number of clusters, `\(n\)` is number of observations
+
+---
+
+# Calinski-Harabasz criterion
+
+![](slides_files/figure-html/ponds-km-calinski-harabasz-1.svg)&lt;!-- --&gt;
+
+---
+
+# Relating classifications to external sets of variables
+
+* Cluster analysis is not an end in and of itself. It is a means to an end.
+* Interpretation of results of cluster analysis can be aided through the use of external data, e.g. environmental data used to aid interpretation of species-derived clusters.
+* Basic EDA graphical approaches, such as boxplots, coded scatterplots.
+* Discriminants analysis.
+* Indicator species analysis.
+
+---
+class: inverse middle center big-subsection
+
+# Diversity
+
+---
+
+# Diversity
+
+Biodiversity is many things to many people
+
+A measure of the variety of biological life present
+
+Perhaps taking into account the relative abundances
+
+*species diversity* is a quantitative measure of the variety or number of different species
+
+---
+
+# Diversity
+
+&lt;table&gt;
+ &lt;thead&gt;
+  &lt;tr&gt;
+   &lt;th style="text-align:left;"&gt; Species &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Stream1 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Stream2 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Stream3 &lt;/th&gt;
+   &lt;th style="text-align:right;"&gt; Stream4 &lt;/th&gt;
+  &lt;/tr&gt;
+ &lt;/thead&gt;
+&lt;tbody&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Isoperla &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 50.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ceratopsyche &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 75.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Ephemerella &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 75.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Chironomus &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 20.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 140.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 200 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Number of species R &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 3.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 4.00 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Shannon-Wiener H &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.39 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 1.08 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.94 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+  &lt;tr&gt;
+   &lt;td style="text-align:left;"&gt; Simpson's D &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.75 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.66 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0.48 &lt;/td&gt;
+   &lt;td style="text-align:right;"&gt; 0 &lt;/td&gt;
+  &lt;/tr&gt;
+&lt;/tbody&gt;
+&lt;/table&gt;
+
+---
+
+# How shall we define "diversity"?
+
+Diversity indices attempt to quantify
+
+* the probability of encountering different species at random, or,
+
+* the uncertainty or multiplicity of possible community states (i.e., the entropy of community composition), or,
+
+* the variance in species composition, relative to a multivariate centroid
+
+---
+
+# Measuring variety
+
+Imgaine a species pool with `\(R\)` species
+
+In a sample with only `\(R = 1\)` species the sample can take on only `\(R = 1\)` states
+
+The abundance of that one species is 100% and all others are zero
+
+---
+
+# Measuring variety
+
+Now imagine a sample with two species `\(R = 2\)`
+
+The community could take on `\(R(R - 1)\)` different states
+
+The first species could by any of the R species
+
+The second species could be any of the *ther* species
+
+All the other species are zero
+
+---
+
+# Measuring variety
+
+Increasing diversity means increasing the possible states that the community could take,
+
+This increases our uncertainty about community structure
+
+This increasing lack of information about the system is a form of *entropy*
+
+Increasing diversity is increasing entropy
+
+---
+
+# Measuring variety
+
+Three commonly used diversity indices
+
+* Species richness `\(R\)`
+
+* Shannon-Wiener diversity
+
+* Simpson's diversity
+
+---
+
+# Species richness
+
+The count of the number of species in a sample or area
+
+Simple
+
+Most commonly used
+
+--
+
+Deceptively simple; need to have common sampling effort
+
+---
+
+# Shannon-Wiener diversity
+
+`$$H^{\prime} = - \sum_{i=1}^{R} p_i \log_e(p_i)$$`
+
+This is the standard measure of entropy or disorder in a system
+
+Originates from Claude Shannon's work in *information theory*
+
+---
+
+# Simpson's diversity
+
+`$$S_D = 1 - \sum_{i=1}^{R} p_i^2$$`
+
+* the probability that two individuals drawn at random from a community will be different species
+
+* the initial slope of the *species-individuals curve*
+
+* the expected *variance* of species composition
+
+---
+
+# Measuring variety
+
+The three indices are directly related
+
+They all estimate *entropy*, the amount of disorder or the multiplicity of possible states of a system
+
+`\(R\)` depends most heavily on the *rare* species
+
+`\(S_D\)` depends most heavily on the *common* species
+
+and `\(H^{\prime}\)` is somewhere in between
+
+---
+
+# Diversity metrics
+
+**vegan** has many functions for computing diversity metrics
+
+.row[
+.col-6[
+Three popular ones are
+
+1. Shannon-Wiener (Wrongly Shannon-Weaver)
+
+2. Simpson
+
+3. Inverse Simpson
+
+`\(p_i\)` is proportion of species `\(i\)`
+
+`\(b\)` is the base, usually `\(e\)`
+
+`\(S\)` is number of species (richness)
+  
+]
+.col-6[
+`$$H = - \sum_{i=1}^{S} p_i \log_b p_i$$`
+
+`$$D_1 = 1 - \sum_{i=1}^{S} p_i^2$$`
+
+`$$D_2 = \frac{1}{\sum_{i=1}^{S} p_i^2}$$`
+]
+]
+
+---
+
+# Diversity metrics
+
+
+```r
+data(BCI)
+H &lt;- diversity(BCI)
+head(H)
+```
+
+```
+##        1        2        3        4        5        6 
+## 4.018412 3.848471 3.814060 3.976563 3.969940 3.776575
+```
+
+```r
+D1 &lt;- diversity(BCI, index = "simpson")
+head(D1)
+```
+
+```
+##         1         2         3         4         5         6 
+## 0.9746293 0.9683393 0.9646078 0.9716117 0.9678267 0.9627557
+```
+
+```r
+D2 &lt;- diversity(BCI, index = "invsimpson", base = 2)
+head(D2)
+```
+
+```
+##        1        2        3        4        5        6 
+## 39.41555 31.58488 28.25478 35.22577 31.08166 26.84973
+```
+
+---
+
+# Diversity metrics
+
+## Richness
+
+
+```r
+head(specnumber(BCI)) # species richness
+```
+
+```
+##   1   2   3   4   5   6 
+##  93  84  90  94 101  85
+```
+
+```r
+head(rowSums(BCI &gt; 0)) # simple
+```
+
+```
+##   1   2   3   4   5   6 
+##  93  84  90  94 101  85
+```
+
+## Pielou's Evenness `\(J\)`
+
+
+```r
+J &lt;- H / log(specnumber(BCI))
+head(J)
+```
+
+```
+##         1         2         3         4         5         6 
+## 0.8865579 0.8685692 0.8476046 0.8752597 0.8602030 0.8500724
+```
+
+---
+
+# Diversity &amp;mdash; R&amp;eacute;nyi entropy &amp; Hill's numbers
+
+R&amp;eacute;nyi's *generalized entropy*
+
+`$$H_a = \frac{1}{1-a} \log \sum_{i = 1}^{S} p_i^a$$`
+
+where `\(a\)` is the *order* of the entropy
+
+Corresponding Hill's numbers are
+
+`$$N_a = \exp{(H_a)}$$`
+
+---
+
+# Diversity &amp;mdash; R&amp;eacute;nyi entropy &amp; Hill's numbers
+
+
+```r
+R &lt;- renyi(BCI, scales = 2)
+head(R)
+```
+
+```
+##        1        2        3        4        5        6 
+## 3.674161 3.452678 3.341263 3.561778 3.436618 3.290256
+```
+
+```r
+N2 &lt;- renyi(BCI, scales = 2, hill = TRUE)
+head(N2) # inverse simpson
+```
+
+```
+##        1        2        3        4        5        6 
+## 39.41555 31.58488 28.25478 35.22577 31.08166 26.84973
+```
+
+---
+
+# Diversity &amp;mdash; R&amp;eacute;nyi entropy &amp; Hill's numbers
+
+
+```r
+k &lt;- sample(nrow(BCI), 6)
+R &lt;- renyi(BCI[k,])
+plot(R)
+```
+
+&lt;img src="slides_files/figure-html/diversity-5-1.svg" width="80%" /&gt;
+
+---
+
+# Partitioning diversity
+
+Refer to biodiversity at different scales; `\(\alpha\)`, `\(\beta\)`, and `\(\gamma\)`
+
+* Alpha diversity, `\(\alpha\)`, is the diversity of a point location or of a single sample
+
+* Beta diversity, `\(\beta\)`, is the diversity due to multiple localities; $\beta$$ diversity is
+sometimes thought of as turnover in species composition among sites, or alternatively as the number of species in a region that are not observed in a sample
+
+* Gamma diversity, `\(\gamma\)`, is the diversity of a region, or at least the diversity
+of all the species in a set of samples collected over a large area
+
+---
+
+# Partitioning diversity
+
+Diversity across spatial scales can be partitioned in one of two ways
+
+1. *additive*, or,
+
+2. *multiplicative*
+
+partitioning
+
+---
+
+# Additive partitioning
+
+`$$\bar{\alpha} + \beta = \gamma$$`
+
+`\(\bar{\alpha}\)` is the average diversity of a samples, while `\(\gamma\)` is the diversity of the pooled samples
+
+`\(\beta\)` is found by difference
+
+`$$\beta = \gamma - \bar{\alpha}$$`
+
+We can think of `\(\beta\)` as the average number of species not found in a sample, but which we know
+to be in the region
+
+---
+
+# Multiplicative partitioning
+
+`$$\bar{\alpha} \beta = \gamma$$`
+
+where `\(\beta\)` is a conversion factor that describes the relative change in species composition among samples
+
+Sometimes this type of `\(\beta\)` diversity is thought of as the number of different community types in a set of samples
+
+---
+
+# Rarefaction
+
+Species richness increases with sample size (effort)
+
+Rarefaction gives the expected number of species rarefied from `\(N\)` to `\(n\)` individuals
+
+`$$\hat{S}_n = \sum_{i=1}^S (1 - q_i) \; \mathsf{where} \; q_i = \frac{\binom{N - x_i}{n}}{\binom{N}{n}}$$`
+
+`\(x_i\)` is count of species `\(i\)` and `\(\binom{N}{n}\)` is a binomial coefficient &amp;mdash; the number of ways to choose `\(n\)` from `\(N\)`
+
+---
+
+# Rarefaction
+
+.row[
+.col-6[
+
+```r
+rs &lt;- rowSums(BCI)
+quantile(rs)
+```
+
+```
+##    0%   25%   50%   75%  100% 
+## 340.0 409.0 428.0 443.5 601.0
+```
+
+```r
+Srar &lt;- rarefy(BCI, min(rs))
+head(Srar)
+```
+
+```
+##        1        2        3        4        5        6 
+## 84.33992 76.53165 79.11504 82.46571 86.90901 78.50953
+```
+
+```r
+rarecurve(BCI, sample = min(rs))
+```
+]
+
+.col-6[
+![](slides_files/figure-html/rarefy-1.svg)&lt;!-- --&gt;
+]
+]
+
+---
+
+# Rarefaction
+
+With rarefaction we can be accused of throwing away data
+
+Yet we need to do something about the often large differences in variances of species and samples owing to sampling effort
+
+---
+
+# High-throughput data
+
+Revolutions in biology &amp; biotechnology have lead to exponential increases in our capacity to generate data arising from the counting of biological molecules
+
+* DNA sequencing,
+* RNA-Seq &amp;mdash; sequence RNA molecules in populations of cells or tissues,
+* ChIp-Seq &amp;mdash; sequence DNA molecules that are bound to particular proteins,
+* &amp;hellip;
+
+Relative cheaply, today we can generate data sets with thousands of variables on tens to hundreds of samples
+
+---
+
+# High-throughput data
+
+Counts of such molecules present a statistical challenge
+
+* the counts typically have a large *dynamic range*, covering many orders of magnitudes
+
+* over this very large range we observe changes in both variance (spread about the mean) and also in distribution of the data &amp;mdash; **heterogeneity**
+
+* like other count data, observations are integers and distributions are skewed
+
+* the biotech methodology imparts systematic sampling biases into the data that we need to account for in an analysis &amp;mdash; typically called **normalization** in this sub-field
+
+---
+
+# Sequence depth &amp; size factors
+
+The number of reads for each sample is a kind of *effort* variable
+
+All else equal, the more reads we generate the more species (OTUs, ASVs, etc) we would expect to identify
+
+If number of reads differs between samples (libraries) then, all else equal we might assume the counts in different samples are proportional to one another, following some proportionality factor `\(s\)`
+
+A simple estimate for `\(s\)` might be the total reads per sample
+
+But we can do better than this &amp;hellip;
+
+---
+
+# Sequence depth &amp; size factors
+
+.row[
+.col-8[
+A small dataset of 5 genes in 2 samples
+
+Two views:
+
+1. estimate `\(s_j\)` as `\(\sum_{i=1}^{m} x_{ij}\)`, blue line is ratio of `\(s_j\)`
+2. instead, estimate `\(s_j\)` such that their ratio is the red line
+
+In 1 we would C is downregulated &amp; A, B, D, &amp; E are upregulated
+
+2 is more parsimonious
+
+`DESeq2::estimateSizeFactorsForMatrix()`
+]
+
+.col-4[
+
+&lt;img src="resources/chap7-rnaseq-normalization-1.png" width="667" /&gt;
+
+.smaller[Holmes &amp; Huber (2019) Modern Statistics for Modern Biology]
+]
+]
+
+---
+
+# Variance stabilizing transformations
+
+The square-root transformation is known as the _variance stabilizing transformation_ for the Poisson distribution
+
+Taking the square root of observations that are distributed Poisson leads to *homoscedasticity*
+
+Can construct variance stabilizing transformations for other distributions
+
+High-throughput count data typically show extra-Poisson variation
+
+`DESeq2::vst()` 
+
+---
+
+# Regularized log transform
+
+This transforms counts to a log&lt;sub&gt;2&lt;/sub&gt;-like scale via a simple model
+
+`$$\log_2(q_{ij}) = \sum_k x_{jk} \beta_{ik}$$`
+
+where `\(q_{ij}\)` are the transformed data and `\(x_{jk}\)` is a particular design matrix with a dummy variable for the `\(j\)`th sample for ($i = {1, 2, \dots m}$ variables)
+
+Priors on the `\(\beta_{ik}\)` make the model identifiable
+
+The _rlog_ transformation is ~ variance stabilizing, but handles highly varying size factors across samples
+
+`DESeq2::rlog()`
+
+---
+
+# Transformations
+
+Comparison of three transformations
+
+&lt;img src="resources/chap7-rnaseq-meansd-1.png" width="2667" /&gt;
+
+.smaller[Holmes &amp; Huber (2019) Modern Statistics for Modern Biology]
+
+???
+
+Figure 8.12: Per-gene standard deviation (sd, taken across samples) against the rank of the mean, for the shifted logarithm , the variance-stabilizing transformation (vst) and the rlog. Note that for the leftmost  2,500 genes, the counts are all zero, and hence their standard deviation is zero. The mean-sd dependence becomes more interesting for genes with non-zero counts. Note also the high value of the standard deviation for genes that are weakly detected (but not with all zero counts) when the shifted logarithm is used, and compare to the relatively flat shape of the mean-sd relationship for the variance-stabilizing transformation.
+
+---
+
+# Implications
+
+Size factors can be used in GLMs etc to normalize samples via as `offset()` term in the formula
+
+For ordination we can't easily use the size factors
+
+Need to use _vst_ or _rlog_ instead
+
+_rlog_ creates data that can't be used in CCA, so if you use it, RDA or db-RDA are the ordination methods to use
+
+---
+
+# Practicalities
+
+
+
+---
+
+# Rarefied counts
+
+Can take a random draw `\(n^{\prime}\)` out of the `\(N\)` individuals in a sample in proportion to species abundances
+
+This yields rarefied counts which some people then go on to analyse
+
+Be careful though as this is a random process &amp;mdash; what if you took a different random sample?
+
+---
+
+# Rarefied counts
+
+`avgdist()` in *vegan* tries to get around this by
+
+1. taking a random draw to get rarefied counts
+2. computing dissimilarity between smaples on basis of rarefied count
+
+Repeat that many times and then as your dissimilarity `\(d_{ij}\)`, take the average of the many `\(d_{ij}^*\)` values you generated above
+
+See also the help page for other suggestions `?avgdist`
+
+---
+
+# Suggested readings
+
+B. Everitt, S. Landau &amp; M. Leese, 2001, Cluster analysis 4th Edition. Arnold
+
+A.D. Gordon, 1999, Classification. Chapman &amp; Hall
+
+L. Kaufman &amp; P.J. Rousseeuw, 1990, Finding groups in data. An introduction to cluster analysis. Wiley
+
+P. Legendre &amp; L. Legendre, 1998, Numerical ecology. Elsevier (Third English Edition)
+
+M. H. H. Stevens, 2009, A Primer of Ecology with R. Springer
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

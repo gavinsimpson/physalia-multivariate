@@ -1,0 +1,1332 @@
+---
+title: "Dissimilarity, cluster analysis, diversity"
+author: "Gavin Simpson"
+date: "November 21, 2022"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css', 'slides.css']
+    lib_dir: libs
+    nature:
+      titleSlideClass: ['inverse','middle','left',my-title-slide]
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      beforeInit: "macros.js"
+      ratio: '16:9'
+---
+class: inverse middle center big-subsection
+
+```{r setup, include=FALSE, cache=FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(cache = FALSE, dev = 'svg', echo = FALSE, message = FALSE, warning = FALSE,
+                      fig.height=6, fig.width = 1.777777*6)
+
+library('vegan')
+library('tibble')
+library('mvnfast')
+library('dplyr')
+library('tidyr')
+library('ggplot2')
+library('gganimate')
+data(varespec, varechem)
+
+## plot defaults
+theme_set(theme_minimal(base_size = 16, base_family = 'Fira Sans'))
+```
+
+# Welcome
+
+---
+
+# Logistics
+
+---
+
+# Today's topics
+
+* Multivariate data
+
+* Diversity
+
+* Dissimilarity
+
+* Cluster analysis
+
+---
+
+# Multivariate data
+
+---
+
+# Multivariate data
+
+Multivariate != multiple regression
+
+Multivariate means we have two or more *response* variables
+
+We are interested in learning about the common patterns or modes of variation among those multiple response variables
+
+Multivariate data require special statistical methods
+
+---
+
+# Multivariate data in biology
+
+Community composition &mdash; many species as the responses
+
+In modern biology we have OTUs and ASVs
+
+In chemistry we have metabolites or spectra or masses or &hellip;
+
+All of these constitute multivariate data
+
+---
+
+# Species composition
+
+Species composition is the set of species in a site or a sample
+
+Typically comes with a measure of abundance
+
+"abundance" could also be whether each species is present or absent in the sample
+
+Relative abundance expresses the abundance of each species as its proportion out of the total abundance in each sample
+
+---
+class: inverse middle center big-subsection
+
+# Dissimilarity
+
+---
+
+# Measuring association &mdash; binary data
+
+.row[
+
+.col-6[
+
+<table>
+    <tr>
+        <td>&nbsp;</td>
+        <td colspan=3>Object <i>j</i></td>
+    </tr>
+    <tr>
+        <td rowspan=3>Object <i>i</i></td>
+        <td> &nbsp; </td>
+        <td> + </td>
+        <td> - </td>
+    </tr>
+    <tr>
+        <td> + </td>
+        <td> a </td>
+        <td> c </td>
+    </tr>
+    <tr>
+        <td> - </td>
+        <td> b </td>
+        <td> d </td>
+    </tr>
+</table>
+
+]
+
+.col-6[
+Dissimilarity based on the number of species present only in $i$ ( $b$ ), or $j$ ( $c$ ), or in present in both ( $a$ ), or absent in both ( $d$ ).
+
+
+]
+]
+
+.row[
+
+.col-6[
+
+Jaccard similarity
+
+$$s_{ij} = \frac{a}{a + b + c}$$
+
+Jaccard dissimilarity
+
+$$d_{ij} = \frac{b + c}{a + b + c}$$
+]
+
+.col-6[
+Simple matching coefficient
+
+$$s_{ij} = \frac{a + d}{a + b + c + d}$$
+
+Simple matching coefficient
+
+$$d_{ij} = \frac{b + c}{a + b + c + d}$$
+]
+]
+
+---
+
+# Dissimilarity
+
+.row[
+
+.col-6[
+
+```{r dissimilarity, echo = FALSE, fig.width = 6, fig.height = 6, dev.args = list(pointsize = 14)}
+plot(1:5, 1:5, type = "n", axes = FALSE, ann = FALSE)
+points(c(2,4), c(4,2), col = c("red","blue"), pch = 1:2,
+       cex = 2, lwd = 2)
+## label points with i and j
+text(c(2,4), c(4,2), labels = c("i", "j"),
+     adj = c(-1.5,-1.5))
+## lable the line of Euclidean distance
+text(3,3, labels = expression(d[ij]), adj = c(-1.5,-1.5))
+## euclidean distance line
+lines(c(2,4), c(4,2), lwd = 2)
+## line from points to x axis
+lines(c(4,4), c(2,0), lty = "dashed")
+lines(c(2,2), c(4,0), lty = "dashed")
+## line from points to y axis
+lines(c(4,0), c(2,2), lty = "dashed")
+lines(c(2,0), c(4,4), lty = "dashed")
+## axes
+axis(1, at = c(2,4), labels = c(expression(X[i1]),
+                       expression(X[j1])))
+axis(2, at = c(2,4), labels = c(expression(X[j2]),
+                       expression(X[i2])), las = 2)
+## titles
+title(xlab = "Variable 1", ylab = "Variable 2")
+title(main =
+      expression(d[ij] == sqrt((X[j1] - X[i1])^2 +
+          (X[j2] - X[i2])^2)))
+box(bty = "l")
+```
+]
+
+.col-6[
+
+$$d_{ij} = \sqrt{\sum\limits^m_{k=1}(x_{ik} - x_{jk})^2}$$
+
+$$d_{ij} = \sum\limits^m_{k=1}|x_{ik} - x_{jk}|$$
+
+$$d_{ij} = \frac{\sum\limits^m_{k=1}|x_{ik} - x_{jk}|}{\sum\limits^m_{k=1}(x_{ik} + x_{jk})}$$
+]
+]
+
+---
+
+# Measuring association &mdash; quantitative data
+
+* Euclidean distance dominated by large values.
+* Manhattan distance less affected by large values.
+* Bray-Curtis sensitive to extreme values.
+* Similarity ratio (Steinhaus-Marczewski $\equiv$ Jaccard) less dominated by extremes.
+* Chord distance, used for proportional data; _signal-to-noise_ measure.
+
+.row[
+
+.col-6[
+Similarity ratio
+
+$d_{ij} = \frac{\sum\limits^m_{k=1}x_{ik}x_{jk}}{\left(\sum\limits^m_{k=1}x_{ik}^2 + \sum\limits^m_{k=1}x_{jk}^2 - \sum\limits^m_{k=1}x_{ik}x_{jk}\right)^2}$
+
+]
+
+.col-6[
+Chord distance
+
+$d_{ij} = \sqrt{\sum\limits^m_{k=1}(\sqrt{p_{ik}} - \sqrt{p_{jk}})^2}$
+]
+]
+
+---
+
+# Measuring association &mdash; mixed data
+
+.row[
+
+.col-8[
+.small[
+* $s_{ijk}$ is similarity between sites $i$ and $j$ for the $k$th variable.
+* Weights $w_{ijk}$ are typically 0 or 1 depending on whether the comparison is valid for variable $k$. Can also use variable weighting with $w_{ijk}$ between 0 and 1.
+* $w_{ijk}$ is zero if the $k$th variable is missing for one or both of $i$ or $j$.
+* For binary variables $s_{ijk}$ is the Jaccard coefficient.
+* For categorical data $s_{ijk}$ is 1 of $i$ and $k$ have same category, 0 otherwise.
+* For quantitative data $s_{ijk} = (1 - |x_{ik} - x_{jk}|) / R_k$
+]
+]
+
+.col-4[
+
+Gower's coefficient
+
+$$s_{ij} = \frac{\sum\limits^m_{i=1} w_{ijk}s_{ijk}}{\sum\limits^m_{i=1} w_{ijk}}$$
+]
+]
+
+---
+
+# Transformations
+
+* Can transform the variables (e.g. species) or the samples to improve the gradient separation of the dissimilarity coefficient.
+* No transformation of variables or samples leads to a situation of quantity domination &mdash; big values dominate $d_{ij}$.
+* Normalise samples &mdash;gives all samples equal weight.
+* Normalise variables;
+    * gives all variables equal weight,
+    * inflates the influence of rare species.
+* Double (_Wisconsin_) transformation; normalise variables then samples.
+* Noy-Meir _et al_. (1975) _J. Ecology_ **63**; 779--800.
+* Faith _et al_. (1987) _Vegetatio_ **69**; 57--68.
+
+---
+
+# Dissimilarity
+
+Two key functions
+
+1. `vegdist()`
+2. `decostand()`
+
+```{r dissimilarity-2, echo = TRUE}
+data(varespec)
+
+euc_dij <- vegdist(varespec, method = "euclidean")
+
+bc_dij <- vegdist(varespec)
+
+hell_dij <- vegdist(decostand(varespec, method = "hellinger"),
+                    method = "euclidean")
+```
+
+---
+class: inverse middle center big-subsection
+
+# Cluster analysis
+
+---
+
+# Basic aim of cluster analysis
+
+* Partition a set of data (objects, samples) into groups known as clusters.
+* Partitions formed that minimise a stated mathematical criterion, e.g. sum of squares (SS)
+    * Minimise within groups SS &rarr; maximising between group SS
+* Cluster analysis is a compromise however:
+    * With 50 objects there are $10^{80}$ possible ways of partitioning the objects
+* Compromise is made in selecting a clustering scheme that reduces the number of partitions to a reasonable value.
+* Commonest approaches impose a hierarchy and then either fuse (_agglomerative_) or split (_divisive_) samples and clusters.
+
+---
+
+# A taxonomy of clusterings
+
+* Clustering techniques can be characterised in many ways:
+
+<table>
+<tr>
+<td>Formal</td>
+<td>Informal</td>
+</tr>
+<tr>
+<td>Hierarchical</td>
+<td>Non-hierarchical</td>
+</tr>
+<tr>
+<td>Quantitative</td>
+<td>Qualitative</td>
+</tr>
+<tr>
+<td>Agglomerative</td>
+<td>Divisive</td>
+</tr>
+<tr>
+<td>Polythetic</td>
+<td>Monothetic</td>
+</tr>
+<tr>
+<td>Sharp</td>
+<td>Fuzzy</td>
+</tr>
+<tr>
+<td>Supervised</td>
+<td>Unsupervised</td>
+</tr>
+<tr>
+<td>Useful</td>
+<td>Not useful</td>
+</tr>
+</table>
+
+---
+
+# A cautionary tale
+
+* Cluster analysis _per se_ is _unsupervised_; we want to find groups in our data.
+* We will define _classification_ as a _supervised_ procedure where we know _a priori_ what the groups are.
+
+---
+
+# A cautionary tale
+
+> The availability of computer packages of classification techniques has led to the waste of more valuable scientific time than any other "statistical" innovation (with the possible exception of multiple regression techniques).
+>  R.M. Cormack (1970) _J. Roy. Stat. Soc. A_ **134(3)**; 321--367. 
+
+---
+class: inverse middle center big-subsection
+
+# Hierarchical cluster analysis
+
+---
+
+# Agglomerative hierarchical clustering
+
+* Agglomerative methods start with all observations in separate clusters and fuse the two most similar observations.
+* Fusion continues, with the two most similar observations and/or clusters being fused at each step.
+* Five main stages in this analysis:
+    * calculate matrix of _(dis)similarities_ $d_{ij}$ between all pairs of $m$ objects,
+    * fuse objects into groups using chosen _clustering strategy_,
+    * display the results graphically via a _dendrogram_ or superimposed on to an ordination,
+    * check for distortion,
+    * validate the results
+
+---
+
+# Clustering strategies
+
+* Different strategies can be used to determine the dissimilarity (_distance_) between a sample and a cluster or two clusters.
+
+* Single link or nearest neighbour;
+    * the distance between the closest members of two clusters,
+    * finds the minimum spanning tree, the shortest tree connecting all points,
+    * can produce _chaining_, producing groups of unequal size.
+
+* Complete link or furthest neighbour;
+    * the distance between the farthest members of two clusters,
+    * produces compact clusters of roughly equal size,
+    * may make compact groups even when none exist
+
+---
+
+# Clustering strategies
+
+* Centroid;
+    * the distance between the centroids (the centre of gravity) of two clusters,
+    * centroid is the point that is the average of the coordinates (variables) of all objects in the cluster
+    * can produce reversals
+
+* Unweighted group average
+    * the average of the distances between the samples in one cluster and the samples of another,
+    * intermediate between single and complete link methods,
+    * maximises the \alert{cophenetic correlation},
+    * may make compact clusters where none exist,
+
+---
+
+# Clustering strategies
+* Minimum variance (Ward's method)
+    * fuse two groups if and only if neither group will combine with any other group to produce a lower within group \alert{sum of squares}
+    * forms compact clusters of equal size; even where none exist,
+
+---
+
+# Clustering strategies
+
+```{r clustering-strategies-figure}
+## linkage examples
+set.seed(1234)
+x1 <- 3 + runif(10)
+x2 <- 5 + runif(10)
+y1 <- 3 + runif(10)
+y2 <- 5 + runif(10)
+x <- c(x1,x2); y <- c(y1, y2)
+require("analogue")
+g1 <- cbind(x1,y1)
+rownames(g1) <- 1:10
+g2 <- cbind(x2,y2)
+rownames(g2) <- 11:20
+colnames(g1) <- colnames(g2) <- c("x", "y")
+distMat <- distance(g1, g2, method = "euclidean")
+opar <- par(mfrow = c(1, 2))
+plot(x,y, main = "Linkage examples")
+## min dist between samples
+lines(x[c(9,15)], y[c(9,15)], col = "red", lty = "dashed")
+## complete link
+lines(x[c(1,16)], y[c(1,16)], col = "blue", lty = "dotted")
+## group centroid
+mean.g1 <- colMeans(g1)
+mean.g2 <- colMeans(g2)
+points(rbind(mean.g1, mean.g2), pch = 8, col = "green")
+lines(rbind(mean.g1, mean.g2), lty = "solid", col = "green")
+legend("topleft",
+       legend = c("Single Link", "Complete Link",
+         "Centroid"),
+       lty = c("dashed", "dotted", "solid"),
+       col = c("red", "blue", "green"),
+       inset = 0.01,
+       bty = "n",
+       cex = 0.8)
+plot(x, y, main = "Group average")
+nx <- 5; ny <- 3.5
+segments(x1, y1, nx, ny, lty = "dashed")
+segments(x2, y2, nx, ny, lty = "dashed")
+points(nx, ny, pch = 2, col = "red", cex = 1.5, lwd = 2)
+par(opar)
+```
+
+---
+
+# Prehistoric dogs from Thailand
+
+* Archaeological digs at prehistoric sites in Thailand have produced a collection of canine mandibles, covering period 3500BC to today
+* Origins of the prehistoric dog uncertain
+    * Could possibly descend from the golden jackal or the wolf
+    * Wolf not native to Thailand; nearest indigenous wolves in western China or Indian subcontinent
+* Data are mean values of each of six measurements of specimens from 7 canine groups
+
+---
+
+# Prehistoric dogs from Thailand
+
+```{r canine}
+canine <- read.csv("data/canine.csv", row.names = 1)
+canine.dist <- dist(scale(canine))
+canine.hclust <- hclust(canine.dist, method = "single")
+opar <- par(mfrow = c(1,4))
+plot(canine.hclust, hang = -0.1,
+     main = "Single link", sub = "", xlab = "")
+plot(hclust(canine.dist, method = "complete"),
+     hang = -0.1, main = "Complete link",
+     sub = "", xlab = "")
+plot(hclust(canine.dist, method = "average"),
+     hang = -0.1, main = "Group average",
+     sub = "", xlab = "")
+plot(hclust(canine.dist, method = "ward"),
+     hang = -0.1, main = "Minimum variance",
+     sub = "", xlab = "")
+par(opar)
+```
+
+---
+
+# Graphical display; dendrograms
+
+.row[
+
+.col-7[
+* The height is the dissimilarity at which the fusion was made.
+* The length of the _stem_ represents the dissimilarities between clusters.
+* _Nodes_ represent clusters; internal or terminal.
+* Configuration of nodes and stems is known as the tree _topology_.
+* Can flip two adjacent stems without affecting topology.
+* Form a clustering by cutting the dendrogram.
+
+]
+
+.col-5[
+
+```{r canine-minimum, fig.height = 8, fig.width = 5}
+plot((tmp <- hclust(canine.dist, method = "ward")),
+     hang = -0.1, main = "Minimum variance",
+     sub = "", xlab = "")
+rect.hclust(tmp, 3, border = "red")
+```
+]
+]
+
+---
+
+# Graphical display; heatmap
+
+.row[
+.col-7[
+
+* A heatmap is another graphical display of data structure.
+* Begin by reordering the rows (sites) and columns (variables) of data matrix.
+* Reorder using cluster analysis on rows and columns separately.
+* Central panel shows the values of the variables for each site as a shading.
+
+]
+
+.col-5[
+```{r heatmap, fig.height = 7, fig.width = 7}
+ponds <- read.csv("data/pondsenv.csv")
+ponds.sc <- scale(ponds)
+heatmap(ponds.sc, main = "Ponds and pools",
+        ylab = "Ponds", xlab = "Hycrochemical variables",
+        margin = c(6,5))
+```
+]
+]
+
+---
+
+# Test for distortion
+
+.row[
+.col-8[
+
+* The hierarchical cluster analysis represents the underlying original dissimilarities
+* Check the dendrogram for distortion
+* Calculate the _cophenetic_ distances; the heights on the dendrogram where samples are fused
+* Calculate the Pearson correlation between the original dissimilarities and cophenetic distances; _cophenetic correlation_
+* Cophenetic correlation = `r round(cor(cophenetic(canine.hclust), canine.dist), 3)`
+
+]
+
+.col-4[
+
+```{r cophenetic, fig.height = 8, fig.width = 5}
+plot(canine.hclust, hang = -0.1, main = "Prehistoric Dogs",
+     xlab = "", sub = "Single Link")
+```
+]
+]
+
+---
+class: inverse middle center big-subsection
+
+# _k_-means clustering
+
+---
+
+# _k_-means clustering
+
+* Hierarchical clustering has a legacy of history: once formed, clusters cannot be changed even if it would be sensible to do so.
+* $k$-means is an iterative procedure that produces a non-hierarchical cluster analysis.
+* If algorithm started from a hierarchical cluster analysis, it will be optimised.
+* Best suited with _centroid_, _group-average_ or _minimum variance_ linkage methods.
+* Computationally difficult; cannot be sure that an optimal solution is found.
+
+---
+
+# _k_-means clustering
+
+* Given $n$ objects in an $m$-dimensional space, find a partition into $k$ groups (clusters) such that the objects within each cluster are more similar to one another than to objects in the other clusters.
+* $k$-means minimises the within group sums of squares (WSS).
+* $k$ is chosen by the user; a scree plot of the WSS for $k = 1,\dots,a$ where $a$ is some small number.
+* Even with modest $n$ cannot evaluate all possible partitions to find one with lowest WSS.
+* As such, algorithms have been developed that rearrange existing partitions and keep the new one only if it is an improvement.
+
+---
+
+# _k_-means clustering
+
+<table>
+<tr>
+<td> $n$ </td>
+<td> $k$ </td>
+<td>Number of possible partitions</td>
+</tr>
+<tr>
+<td>15</td>
+<td>3</td>
+<td>2,375,101</td>
+</tr>
+<tr>
+<td>20</td>
+<td>4</td>
+<td>45,232,115,901</td>
+</tr>
+<tr>
+<td>25</td>
+<td>8</td>
+<td>690,223,721,118,368,580</td>
+</tr>
+<tr>
+<td>100</td>
+<td>5</td>
+<td> $10^{68}$ </td>
+</tr>
+</table>
+
+---
+
+# _k_-means clustering algorithm
+
+* $k$-means algorithm proceeds as follows:
+    1. Find some initial partition of the individuals into $k$ groups. May be provided by previous hierarchical cluster analysis,
+    2. Calculate the change in the clustering criterion (e.g. WSS) by moving each individual from its current cluster to another,
+    3. Make the change that leads to the greatest improvement in the value of the clustering criterion,
+    4. Repeat steps 2 and 3 until no move of an individual leads to an improvement in the clustering criterion.
+* If variables are on different scales, they should be standardised before applying $k$-means.
+* Display results on an ordination; no hierarchy so no dendrogram.
+
+---
+
+# k-means clustering: Ponds
+
+* Cluster 30 shallow ponds and pools from south east UK on basis of water chemistry.
+* Run $k$-means for $k = 1,\dots,10$ and collect WSS.
+* No clear elbow in scree plot of WSS; change of slope at $k = 4$.
+* Display results of $k$-means with $k = 4$ on an NMDS of the Ponds data set.
+
+---
+
+# k-means clustering: Ponds
+
+```{r ponds-k-means, results="hide", fig.width = 5, fig.height = 5}
+# ponds k-means
+require("vegan")
+ponds <- read.csv("data/pondsenv.csv")
+ponds.sc <- scale(ponds)
+ponds.dmat <- vegdist(ponds, "euclidean")
+ponds.nmds <- metaMDS(ponds, distance = "euclidean")
+#plot(ponds.nmds, display = "sites")
+##ponds.avg <- hclust(dist(ponds.sc), method = "average")
+n <- nrow(ponds.sc)
+wss <- rep(0, 10)
+wss[1] <- (n - 1) * sum(apply(ponds.sc, 2, var))
+for(i in 2:10) {
+  set.seed(1234)
+  mod <- kmeans(ponds.sc, centers = i)
+  wss[i] <- sum(mod$withinss)
+}
+#opar <- par(mfrow = c(1,2))
+plot(1:10, wss, type = "b", xlab = "Number of groups",
+     ylab = "Within groups sum of squares", title = "Screeplot")
+set.seed(1234)
+ponds.km <- kmeans(ponds.sc, centers = 4)
+coord <- scores(ponds.nmds, choices = 1:2, display = "sites")
+plot(coord, pch = c(1:5)[ponds.km$cluster],
+     col = c("red","green","blue","black","orange")[ponds.km$cluster],
+     xlab = "NMDS Axis 1", ylab = "NMDS Axis 2",
+     main = "k-means clustering of Ponds dataset")
+#par(opar)
+```
+
+---
+class: inverse middle center big-subsection
+
+# Indicator species analysis
+
+---
+
+# Detection of indicator species
+
+* A basic concept and tradition in ecology and biogeography.
+* Species characteristic of e.g. particular habitat, geographical region, vegetation type.
+* Adds ecological meaning to groups of sites delineated by cluster analysis.
+* _Indicator species_ are species that are indicative of particular groups of sites.
+* _Good_ indicator species should be found mostly in a single group _and_ be present be present at most sites in that group.
+* This is an important duality: _faithfulness_ and _constancy_.
+
+---
+
+# INDVAL
+
+* _INDVAL_ method of Dufrene and Legendre (1997; _Ecological Monographs_ 67, 345--366) is a well respected approach for identifying indicator species.
+* INDVAL can derive indicator species for any clustering of objects.
+* Indicator species values based only on within-species abundances and occurrence comparisons. Values not affected by abundances of other species.
+* Significance of indicator values for each species is determined via a randomisation procedure.
+
+---
+
+# INDVAL
+
+* _Specificity_ is $A_{ij} = \mu_{\mathrm{species}_{ij}} / \mu_{\mathrm{species}_i}$.
+* _Fidelity_ is $B_{ij} = \mu_{\mathrm{sites}_{ij}} / \mu_{\mathrm{sites}_i}$.
+* $A_{ij}$ is maximum when species $i$ is present only in group $j$.
+* $B_{ij}$ is maximum when species $i$ is present in all sites within group $j$.
+* $\mathrm{INDVAL}_{ij} = (A_{ij} \times B_{ij} \times 100)\%$.
+* Indicator value for species $i$ is the largest value of $\mathrm{INDVAL}_{ij}$ observed over all $j$ groups: $\mathrm{INDVAL}_i = \mathrm{max}(\mathrm{INDVAL}_{ij})$.
+* $\mathrm{INDVAL}_i$ will be 100% when individuals of species $i$ are observed at all sites belonging only to group $j$.
+* A random reallocation of sites among groups is used to test the significance of $\mathrm{INDVAL}_i$.
+
+---
+class: inverse middle center big-subsection
+
+# Interpretting clusters
+
+---
+
+# Silhouette widths
+
+* Deciding how many clusters should be retained is problematic
+* Little good theory to guide the choice
+* Silhouette plots offer a simple graphical means for assessing quality of a clustering
+* Silhouette width $s_i$ of object $i$ is
+    $$s_i = \frac{b_i - a_i}{\mathrm{max}(a_i, b_i)}$$
+* $a_i$ is average distance of object $i$ to all other objects in same cluster
+* $b_i$ is smallest distance of object $i$ to another cluster
+* Hence, maximal value of $s_i$ will be found where the intra-cluster distance $a$ is much smaller that the inter-cluster distance $b$
+
+
+---
+
+# Silhouette widths: Ponds $k$-means
+
+.row[
+
+.col-7[
+* `silhouette()` in the _cluster_ package
+* Provide a vector of cluster memberships and the dissimilarity matrix used to cluster the data
+* Returns object containing the nearest neighbouring cluster and the silhouette width $s_i$ for each observation.
+* Low values of $s_i$ indicate observation lies between two clusters
+* High values of $s_i$, close to 1, indicate well-clustered objects
+]
+
+.col-5[
+
+```{r ponds-km-silhouette, fig.height = 6, fig.width = 5}
+library("cluster")
+sil.km <- with(ponds.km, silhouette(cluster, ponds.dmat))
+plot(sil.km)
+```
+]
+]
+
+---
+
+# Calinski-Harabasz criterion
+
+Calinski, T. and Harabasz, J. (1974) A dendrite method for cluster analysis. _Commun. Stat._ **3**: 1--27.
+
+* The Calinski-Harabasz (1974) criterion is suggested as a simple means to determine the number of clusters to retain for analysis
+* Function `cascadeKM()` in _vegan_ for $k$-means
+* Criterion computed as
+    $$\frac{\mathrm{SSB}/(k-1)}{\mathrm{SSW}/(n-k)}$$
+* $\mathrm{SSW}$ \& $\mathrm{SSB}$ within cluster and between cluster sums of squares
+* $k$ is number of clusters, $n$ is number of observations
+
+---
+
+# Calinski-Harabasz criterion
+
+```{r ponds-km-calinski-harabasz}
+ponds.cas <- cascadeKM(ponds.sc, 1, 6)
+plot(ponds.cas, sortg = TRUE)
+```
+
+---
+
+# Relating classifications to external sets of variables
+
+* Cluster analysis is not an end in and of itself. It is a means to an end.
+* Interpretation of results of cluster analysis can be aided through the use of external data, e.g. environmental data used to aid interpretation of species-derived clusters.
+* Basic EDA graphical approaches, such as boxplots, coded scatterplots.
+* Discriminants analysis.
+* Indicator species analysis.
+
+---
+class: inverse middle center big-subsection
+
+# Diversity
+
+---
+
+# Diversity
+
+Biodiversity is many things to many people
+
+A measure of the variety of biological life present
+
+Perhaps taking into account the relative abundances
+
+*species diversity* is a quantitative measure of the variety or number of different species
+
+---
+
+# Diversity
+
+```{r diversity-table-example, echo = FALSE}
+df <- tibble(Species = c("Isoperla", "Ceratopsyche", "Ephemerella", "Chironomus",
+    "Number of species R", "Shannon-Wiener H", "Simpson's D"),
+Stream1 = c(20, 20, 20,  20, 4, 1.39, 0.75),
+Stream2 = c(50, 75, 75,   0, 3, 1.08, 0.66),
+Stream3 = c(20, 20, 20, 140, 4, 0.94, 0.48),
+Stream4 = c(0,  0,  0, 200, 1, 0.00, 0.00))
+knitr::kable(df, format = "html")
+```
+
+---
+
+# How shall we define "diversity"?
+
+Diversity indices attempt to quantify
+
+* the probability of encountering different species at random, or,
+
+* the uncertainty or multiplicity of possible community states (i.e., the entropy of community composition), or,
+
+* the variance in species composition, relative to a multivariate centroid
+
+---
+
+# Measuring variety
+
+Imgaine a species pool with $R$ species
+
+In a sample with only $R = 1$ species the sample can take on only $R = 1$ states
+
+The abundance of that one species is 100% and all others are zero
+
+---
+
+# Measuring variety
+
+Now imagine a sample with two species $R = 2$
+
+The community could take on $R(R - 1)$ different states
+
+The first species could by any of the R species
+
+The second species could be any of the *ther* species
+
+All the other species are zero
+
+---
+
+# Measuring variety
+
+Increasing diversity means increasing the possible states that the community could take,
+
+This increases our uncertainty about community structure
+
+This increasing lack of information about the system is a form of *entropy*
+
+Increasing diversity is increasing entropy
+
+---
+
+# Measuring variety
+
+Three commonly used diversity indices
+
+* Species richness $R$
+
+* Shannon-Wiener diversity
+
+* Simpson's diversity
+
+---
+
+# Species richness
+
+The count of the number of species in a sample or area
+
+Simple
+
+Most commonly used
+
+--
+
+Deceptively simple; need to have common sampling effort
+
+---
+
+# Shannon-Wiener diversity
+
+$$H^{\prime} = - \sum_{i=1}^{R} p_i \log_e(p_i)$$
+
+This is the standard measure of entropy or disorder in a system
+
+Originates from Claude Shannon's work in *information theory*
+
+---
+
+# Simpson's diversity
+
+$$S_D = 1 - \sum_{i=1}^{R} p_i^2$$
+
+* the probability that two individuals drawn at random from a community will be different species
+
+* the initial slope of the *species-individuals curve*
+
+* the expected *variance* of species composition
+
+---
+
+# Measuring variety
+
+The three indices are directly related
+
+They all estimate *entropy*, the amount of disorder or the multiplicity of possible states of a system
+
+$R$ depends most heavily on the *rare* species
+
+$S_D$ depends most heavily on the *common* species
+
+and $H^{\prime}$ is somewhere in between
+
+---
+
+# Diversity metrics
+
+**vegan** has many functions for computing diversity metrics
+
+.row[
+.col-6[
+Three popular ones are
+
+1. Shannon-Wiener (Wrongly Shannon-Weaver)
+
+2. Simpson
+
+3. Inverse Simpson
+
+$p_i$ is proportion of species $i$
+
+$b$ is the base, usually $e$
+
+$S$ is number of species (richness)
+  
+]
+.col-6[
+$$H = - \sum_{i=1}^{S} p_i \log_b p_i$$
+
+$$D_1 = 1 - \sum_{i=1}^{S} p_i^2$$
+
+$$D_2 = \frac{1}{\sum_{i=1}^{S} p_i^2}$$
+]
+]
+
+---
+
+# Diversity metrics
+
+```{r diversity-1, echo = TRUE}
+data(BCI)
+H <- diversity(BCI)
+head(H)
+D1 <- diversity(BCI, index = "simpson")
+head(D1)
+D2 <- diversity(BCI, index = "invsimpson", base = 2)
+head(D2)
+```
+
+---
+
+# Diversity metrics
+
+## Richness
+
+```{r diversity-2, echo = TRUE}
+head(specnumber(BCI)) # species richness
+
+head(rowSums(BCI > 0)) # simple
+```
+
+## Pielou's Evenness $J$
+
+```{r diversity-3, echo = TRUE}
+J <- H / log(specnumber(BCI))
+head(J)
+```
+
+---
+
+# Diversity &mdash; R&eacute;nyi entropy & Hill's numbers
+
+R&eacute;nyi's *generalized entropy*
+
+$$H_a = \frac{1}{1-a} \log \sum_{i = 1}^{S} p_i^a$$
+
+where $a$ is the *order* of the entropy
+
+Corresponding Hill's numbers are
+
+$$N_a = \exp{(H_a)}$$
+
+---
+
+# Diversity &mdash; R&eacute;nyi entropy & Hill's numbers
+
+```{r diversity-4, echo = TRUE}
+R <- renyi(BCI, scales = 2)
+head(R)
+
+N2 <- renyi(BCI, scales = 2, hill = TRUE)
+head(N2) # inverse simpson
+```
+
+---
+
+# Diversity &mdash; R&eacute;nyi entropy & Hill's numbers
+
+```{r diversity-5, echo = TRUE, fig.height = 6, fig.width = 6 * 1.77777, out.width = "80%"}
+k <- sample(nrow(BCI), 6)
+R <- renyi(BCI[k,])
+plot(R)
+```
+
+---
+
+# Partitioning diversity
+
+Refer to biodiversity at different scales; $\alpha$, $\beta$, and $\gamma$
+
+* Alpha diversity, $\alpha$, is the diversity of a point location or of a single sample
+
+* Beta diversity, $\beta$, is the diversity due to multiple localities; $\beta$$ diversity is
+sometimes thought of as turnover in species composition among sites, or alternatively as the number of species in a region that are not observed in a sample
+
+* Gamma diversity, $\gamma$, is the diversity of a region, or at least the diversity
+of all the species in a set of samples collected over a large area
+
+---
+
+# Partitioning diversity
+
+Diversity across spatial scales can be partitioned in one of two ways
+
+1. *additive*, or,
+
+2. *multiplicative*
+
+partitioning
+
+---
+
+# Additive partitioning
+
+$$\bar{\alpha} + \beta = \gamma$$
+
+$\bar{\alpha}$ is the average diversity of a samples, while $\gamma$ is the diversity of the pooled samples
+
+$\beta$ is found by difference
+
+$$\beta = \gamma - \bar{\alpha}$$
+
+We can think of $\beta$ as the average number of species not found in a sample, but which we know
+to be in the region
+
+---
+
+# Multiplicative partitioning
+
+$$\bar{\alpha} \beta = \gamma$$
+
+where $\beta$ is a conversion factor that describes the relative change in species composition among samples
+
+Sometimes this type of $\beta$ diversity is thought of as the number of different community types in a set of samples
+
+---
+
+# Rarefaction
+
+Species richness increases with sample size (effort)
+
+Rarefaction gives the expected number of species rarefied from $N$ to $n$ individuals
+
+$$\hat{S}_n = \sum_{i=1}^S (1 - q_i) \; \mathsf{where} \; q_i = \frac{\binom{N - x_i}{n}}{\binom{N}{n}}$$
+
+$x_i$ is count of species $i$ and $\binom{N}{n}$ is a binomial coefficient &mdash; the number of ways to choose $n$ from $N$
+
+---
+
+# Rarefaction
+
+.row[
+.col-6[
+```{r rarefy, echo = TRUE, fig.show = "hide"}
+rs <- rowSums(BCI)
+quantile(rs)
+
+Srar <- rarefy(BCI, min(rs))
+head(Srar)
+
+rarecurve(BCI, sample = min(rs))
+```
+]
+
+.col-6[
+```{r rarefy, echo = FALSE, fig.height = 6, fig.width = 6, dev.args = list(pointsize = 14), results = "hide"}
+```
+]
+]
+
+---
+
+# Rarefaction
+
+With rarefaction we can be accused of throwing away data
+
+Yet we need to do something about the often large differences in variances of species and samples owing to sampling effort
+
+---
+
+# High-throughput data
+
+Revolutions in biology & biotechnology have lead to exponential increases in our capacity to generate data arising from the counting of biological molecules
+
+* DNA sequencing,
+* RNA-Seq &mdash; sequence RNA molecules in populations of cells or tissues,
+* ChIp-Seq &mdash; sequence DNA molecules that are bound to particular proteins,
+* &hellip;
+
+Relative cheaply, today we can generate data sets with thousands of variables on tens to hundreds of samples
+
+---
+
+# High-throughput data
+
+Counts of such molecules present a statistical challenge
+
+* the counts typically have a large *dynamic range*, covering many orders of magnitudes
+
+* over this very large range we observe changes in both variance (spread about the mean) and also in distribution of the data &mdash; **heterogeneity**
+
+* like other count data, observations are integers and distributions are skewed
+
+* the biotech methodology imparts systematic sampling biases into the data that we need to account for in an analysis &mdash; typically called **normalization** in this sub-field
+
+---
+
+# Sequence depth & size factors
+
+The number of reads for each sample is a kind of *effort* variable
+
+All else equal, the more reads we generate the more species (OTUs, ASVs, etc) we would expect to identify
+
+If number of reads differs between samples (libraries) then, all else equal we might assume the counts in different samples are proportional to one another, following some proportionality factor $s$
+
+A simple estimate for $s$ might be the total reads per sample
+
+But we can do better than this &hellip;
+
+---
+
+# Sequence depth & size factors
+
+.row[
+.col-8[
+A small dataset of 5 genes in 2 samples
+
+Two views:
+
+1. estimate $s_j$ as $\sum_{i=1}^{m} x_{ij}$, blue line is ratio of $s_j$
+2. instead, estimate $s_j$ such that their ratio is the red line
+
+In 1 we would C is downregulated & A, B, D, & E are upregulated
+
+2 is more parsimonious
+
+`DESeq2::estimateSizeFactorsForMatrix()`
+]
+
+.col-4[
+
+```{r echo = FALSE}
+knitr::include_graphics("resources/chap7-rnaseq-normalization-1.png")
+```
+
+.smaller[Holmes & Huber (2019) Modern Statistics for Modern Biology]
+]
+]
+
+---
+
+# Variance stabilizing transformations
+
+The square-root transformation is known as the _variance stabilizing transformation_ for the Poisson distribution
+
+Taking the square root of observations that are distributed Poisson leads to *homoscedasticity*
+
+Can construct variance stabilizing transformations for other distributions
+
+High-throughput count data typically show extra-Poisson variation
+
+`DESeq2::vst()` 
+
+---
+
+# Regularized log transform
+
+This transforms counts to a log<sub>2</sub>-like scale via a simple model
+
+$$\log_2(q_{ij}) = \sum_k x_{jk} \beta_{ik}$$
+
+where $q_{ij}$ are the transformed data and $x_{jk}$ is a particular design matrix with a dummy variable for the $j$th sample for ($i = {1, 2, \dots m}$ variables)
+
+Priors on the $\beta_{ik}$ make the model identifiable
+
+The _rlog_ transformation is ~ variance stabilizing, but handles highly varying size factors across samples
+
+`DESeq2::rlog()`
+
+---
+
+# Transformations
+
+Comparison of three transformations
+
+```{r echo = FALSE}
+knitr::include_graphics("resources/chap7-rnaseq-meansd-1.png")
+```
+
+.smaller[Holmes & Huber (2019) Modern Statistics for Modern Biology]
+
+???
+
+Figure 8.12: Per-gene standard deviation (sd, taken across samples) against the rank of the mean, for the shifted logarithm , the variance-stabilizing transformation (vst) and the rlog. Note that for the leftmost  2,500 genes, the counts are all zero, and hence their standard deviation is zero. The mean-sd dependence becomes more interesting for genes with non-zero counts. Note also the high value of the standard deviation for genes that are weakly detected (but not with all zero counts) when the shifted logarithm is used, and compare to the relatively flat shape of the mean-sd relationship for the variance-stabilizing transformation.
+
+---
+
+# Implications
+
+Size factors can be used in GLMs etc to normalize samples via as `offset()` term in the formula
+
+For ordination we can't easily use the size factors
+
+Need to use _vst_ or _rlog_ instead
+
+_rlog_ creates data that can't be used in CCA, so if you use it, RDA or db-RDA are the ordination methods to use
+
+---
+
+# Practicalities
+
+```{r eval = FALSE}
+# install.packages("BiocManager")
+# BiocManager::install("DESeq2")
+library("DESeq2")
+
+dds_asv <- DESeqDataSetFromMatrix(countData = orig_asv, # response count data
+                                  colData = meta_data,  # other data including predictors
+                                  design = ~ treatment) # experimental design
+
+## Make sure that the control is the reference level
+dds_asv$treatment <- relevel(dds_asv$treatment, ref = "CON")
+
+# compute the regularized log transform
+rld <- rlog(dds_asv, blind = FALSE)
+# compute the variance stabilizing transform
+vst <- vst(dds_asv, blind = FALSE)
+
+# extract rlog transformed data & get ready to go into *vegan*
+cts <- t(assay(rld))
+cts_df <- as.data.frame(cts)
+```
+
+---
+
+# Rarefied counts
+
+Can take a random draw $n^{\prime}$ out of the $N$ individuals in a sample in proportion to species abundances
+
+This yields rarefied counts which some people then go on to analyse
+
+Be careful though as this is a random process &mdash; what if you took a different random sample?
+
+---
+
+# Rarefied counts
+
+`avgdist()` in *vegan* tries to get around this by
+
+1. taking a random draw to get rarefied counts
+2. computing dissimilarity between smaples on basis of rarefied count
+
+Repeat that many times and then as your dissimilarity $d_{ij}$, take the average of the many $d_{ij}^*$ values you generated above
+
+See also the help page for other suggestions `?avgdist`
+
+---
+
+# Suggested readings
+
+B. Everitt, S. Landau & M. Leese, 2001, Cluster analysis 4th Edition. Arnold
+
+A.D. Gordon, 1999, Classification. Chapman & Hall
+
+L. Kaufman & P.J. Rousseeuw, 1990, Finding groups in data. An introduction to cluster analysis. Wiley
+
+P. Legendre & L. Legendre, 1998, Numerical ecology. Elsevier (Third English Edition)
+
+M. H. H. Stevens, 2009, A Primer of Ecology with R. Springer
