@@ -1,0 +1,23 @@
+---
+title: Tatry Mountain data
+author: Gavin Simpson
+date: Novermber 21, 2022
+output: html_document
+---
+
+# Tatry Mountain Data
+
+Vegetation records (releves) from an altitudinal transect in Nizke Tatry Mountains, Slovakia. Releve 1 was recorded at an altitude of 1200m above sea level, while releve 14 at 1830m above sea level. Releves were recorded using a Bruan-Blanquet scale (r, +, 1-5), which was recoded to 1-7 and is on an ordinal scale.
+
+```{r, results = "hide"}
+library("readxl") # might need install.packages("readxl")
+library("vegan")
+
+tatry <- read_excel("01-monday/data/tatry.xlsx")
+head(tatry)
+
+# or via csv
+library("readr")
+tatry_url <- "https://bit.ly/tatry-spp"
+tatry <- read_csv(tatry_url)
+```
