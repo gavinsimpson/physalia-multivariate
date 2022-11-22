@@ -33,10 +33,10 @@ Plot the dendrograms
 
 ```{r}
 layout(matrix(1:4, ncol = 2))
-plot(cl_single)
-plot(cl_complete)
-plot(cl_average)
-plot(cl_ward)
+plot(cl_single, hang = -0.1)
+plot(cl_complete, hang = -0.1)
+plot(cl_average, hang = -0.1)
+plot(cl_ward, hang = -0.1)
 layout(1)
 ```
 
@@ -44,9 +44,12 @@ Now look at *k*-means
 
 ```{r}
 set.seed(42)
-vltava_hell <- decostand(vltava,
-    method = "hellinger")
+vltava_hell <- decostand(vltava, method = "hellinger")
 cas_km <- cascadeKM(vltava_hell, 1, 10)
+
+
+set.seed(42)
+cas_km <- cascadeKM(sqrt(vltava), 1, 10)
 ```
 
 We can plot this
@@ -55,11 +58,20 @@ We can plot this
 plot(cas_km)
 ```
 
+### Cophenetic correlation
+
+The cophenetic distances can be computed from the dendrogram using `cophenetic()`. Then we can compute the cophenetic correlation, the correlation between the original dissimilarities and the cophenetic distances using `cor()`
+
+```{r}
+cop <- cophenetic(cl_ward)
+cor(cop, dis)
+```
+
 ## Diversity
 
 Refer back to the slides and compute the following diversity measure
 
-* richness
+* Richness
 
 * Shannon-Wiener
 

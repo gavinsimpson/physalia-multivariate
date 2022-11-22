@@ -1,0 +1,651 @@
+---
+title: "Permutation tests"
+author: Gavin L. Simpson
+date: September 22, 2022
+fontsize: 10pt
+classoption: "compress, aspectratio=169"
+bibliography: "resources/vegan-refs.bib"
+output:
+  xaringan::moon_reader:
+    css: ['default', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css', 'slides.css']
+    lib_dir: libs
+    nature:
+      titleSlideClass: ['inverse','middle','left',my-title-slide]
+      highlightStyle: github
+      highlightLines: true
+      countIncrementalSlides: false
+      beforeInit: "macros.js"
+      ratio: '16:9'
+---
+class: inverse middle center big-subsection
+
+```{r setup-options, echo = FALSE, results = "hide", message = FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(cache = TRUE, dev = 'svg', echo = TRUE, message = FALSE, warning = FALSE,
+                      fig.height=6, fig.width = 1.777777*6)
+library("vegan")
+library("ggplot2")
+data(varespec)
+data(varechem)
+
+## plot defaults
+theme_set(theme_minimal(base_size = 16, base_family = 'Fira Sans'))
+```
+
+# Welcome
+
+---
+
+# Today's topics
+
+* Restricted permutation tests
+* PERMANOVA
+* Distance-based RDA
+* Diagnostics
+
+---
+class: inverse middle center subsection
+
+# Permutation tests
+
+---
+
+# Permutation tests in vegan
+
+RDA has lots of theory behind it, CCA bit less. However, ecological/environmental data invariably violate what little theory we have
+
+Instead we use permutation tests to assess the *importance* of fitted models &mdash; the data are shuffled in some way and the model refitted to derive a Null distribution under some hypothesis of *no effect*
+
+---
+
+# Permutation tests in vegan
+
+What *is* shuffled and *how* is of **paramount** importance for the test to be valid
+
+* No conditioning (partial) variables then rows of the species data are permuted
+* With conditioning variables, two options are available, both of which *permute residuals* from model fits
+    * The *full model* uses residuals from model $Y = X + Z + \varepsilon$
+    * The *reduced model* uses residuals from model $Y = Z + \varepsilon$
+* In **vegan** which is used can be set via argument `model` with `"direct"`, `"full"`, and `"reduced"` respectively
+
+---
+
+# Permutation tests in vegan
+
+A test statistic is required, computed for observed model & each permuted model
+
+**vegan** uses a pseudo $F$ statistic
+
+$$F=\frac{\chi^2_{model} / df_{model}}{\chi^2_{resid} / df_{resid}}$$
+
+Evaluate whether $F$ is unusually large relative to the null (permutation) distribution of $F$
+
+---
+
+# Permutation tests in vegan
+
+.row[
+.col-6[
+```{r permustats-1, results = "hide"}
+cca1 <- cca(varespec ~ ., data = varechem)
+pstat <- permustats(anova(cca1))
+summary(pstat)
+```
+.small[
+```{r permustats-1, echo = FALSE}
+```
+]
+]
+.col-6[
+```{r permustats-2, fig.width = 6, fig.height = 6}
+densityplot(pstat)
+```
+]
+]
+
+???
+
+The summary method of permustats estimates the standardized effect sizes (SES) as the difference
+of observed statistic and mean of permutations divided by the standard deviation of permutations
+(also known as z-values). It also prints the the mean, median, and limits which contain interval
+percent of permuted values. With the default (interval = 0.95), for two-sided test these are (2.5%,
+97.5%) and for one-sided tests either 5% or 95% quantile and the p-value depending on the test
+direction. The mean, quantiles and z values are evaluated from permuted values without observed
+statistic, but the p-value is evaluated with the observed statistic. 
+
+---
+
+# Permutation tests in vegan: `anova()`
+
+* The main user function is the `anova()` method
+* It is an interface to the lower-level function `permutest.cca()`
+* At its most simplest, the `anova()` method tests whether the **model** as a whole is significant
+
+---
+
+# Permutation tests in vegan: `anova()`
+
+$$F = \frac{1.4415 / 14}{0.6417 / 9} = 1.4441$$
+
+```{r cca-anova}
+set.seed(42)
+(perm <- anova(cca1))
+```
+
+---
+class: inverse middle center subsection
+
+# Restricted permutation tests
+
+---
+
+# Restricted permutation tests
+
+What *is* shuffled and *how* is of **paramount** importance for a valid test
+
+Complete randomisation assumes a null hypothesis where all observations are *independent*
+
+* Temporal or spatial correlation
+* Clustering, repeated measures
+* Nested sampling designs (Split-plots designs)
+* Blocks
+* &hellip;
+
+Permutation *must* give null distribution of the test statistic whilst preserving the *dependence* between observations
+
+Trick is to shuffle the data whilst preserving that dependence
+
+---
+
+# Restricted permutations
+
+Canoco has had restricted permutations for a *long* time. *vegan* has only recently caught up & we're not (quite) there yet
+
+*vegan* used to only know how to completely randomise data or completely randomise within blocks (via `strata` in *vegan*)
+
+The **permute** package grew out of initial code in the *vegan* repository to generate the sorts of restricted permutations available in Canoco
+
+We have now fully integrated **permute** into *vegan*&hellip;
+
+*vegan* depends on *permute* so it will already be installed & loaded when using *vegan*
+
+---
+
+# Restricted permutations with permute
+
+*permute* follows *Canoco* closely &mdash; at the (friendly!) chiding of Cajo ter Braak when it didn't do what he wanted!
+
+Samples can be thought of as belonging to three levels of a hierarchy
+
+ * the *sample* level; how are individual samples permuted
+ * the *plot* level; how are samples grouped at an intermediate level
+ * the *block* level; how are samples grouped at the outermost level
+
+Blocks define groups of plots, each of which can contain groups of samples
+
+---
+
+# Restricted permutations with permute
+
+Blocks are *never* permuted; if defined, only plots or samples *within* the blocks get shuffled & samples are **never** swapped between blocks
+
+Plots or samples within plots, or both can be permuted following one of four simple permutation types
+
+1. Free permutation (randomisation)
+2. Time series or linear transect, equal spacing
+3. Spatial grid designs, equal regular spacing
+4. Permutation of plots (groups of samples)
+5. Fixed (no permutation)
+
+Multiple plots per block, multiple samples per plot; plots could be arranged in a spatial grid & samples within plots form time series
+
+---
+
+#  Blocks
+
+Blocks are a random factor that does not interact with factors that vary within blocks
+
+Blocks form groups of samples that are never permuted between blocks, only within blocks
+
+Using blocks you can achieve what the `strata` argument used to in **vegan**; needs to be a factor variable
+
+The variation *between* blocks should be excluded from the test; **permute** doesn't do this for you!
+
+Use `+ Condition(blocks)` in the model formula where `blocks` is a factor containing the block membership for each observation
+
+---
+
+# Time series & linear transects
+
+Can link *randomly* starting point of one series to any time point of another series if series are stationary under H<sub>0</sub> that series are unrelated
+
+Achieve this via cyclic shift permutations &mdash; wrap series into a circle
+
+```{r cyclic-shift-figure, echo = FALSE}
+knitr::include_graphics("./resources/cyclic-shifts-figure.png")
+```
+
+---
+
+# Time series & linear transects
+
+Works OK if there are no trends or cyclic pattern &mdash; autocorrelation structure only broken at the end points *if* series are stationary
+
+Can detrend to make series stationary but not if you want to test significance of a trend
+
+```{r shuffle-time-series, echo = TRUE}
+shuffle(10, control = how(within = Within(type = "series")))
+```
+
+---
+
+# Spatial grids
+
+.row[
+
+.col-6[
+The trick of cyclic shifts can be extended to two dimensions for a regular spatial grid arrangement of points
+
+Now shifts are *toroidal* as we join the end point in the *x* direction together and in the *y* direction together
+
+.small[
+Source: Dave Burke, Wikimedia CC BY
+]
+]
+
+.col-6[
+
+```{r set-up-toroidal}
+set.seed(4)
+h <- how(within = Within(type = "grid",
+                         ncol = 3, nrow = 3))
+perm <- shuffle(9, control = h)
+matrix(perm, ncol = 3)
+```
+.center[
+```{r toroidal-shifts-figure, echo = FALSE}
+knitr::include_graphics("./resources/Toroidal_coord.png")
+```
+]
+
+]
+]
+
+---
+
+# Whole-plots & split-plots I
+
+Split-plot designs are hierarchical with two levels of units
+
+1. **whole-plots** , which contain
+2. **split-plots** (the samples)
+
+Permute one or both, but whole-plots must be of equal size
+
+Essentially allows more than one error stratum to be analyzed
+
+Test effect of constraints that vary *between* whole plots by permuting the whole-plots whilst retaining order of split-splots (samples) within the whole-plots
+
+Test effect of constraints that vary *within* whole-plots by permuting the split-plots within whole-plots without permuting the whole-plots
+
+---
+
+# Whole-plots & split-plots II
+
+Whole-plots or split-plots, or both, can be time series, linear transects or rectangular grids in which case the appropriate restricted permutation is used
+
+If the split-plots are parallel time series & `time` is an autocorrelated error component affecting all series then the same cyclic shift can be applied to each time series (within each whole-plot) (`constant = TRUE`)
+
+---
+
+# Mirrored permutations
+
+Mirroring in restricted permutations allows for isotropy in dependencies by reflecting the ordering of samples in time or spatial dimensions
+
+For a linear transect, technically the autocorrelation at lag *h* is equal to that at lag -*h* (also in a trend-free time series)
+
+.center[
+```{r cyclic-shift-mirror-figure, echo = FALSE}
+knitr::include_graphics("./resources/cyclic-shifts-with-mirror-figure.svg")
+```
+]
+
+---
+
+# Mirrored permutations
+
+Hence the series `(1, 2, 3, 4)` and `(4, 3, 2, 1)` are equivalent fom this point of view & we can draw permutations from either version
+
+Similar argument can be made for spatial grids
+
+Using `mirror = TRUE` then can double (time series, linear transects) or quadruple (spatial grids) the size of the set of permutations
+
+---
+
+# Sets of permutations &mdash; no free lunch
+
+Restricted severely reduce the size of the set of permutations
+
+As the minimum *p* value obtainable is $1 / np$ where $np$ is number of allowed permutations (including the observed) this can impact the ability to detect signal/pattern
+
+If we don't want mirroring
+
+* in a time series of 20 samples the minimum *p* is 1/20 (0.05)
+* in a time series of 100 samples the minimum *p* is 1/100 (0.01)
+* in a data set with 10 time series each of 20 observations (200 total), if we assume an autocorrelated error component over all series (`constant = TRUE`) then there are only 20 permutations of the data and minimum *p* is 0.05
+
+---
+
+# Sets of permutations &mdash; no free lunch
+
+When the set of permutations is small it is better to switch to an exact test & evaluate all permutations in the set rather than randomly sample from the set
+
+Use `complete = TRUE` in the call to `how()` &mdash; perhaps also increase `maxperm`
+
+---
+
+# Designing permutation schemes
+
+In **permute**, we set up a permutation scheme with `how()`
+
+We sample from the permutation scheme with
+
+ * `shuffle()`, which gives a single draw from scheme, or
+ * `shuffleSet()`, which returns a set of `n` draws from the scheme
+
+`allPerms()` can generated the entire set of permutations &mdash; **note** this was designed for small sets of permutations & is slow if you request it for a scheme with many thousands of permutations!
+
+---
+
+# Designing permutation schemes
+
+`how()` has three main arguments
+
+1. `within` &mdash; takes input from helper `Within()`
+2. `plots`  &mdash; takes input from helper `Plots()`
+3. `blocks` &mdash; takes a factor variable as input
+ 
+```{r}
+plt <- gl(3, 10)
+h <- how(within = Within(type = "series"), plots = Plots(strata = plt))
+```
+
+---
+
+# Designing permutation schemes
+
+Helper functions make it easy to change one or a few aspects of permutation scheme, rest left at defaults
+
+```{r helper-funs}
+args(Within)
+args(Plots)
+```
+
+---
+
+# Designing permutation schemes
+
+`how()` has additional arguments, many of which control the heuristics that kick in to stop you shooting yourself in the foot and demanding 9999 permutations when there are only 10
+
+* `complete` should we enumerate the entire set of permutations?
+* `minperm` lower bound on the size of the set of permutations at & below which we turn on complete enumeration
+
+```{r how-args}
+args(how)
+```
+
+---
+
+# Time series example I
+
+Time series within 3 plots, 10 observation each
+
+```{r ts-perm-example1}
+plt <- gl(3, 10)
+h <- how(within = Within(type = "series"),
+         plots = Plots(strata = plt))
+set.seed(4)
+p <- shuffle(30, control = h)
+do.call("rbind", split(p, plt)) ## look at perms in context
+```
+
+---
+
+# Time series example II
+
+Time series within 3 plots, 10 observation each, same permutation within each
+
+```{r ts-perm-example2}
+plt <- gl(3, 10)
+h <- how(within = Within(type = "series", constant = TRUE),
+         plots = Plots(strata = plt))
+set.seed(4)
+p <- shuffle(30, control = h)
+do.call("rbind", split(p, plt)) ## look at perms in context
+```
+
+---
+class: inverse middle center subsection
+
+# Ohraz Case Study
+
+---
+
+# Restricted permutations | Ohraz
+
+Now we've seen how to drive **permute**, we can use the same `how()` commands to set up permutation designs within **vegan** functions
+
+Analyse the Ohraz data Case study 5 of Leps & Smilauer
+
+Repeated observations of composition from an experiment
+
+* Factorial design (3 replicates)
+* Treatments: fertilisation, mowing, *Molinia* removal
+
+Test 1 of the hypotheses
+
+> There are *no* directional changes in species composition in time that are common to all treatments or specific treatments
+
+---
+
+# Restricted permutations | Ohraz
+
+Analyse the Ohraz data Case study 5 of Leps & Smilauer
+
+```{r worked-example-devel-1}
+## load vegan
+library("vegan")
+
+## load the data
+spp <- read.csv("data/ohraz-spp.csv", header = TRUE, row.names = 1)
+env <- read.csv("data/ohraz-env.csv", header = TRUE, row.names = 1)
+molinia <- spp[, 1]
+spp <- spp[, -1]
+
+## Year as numeric
+env <- transform(env, year = as.numeric(as.character(year)))
+```
+
+---
+
+# Restricted permutations | Ohraz
+
+```{r worked-example-devel-2}
+c1 <- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
+(h <- how(within = Within(type = "none"), plots = Plots(strata = env$plotid, type = "free")))
+```
+
+---
+
+# Restricted permutations | Ohraz
+
+```{r worked-example-devel-2a}
+set.seed(42)
+anova(c1, permutations = h, model = "reduced")
+```
+
+---
+
+# Restricted permutations | Ohraz
+
+```{r worked-example-devel-2b}
+set.seed(24)
+anova(c1, permutations = h, model = "reduced", by = "axis")
+```
+
+---
+class: inverse middle center subsection
+
+# Hierarchical analysis of crayfish
+
+---
+
+# Hierarchical analysis of crayfish
+
+Variation in communities may exist at various scales, sometimes hierarchically
+
+A first step in understanding this variation is to test for its exisistence
+
+In this example from Leps & Smilauer (2014) uses crayfish data from Spring River, Arkansas/Missouri, USA, collected by Dr. Camille Flinders.
+
+567 records of 5 species, each sub-divided into *Large* & *Small* individuals 
+
+---
+
+# Hierarchical analysis of crayfish
+
+```{r load-crayfish}
+## load data
+crayfish <- head(read.csv("data/crayfish-spp.csv")[, -1], -1)
+design <- read.csv("data/crayfish-design.csv", skip = 1)[, -1]
+
+## fixup the names
+names(crayfish) <- gsub("\\.", "", names(crayfish))
+names(design) <- c("Watershed", "Stream", "Reach", "Run",
+                   "Stream.Nested", "ReachNested", "Run.Nested")
+```
+
+---
+
+# Crayfish &mdash; Unconstrained
+
+A number of samples have 0 crayfish, which excludes unimodal methods
+
+```{r crayfish-unconstrained}
+m.pca <- rda(crayfish)
+summary(eigenvals(m.pca))
+```
+
+---
+
+# Crayfish &mdash; Unconstrained
+
+```{r crayfish-pca-plot, fig.show = "hide", collapse = TRUE}
+layout(matrix(1:2, ncol = 2))
+biplot(m.pca, type = c("text", "points"), scaling = "species")
+set.seed(23)
+ev.pca <- envfit(m.pca ~ Watershed, data = design, scaling = "species")
+plot(ev.pca, labels = levels(design$Watershed), add = FALSE)
+layout(1)
+```
+.center[
+```{r crayfish-pca-plot, fig.show = "hold", out.width = "75%", echo = FALSE, fig.height = 5}
+```
+]
+
+---
+
+# Crayfish &mdash; Watershed scale
+
+```{r crayfish-watershed}
+m.ws <- rda(crayfish ~ Watershed, data = design)
+m.ws
+```
+
+---
+
+# Crayfish &mdash; Watershed scale
+
+```{r crayfish-watershed-2}
+summary(eigenvals(m.ws, constrained = TRUE))
+```
+
+---
+
+# Crayfish &mdash; Watershed scale
+
+```{r crayfish-watershed-3}
+set.seed(1)
+ctrl <- how(nperm = 499, within = Within(type = "none"),
+            plots = with(design, Plots(strata = Stream, type = "free")))
+(sig.ws <- anova(m.ws, permutations = ctrl))
+```
+
+---
+
+# Crayfish &mdash; Stream scale
+
+```{r crayfish-stream}
+m.str <- rda(crayfish ~ Stream + Condition(Watershed), data = design)
+m.str
+```
+
+---
+
+# Crayfish &mdash; Stream scale
+
+```{r crayfish-stream-2}
+summary(eigenvals(m.str, constrained = TRUE))
+```
+
+---
+
+# Crayfish &mdash; Stream scale
+
+```{r crayfish-stream-3}
+set.seed(1)
+ctrl <- how(nperm = 499, within = Within(type = "none"),
+            plots = with(design, Plots(strata = Reach, type = "free")),
+            blocks = with(design, Watershed))
+(sig.str <- anova(m.str, permutations = ctrl))
+```
+
+---
+
+# Crayfish &mdash; Reach scale
+
+```{r crayfish-reach}
+(m.re <- rda(crayfish ~ Reach + Condition(Stream), data = design))
+```
+
+---
+
+# Crayfish &mdash; Reach scale
+
+```{r crayfish-reach-2}
+set.seed(1)
+ctrl <- how(nperm = 499, within = Within(type = "none"),
+            plots = with(design, Plots(strata = Run, type = "free")),
+            blocks = with(design, Stream))
+(sig.re <- anova(m.re, permutations = ctrl))
+```
+
+---
+
+# Crayfish &mdash; Run scale
+
+```{r crayfish-run}
+(m.run <- rda(crayfish ~ Run + Condition(Reach), data = design))
+```
+
+---
+
+# Crayfish &mdash; Run scale
+
+```{r crayfish-run-2}
+set.seed(1)
+ctrl <- how(nperm = 499, within = Within(type = "free"),
+            blocks = with(design, Reach))
+(sig.run <- anova(m.run, permutations = ctrl))
+```
+

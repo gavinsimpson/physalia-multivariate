@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Other topics</title>
+    <meta charset="utf-8" />
+    <meta name="author" content="Gavin L. Simpson" />
+    <meta name="date" content="2022-11-25" />
+    <link href="libs/remark-css/default.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
+    <link rel="stylesheet" href="slides.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+class: inverse, middle, left, my-title-slide, title-slide
+
+.title[
+# Other topics
+]
+.author[
+### Gavin L. Simpson
+]
+.date[
+### November 25, 2022
+]
+
+---
+
+class: inverse middle center big-subsection
+
+
+
+# Welcome
+
+---
+
+# Today's topics
+
+* PERMANOVA
+* Distance-based RDA
+* Co-correspondence analysis
+* Diagnostics
+
+---
+class: inverse middle center big-subsection
+
+# PERMANOVA
+
+---
+
+# MANOVA
+
+MANOVA is the multivariate form of ANOVA
+
+* Multivariate response data
+* Categorical predictor variables
+
+Decompose variation in the responses into
+
+1. variation within groups
+2. variation between groups
+
+Test to see if two is unusually large relative to H&lt;sub&gt;0&lt;/sub&gt;
+
+---
+
+# PERMANOVA
+
+Doing that test requires lots of assumptions that rarely hold for ecological data
+
+PERMANOVA: Permutational multivariate analysis of variance
+
+Avoids most of these issues through the use of permutation tests
+
+Directly decomposes a dissimilarity matrix into
+
+1. variation within groups
+2. variation between groups
+
+---
+
+# PERMANOVA *sensu stricto*
+
+*vegan* has four different ways to do essentially do this kind of analysis
+
+1. `adonis()` &amp;mdash; implements Anderson (2001)
+2. `adonis2()` &amp;mdash; implements McArdle &amp; Anderson (2001)
+3. `dbrda()` &amp;mdash; implementation based on McArdle &amp; Anderson (2001)
+4. `capscale()` &amp;mdash; implements Legendre &amp; Anderson (1999)
+
+Be careful with `adonis()` as it allows only sequential tests
+
+A difference between the functions is how they treat negative eigenvalues
+
+---
+
+# The PERMANOVA idea
+
+.center[
+![](slides_files/figure-html/permanova-idea-plot-1.svg)&lt;!-- --&gt;
+]
+
+---
+
+# PERMANOA &amp;mdash; `adonis2()`
+
+
+```r
+data(dune, dune.env)
+adonis2(dune ~ Management*A1, data = dune.env, by = "terms")
+```
+
+```
+## Permutation test for adonis under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 999
+## 
+## adonis2(formula = dune ~ Management * A1, data = dune.env, by = "terms")
+##               Df SumOfSqs      R2      F Pr(&gt;F)   
+## Management     3   1.4686 0.34161 3.2629  0.002 **
+## A1             1   0.4409 0.10256 2.9387  0.017 * 
+## Management:A1  3   0.5892 0.13705 1.3090  0.195   
+## Residual      12   1.8004 0.41878                 
+## Total         19   4.2990 1.00000                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+
+# PERMANOA &amp;mdash; `adonis2()`
+
+
+```r
+data(dune, dune.env)
+adonis2(dune ~ A1*Management, data = dune.env, by = "terms")
+```
+
+```
+## Permutation test for adonis under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 999
+## 
+## adonis2(formula = dune ~ A1 * Management, data = dune.env, by = "terms")
+##               Df SumOfSqs      R2      F Pr(&gt;F)   
+## A1             1   0.7230 0.16817 4.8187  0.003 **
+## Management     3   1.1865 0.27600 2.6362  0.007 **
+## A1:Management  3   0.5892 0.13705 1.3090  0.191   
+## Residual      12   1.8004 0.41878                 
+## Total         19   4.2990 1.00000                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+
+# PERMANOA &amp;mdash; `adonis2()`
+
+
+```r
+data(dune, dune.env)
+adonis2(dune ~ Management*A1, data = dune.env, by = "margin")
+```
+
+```
+## Permutation test for adonis under reduced model
+## Marginal effects of terms
+## Permutation: free
+## Number of permutations: 999
+## 
+## adonis2(formula = dune ~ Management * A1, data = dune.env, by = "margin")
+##               Df SumOfSqs      R2     F Pr(&gt;F)
+## Management:A1  3   0.5892 0.13705 1.309  0.222
+## Residual      12   1.8004 0.41878             
+## Total         19   4.2990 1.00000
+```
+
+--
+
+The interaction is the only term that isn't *marginal* to other terms; not significant
+
+---
+
+# PERMANOA &amp;mdash; `adonis2()`
+
+
+```r
+adonis2(dune ~ Management + A1, data = dune.env, by = "margin")
+```
+
+```
+## Permutation test for adonis under reduced model
+## Marginal effects of terms
+## Permutation: free
+## Number of permutations: 999
+## 
+## adonis2(formula = dune ~ Management + A1, data = dune.env, by = "margin")
+##            Df SumOfSqs      R2      F Pr(&gt;F)   
+## Management  3   1.1865 0.27600 2.4828  0.006 **
+## A1          1   0.4409 0.10256 2.7676  0.025 * 
+## Residual   15   2.3895 0.55583                 
+## Total      19   4.2990 1.00000                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+
+# The dispersion problem
+
+Anderson (2001) noted that PERMANOVA could confound *location* &amp; *dispersion* effects
+
+If one or more groups are more variable &amp;mdash; dispersed around the centroid &amp;mdash; than the others, this can result in a false detection of a difference of means &amp;mdash; a *location* effect
+
+Same problem affects *t* tests, ANOVA
+
+Warton et al (2012)
+Anderson &amp; Walsh (2013)
+Anderson *et al* (2017)
+
+---
+
+# Dispersion
+
+.center[
+![](slides_files/figure-html/permanova-idea-plot-1.svg)&lt;!-- --&gt;
+]
+
+---
+
+# Test for dispersion effects
+
+Marti Anderson (2006) developed a test for multivariate dispersions &amp;mdash; PERMDISP2
+
+1. Calculate how far each observation is from its group median (or centroid)
+2. Take the absolute values of these distances-to-medians
+3. Do an ANOVA on the absolute distances with the *groups* as covariates
+4. Test the H&lt;sub&gt;0&lt;/sub&gt; of equal absolute distances to median among groups using a permutation test
+
+In *vegan* this is `betadisper()`
+
+---
+
+# Test for dispersion effects
+
+.row[
+.col-6[
+.not-so-small[
+
+```r
+data(varespec)
+dis &lt;- vegdist(varespec) # Bray-Curtis distances
+## First 16 sites grazed, remaining 8 sites ungrazed
+groups &lt;- factor(c(rep(1,16), rep(2,8)),
+                 labels = c("grazed","ungrazed"))
+
+mod &lt;- betadisper(dis, groups)
+mod
+```
+
+```
+## 
+## 	Homogeneity of multivariate dispersions
+## 
+## Call: betadisper(d = dis, group = groups)
+## 
+## No. of Positive Eigenvalues: 15
+## No. of Negative Eigenvalues: 8
+## 
+## Average distance to median:
+##   grazed ungrazed 
+##   0.3926   0.2706 
+## 
+## Eigenvalues for PCoA axes:
+## (Showing 8 of 23 eigenvalues)
+##  PCoA1  PCoA2  PCoA3  PCoA4  PCoA5  PCoA6  PCoA7  PCoA8 
+## 1.7552 1.1334 0.4429 0.3698 0.2454 0.1961 0.1751 0.1284
+```
+]
+]
+.col-6[
+
+```r
+boxplot(mod)
+```
+
+![](slides_files/figure-html/permdisp-plot-1.svg)&lt;!-- --&gt;
+]
+]
+
+---
+
+# Test for dispersions
+
+.row[
+
+.col-6[
+.smaller[
+
+```r
+set.seed(25)
+permutest(mod)
+```
+
+```
+## 
+## Permutation test for homogeneity of multivariate dispersions
+## Permutation: free
+## Number of permutations: 999
+## 
+## Response: Distances
+##           Df  Sum Sq  Mean Sq      F N.Perm Pr(&gt;F)  
+## Groups     1 0.07931 0.079306 4.6156    999  0.045 *
+## Residuals 22 0.37801 0.017182                       
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+]
+
+.col-6[
+
+```r
+plot(mod)
+```
+
+![](slides_files/figure-html/permdisp-plot-it-1.svg)&lt;!-- --&gt;
+
+]
+]
+
+---
+
+# Test for dispersions
+
+
+```r
+set.seed(4)
+permutest(mod, pairwise = TRUE)
+```
+
+```
+## 
+## Permutation test for homogeneity of multivariate dispersions
+## Permutation: free
+## Number of permutations: 999
+## 
+## Response: Distances
+##           Df  Sum Sq  Mean Sq      F N.Perm Pr(&gt;F)  
+## Groups     1 0.07931 0.079306 4.6156    999  0.036 *
+## Residuals 22 0.37801 0.017182                       
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Pairwise comparisons:
+## (Observed p-value below diagonal, permuted p-value above diagonal)
+##           grazed ungrazed
+## grazed              0.043
+## ungrazed 0.04295
+```
+
+---
+
+# Test for locations with non-equal dispersion?
+
+Marti Anderson &amp; colleagues (2017) have proposed a solution that is related to the Berens-Fisher problem
+
+This is in Primer but not yet in *vegan*
+
+&lt;https://github.com/vegandevs/vegan/issues/344&gt;
+
+---
+class: inverse middle center big-subsection
+
+# Distance-based RDA
+
+---
+
+# Distance-based RDA
+
+Multiple models that all do something Similar
+
+1. `adonis()` (deprecated)
+2. `adonis2()`
+3. `capscale()`
+4. `dbrda()`
+
+They all do essentially the same thing, but they do it differently &amp; have slightly different behaviour
+
+---
+
+# Distance-based RDA
+
+Distance-based RDA (db-RDA) is a constrained form of principal coordinates analysis (PCO)
+
+It is similar to RDA but allows for non-Euclidean dissimilarity indices
+
+In *vegan*, db-RDA is implemented in `dbrda()`
+
+---
+
+# Constrained analysis of principal coordinates
+
+`capscale()` is *another* constrained form of PCO due to Legendre &amp; Anderson (1999)
+
+It is *very* similar to `dbrda()` but handles the negative eigenvalue problem in a different way &amp;mdash; it ignores them!
+
+---
+
+# Constrained analysis of principal coordinates
+
+`capscale()` works by
+
+1. convert the response data into dissimilarities
+2. apply PCO on the dissimilarities, take the PCO sample (site) scores as *new* response data
+3. fit `rda()` to the *new* response data and predictor variables as constraints
+
+Essentially, we embed the dissimilarities in a Euclidean space using PCO, and then we use RDA on this highly transformed response data
+
+---
+
+# Distance-based RDA
+
+db-RDA foregoes step 2., and directly decomposes the dissimilarities into components explained by each term in the model
+
+Negative eigenvalues resulting from non-metric dissimilarity coefficients are handled via
+
+1. square-root transform of the dissimilarities, or
+2. adding a constant to the dissimilarities using methods `"lingoes"` (default, preferred) or `"cailliez"`
+
+db-RDA is based on the ideas in McArdle &amp; Anderson (2001)
+
+--
+
+Err&amp;hellip; isn't that what `adonis2()` was developed to do?
+
+--
+
+*Yes*, but&amp;hellip;
+
+---
+
+# Distance-based RDA
+
+`adonis2()` was a ground up redevelopment of the `adonis()` implementation and as such it retains many of the arguments and concepts of PERMANOVA, just updated to use the direct decomposition of dissimilarities
+
+`dbrda()` inherits from `rda()` and `cca()` and as a result has expanded set of capability
+
+`dbrda()` can use `Condition()` in the formula to fit partial db-RDA
+
+`Condition()` is often needed to provide correct restricted perumtation tests
+
+---
+
+# Distance-based RDA
+
+The equivalent model to `adonis2()` in `dbrda()`-form is
+
+
+```r
+data(dune, dune.env)
+dune_dbrda &lt;- dbrda(dune ~ Management * A1, data = dune.env,
+    method = "bray")
+```
+
+because they have different default `method` values
+
+---
+class: inverse middle center subsection
+
+# Ohraz Case Study
+
+---
+
+# Restricted permutations | Ohraz
+
+Analyse the Ohraz data Case study 5 of Leps &amp; Smilauer
+
+Repeated observations of composition from an experiment
+
+* Factorial design (3 replicates)
+* Treatments: fertilisation, mowing, *Molinia* removal
+
+Test 1 of the hypotheses
+
+&gt; There are *no* directional changes in species composition in time that are common to all treatments or specific treatments
+
+---
+
+# Restricted permutations | Ohraz
+
+
+```r
+spp &lt;- read_csv(url("https://bit.ly/ohraz-spp")) %&gt;%
+    rename(label = "...1") %&gt;%
+    janitor::clean_names()
+
+molinia &lt;- spp %&gt;%
+    select(label:molicaer)
+
+spp &lt;- spp %&gt;%
+    select(-molicaer) %&gt;%
+    column_to_rownames("label")
+
+env &lt;- read_csv(url("https://bit.ly/ohraz-env")) %&gt;%
+    rename(label = "...1") %&gt;%
+    mutate(across(c(mowing:removal, plotid), ~ factor(.x))) %&gt;%
+    column_to_rownames("label")
+```
+
+---
+
+# Distance-based RDA | Ohraz
+
+
+```r
+ohraz_dbrda &lt;- dbrda(spp ~ year +
+    year:mowing + year:fertilizer + year:removal +
+    Condition(plotid), data = env, method = "bray", add = "lingoes")
+h &lt;- how(within = Within(type = "none"),
+    plots = Plots(strata = env$plotid, type = "free"))
+set.seed(42)
+anova(ohraz_dbrda, permutations = h, model = "reduced")
+```
+
+```
+## Permutation test for dbrda under reduced model
+## Plots: env$plotid, plot permutation: free
+## Permutation: none
+## Number of permutations: 199
+## 
+## Model: dbrda(formula = spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env, add = "lingoes", method = "bray")
+##          Df Variance      F Pr(&gt;F)   
+## Model     4   96.846 5.3777  0.005 **
+## Residual 68  306.146                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+class: inverse middle center big-subsection
+
+# Other stuff
+
+---
+
+# Diagnostics for constrained ordinations
+
+**vegan** provides a series of diagnostics to help assess the model fit
+
+* `goodness()`
+* `inertcomp()`
+* `spenvcor()`
+* `intersetcor()`
+* `vif.caa()`
+
+---
+
+# Diagnostics | goodness of fit
+
+`goodness()` computes a goodness of fit statistic for species or sites, controlled by argument `display`
+
+Gives the cumulative proportion of variance explained by each axis
+
+
+```r
+upr &lt;- cca(varespec ~ ., data = varechem)
+lwr &lt;- cca(varespec ~ 1, data = varechem)
+set.seed(1)
+
+mods &lt;- ordistep(lwr, scope = formula(upr), trace = 0)
+head(goodness(mods))
+```
+
+```
+##                  CCA1        CCA2      CCA3
+## Callvulg 0.0062471656 0.318907619 0.8254657
+## Empenigr 0.1164701677 0.137604904 0.1953245
+## Rhodtome 0.0999089739 0.169697909 0.1824153
+## Vaccmyrt 0.2361482843 0.240516323 0.2406730
+## Vaccviti 0.1523704591 0.156502301 0.2110550
+## Pinusylv 0.0009244423 0.004802076 0.0060096
+```
+
+---
+
+# Diagnostics | inertia decomposition
+
+`inertcomp()` decomposes the variance in samples or species in partial, constrained, and unconstrained components
+
+* `statistic = "explained` (default) gives the decomposition in terms of variance
+* `statistic = "distance"` gives decomposition in terms of the the residual distance
+
+
+```r
+head(inertcomp(mods, proportional = TRUE))
+```
+
+```
+##                CCA        CA
+## Callvulg 0.8254657 0.1745343
+## Empenigr 0.1953245 0.8046755
+## Rhodtome 0.1824153 0.8175847
+## Vaccmyrt 0.2406730 0.7593270
+## Vaccviti 0.2110550 0.7889450
+## Pinusylv 0.0060096 0.9939904
+```
+
+---
+
+# Diagnostics | species-environment correlations
+
+`spenvcor()` returns the (weighted) correlation between the weighted average-based and the linear combination-based sets of site scores
+
+A *poor* measure of goodness of fit. Sensitive to
+
+* outliers (like all correlations)
+* overfitting (using too many constraints)
+
+Better models can have poorer species-environment correlations
+
+
+```r
+spenvcor(mods)
+```
+
+```
+##      CCA1      CCA2      CCA3 
+## 0.8554793 0.8131627 0.8792221
+```
+
+---
+
+# Diagnostics | interset correlations
+
+`intersetcor()` returns the (weighted) correlation between the weighted average-based site scores and each constraint variable
+
+Another *poor* diagnostic
+
+* correlation based
+* focuses on a single constraint--axis combination at a time
+
+
+```r
+intersetcor(mods)
+```
+
+```
+##          CCA1       CCA2      CCA3
+## Al  0.7356445 -0.1304293 0.4260453
+## P  -0.3588931 -0.6109601 0.4478786
+## K  -0.3767902 -0.1339051 0.7759566
+```
+
+Vector fitting (`envfit()`) or biplot scores (`scores(model, display = "bp")`) are better alternatives
+
+---
+
+# References
+
+.smaller[
+* Anderson, M.J., 2001. A new method for non-parametric multivariate analysis of variance. Austral Ecol. 26, 32&amp;ndash;46
+* Anderson, M.J., 2006. Distance-based tests for homogeneity of multivariate dispersions. Biometrics 62, 245&amp;ndash;253
+* Anderson, M.J., Walsh, D.C.I., 2013. PERMANOVA, ANOSIM, and the Mantel test in the face of heterogeneous dispersions: What null hypothesis are you testing? Ecol. Monogr. 83, 557&amp;ndash;574
+* Anderson, M.J., Walsh, D.C.I., Robert Clarke, K., Gorley, R.N., Guerra-Castro, E., 2017. Some solutions to the multivariate Behrens-Fisher problem for dissimilarity-based analyses. Aust. N. Z. J. Stat. 59, 57&amp;ndash;79
+* Blanchet, F.G., Legendre, P., Borcard, D., 2008. Forward selection of explanatory variables. Ecology 89, 2623&amp;ndash;2632
+* Legendre, P., Anderson, M.J., 1999. Distance-based redundancy analysis: testing multispecies responses in multifactorial ecological experiments. Ecol. Monogr. 69, 1&amp;ndash;24
+* McArdle, B.H., Anderson, M.J., 2001. Fitting Multivariate Models to Community Data: A Comment on Distance-Based Redundancy Analysis. Ecology 82, 290&amp;ndash;297
+* Warton, D.I., Wright, S.T., Wang, Y., 2012. Distance-based multivariate analyses confound location and dispersion effects. Methods Ecol. Evol. 3, 89&amp;ndash;101
+]
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script src="macros.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "github",
+"highlightLines": true,
+"countIncrementalSlides": false,
+"ratio": "16:9"
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+// add `data-at-shortcutkeys` attribute to <body> to resolve conflicts with JAWS
+// screen reader (see PR #262)
+(function(d) {
+  let res = {};
+  d.querySelectorAll('.remark-help-content table tr').forEach(tr => {
+    const t = tr.querySelector('td:nth-child(2)').innerText;
+    tr.querySelectorAll('td:first-child .key').forEach(key => {
+      const k = key.innerText;
+      if (/^[a-z]$/.test(k)) res[k] = t;  // must be a single letter (key)
+    });
+  });
+  d.body.setAttribute('data-at-shortcutkeys', JSON.stringify(res));
+})(document);
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>

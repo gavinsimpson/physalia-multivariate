@@ -1,0 +1,149 @@
+# Birds Data
+
+This data set is on bird assemblages in a montane forest in the Velka Fatra Mountains (Slovak Republic).
+
+```{r, message=FALSE}
+library("readr")
+library("tidyr")
+library("dplyr")
+library("tibble")
+```
+
+We can load the bird data and process it into two data sets
+
+1. the species abundances, and
+2. the associated environmental variables.
+
+
+```{r}
+birds_url <- "https://bit.ly/maed-birds"
+
+birds <- read_csv(birds_url, na = "", skip = 1)
+
+birds_spp <- birds %>%
+    mutate(across(AegiCaud:OriOri, ~ replace_na(.x, 0))) %>%
+    column_to_rownames("...1")
+birds_spp <- birds_spp[, 1:36]
+
+birds_env <- birds %>%
+    select(c("...1", Altit:Expos)) %>%
+    mutate(Rocks = factor(Rocks), Expos = factor(Expos)) %>%
+    column_to_rownames("...1")
+```
+
+The aim of the analysis is to find a good ordination of the species data (choose your ordination method, transformation, dissimilarity, etc according to what features of the species data you want to focus on). Then, having found a good ordination, use the environmental data to try to explain the ordination axes or mapping you have created.
+
+The variables are:
+
+* Altitude
+* Forest cover
+* Forest density
+* Amount of broad leaf trees
+* E2 layer (scrub layer cover)
+* E2 layer conifers
+* E1 layer (herb layer cover)
+* E1 height
+* Slope
+* Presence of rocks
+* Exposure
+
+
+# How the Canoco developers would analyse these data
+
+They treat the data as "compositional" (despite them being the average number of breeding pairs averaged over 4 visits to each sampling location).
+
+```{r}
+birds_pca <- rda(birds_spp)
+
+birds_pca
+
+summary(eigenvals(birds_pca))
+
+plot(birds_pca)
+
+ev_pca <- envfit(birds_pca ~ Altit, data = birds_env)
+ev_pca
+plot(ev_pca, add = TRUE)
+
+ordisurf(birds_pca ~ Altit, data = birds_env, add = TRUE)
+```
+
+# How I might have approached this
+
+```{r}
+birds_ca <- cca(birds_spp)
+
+birds_ca
+
+summary(eigenvals(birds_ca))
+
+plot(birds_ca)
+
+ev_ca <- envfit(birds_ca ~ Altit, data = birds_env)
+ev_ca
+plot(ev_ca, add = TRUE)
+
+ordisurf(birds_ca ~ Altit, data = birds_env, add = TRUE)
+```
+
+or
+
+```{r}
+birds_h <- rda(decostand(birds_spp, method = "hellinger"))
+
+birds_h
+
+summary(eigenvals(birds_h))
+
+plot(birds_h)
+
+ev_h <- envfit(birds_h ~ Altit, data = birds_env)
+ev_h
+plot(ev_h, add = TRUE)
+
+ordisurf(birds_h ~ Altit, data = birds_env, add = TRUE)
+```
+
+or
+
+
+```{r}
+birds_nmds <- metaMDS(decostand(birds_spp, method = "hellinger"),
+    dist = "euclidean",
+    autotransform = FALSE, expand = FALSE)
+
+birds_nmds
+
+stressplot(birds_nmds)
+
+ordipointlabel(birds_nmds)
+ev_nmds <- envfit(birds_nmds ~ Altit, data = birds_env)
+ev_nmds
+
+plot(ev_nmds, add = TRUE)
+
+ordisurf(birds_nmds ~ Altit, data = birds_env, add = TRUE)
+```
+
+But does it make any difference?
+
+```{r}
+layout(matrix(1:4, ncol = 2, byrow = TRUE))
+plot(birds_pca, main = "PCA")
+plot(ev_pca, add = TRUE)
+ordisurf(birds_pca ~ Altit, data = birds_env, add = TRUE,
+    col = "forestgreen")
+plot(birds_ca, main = "CA")
+plot(ev_ca, add = TRUE)
+ordisurf(birds_ca ~ Altit, data = birds_env, add = TRUE,
+    col = "forestgreen")
+plot(birds_h, main = "PCA (Hellinger)")
+plot(ev_h, add = TRUE)
+ordisurf(birds_h ~ Altit, data = birds_env, add = TRUE,
+    col = "forestgreen")
+ordipointlabel(birds_nmds, main = "NMDS")
+plot(ev_nmds, add = TRUE)
+ordisurf(birds_nmds ~ Altit, data = birds_env, add = TRUE,
+    col = "forestgreen")
+layout(1)
+```

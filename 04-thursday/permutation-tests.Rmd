@@ -1,0 +1,264 @@
+---
+title: Permutation tests
+author: Gavin Simpson
+date: September 22, 2020
+output: html_document
+---
+
+# Abstract
+
+Below, you'll find several examples of experimental designs or other multivariate data sets that we wish to test using constrained ordination methods and restricted permutation (Monte Carlo) tests.
+
+# Ectomycorrhizal fungi
+
+In this example we will study the effect of sod-cutting and sod-addition on the number of sporocarps of ectomycorrhizal fungi in Pine stands differing in age and soil type using data from an experiment reported in Baar & Ter Braak (1996). The experimental layout is as follows. Six stands (St1&ndash;St6) with Scots pine of different age and soil type were selected. Within each stand, plots were laid out, with a size of 15 m x 15 m. Treatments applied to stands were:
+
+* `S` &mdash; sod cutting, in which the litter and humus layers and the herbaceous vegetation were removed,
+
+* `A` &mdash; sod addition, in which removed litter and humus were added onto the existing litter and humus layers, and
+
+* `C` &mdash; control, in which the litter and humus layers were left unchanged.
+
+Treatment `A` (sod addition) was not done in the oldest two stands (`St5` and `St6`) as these were the oldest stands and already had thick layers of humus and litter. The treatments were replicated 4 times each, hence in the younger stands we have 12 plots (4 replicates by 3 treatments), while in the oldest stands we have 8 plots each (4 replicates by 2 treatments). Within stands, treatments were randomized.
+
+```{r}
+library("vegan")
+library("permute")
+library("readr")
+library("tidyr")
+library("dplyr")
+library("tibble")
+library("forcats")
+library("stringr")
+
+fungi <- read_csv(url("https://bit.ly/fungi-spp"), skip = 1L,
+    col_types = "-cddddddddddddddddddddddddddddddddddd") %>%
+    mutate(across(Amangemm:Xerosubt, ~ replace_na(.x, 0))) %>%
+        select(-(Ncarp:Nspec)) %>%
+        rename(label = "...2")
+
+design <- read_csv(url("https://bit.ly/fungi-design"), skip = 1L,
+    col_types = "-cccdc") %>%
+    rename(label = "...2", Treatment = `LH-treat`) %>%
+        mutate(Treatment = fct_relevel(Treatment, "C", after = 0L),
+            Treatment = fct_recode(Treatment, control = "C",
+                sod_cutting = "S", sod_addition = "A"),
+            Stand = factor(Stand),
+            SoilType = factor(SoilType))
+```
+
+
+## Testing the effects of whole-plot variables
+
+### Testing the effects of stand age and soil type
+
+Using restricted permutations for split-plot designs, we can test the effects of variables that vary between whole-plots (but which are constant at the split-lot level). However, this is only possible if we make the design balanced by
+
+1. deleting all plots from stands `St5` and `St6`, or
+2. deleting all the `sod_addition` plots.
+
+For this particular hypothesis we are testing the effect of a variable that variables at the whole-plot level (the stand level), it is better to keep as many stands as possible, so the `sod_addition` plots will be deleted.
+
+```{r delete-sod-addition-plots}
+fungi_bal <- fungi %>%
+    left_join(design) %>%
+    filter(Treatment != "sod_addition") %>%
+    select(label:"Xerosubt") %>%
+    mutate(across(-label, ~ log1p(.x))) %>%
+    column_to_rownames("label")
+
+design_bal <- design %>%
+    filter(Treatment != "sod_addition") %>%
+    column_to_rownames("label")
+```
+
+
+* Fit the RDA using the two variables that vary at the stand level.
+
+* To test variables at this whole-plot level we need to permute the whole plot while leaving the split-plots (samples within the whole-plots) unpermuted. Created the necessary design using `how()` to test the effects of the whole plot variables that only vary at the stand level (whole-plots).
+
+### Testing the effects of stand age adjusting for soil type
+
+We can test the effect of `Age` while controlling (or adjusting) for the effect of `SoilType` by partialling out the effect of `SoilType` using `Condition()`.
+
+* Fit an RDA to estimate the effect of `Age` while adjusting for the effect of `SoilType`
+
+* Use an appropriate restricted permutation design to test the effects of `Age` adjusted for `SoilType`
+
+## Testing the effect of split-plot variables
+
+The treatment varies at the split-plot (within) level. We now want to test the effects of the treatment on the abundance of the fungi. This is best done by randomising samples within blocks (stands), while keeping the blocks fixed. To do this correctly, we also need to include the block variable as a covariate to be partialled out using `Condition()`.
+
+We can use all the data for this test, so we prepare the full data set for analysis
+
+```{r prep-fungi-all}
+fungi_all <- fungi %>%
+    mutate(across(-label, ~ log1p(.x))) %>%
+    column_to_rownames("label")
+
+design_all <- design %>%
+    column_to_rownames("label")
+```
+
+* Create an RDA to estimate the effect of the treatment while adjusting for the dependence structure in the data.
+
+* Design an appropriate restricted permutation design to test the estimated treatment effect.
+
+Additionally, we might be interested in testing the effect of the treatment differs among stands of different age, adjusting for a possible treatment by soil type interaction.
+
+* Fit an RDA to the data to test for different treatment effects among stands of different ages
+
+* Using an appropriate permutation design, test the estimated treatment effects among stands of different ages
+
+# Testing a spatial design
+
+In this example you'll look at the effect of pH on plant species in a wetland. The samples were laid out in grid of 20 samples arranged in **five** rows and **four** columns over the wetland.
+
+The response data are abundances of 100 plant species at each of the 20 plots. We also have some associated data to go with the species abundances. The plots were sampled in 1977 and 1988, and pH and water depth were recorded at each location in the grid for each year.
+
+For this example we'll look only at the effect of pH on wetland plant abundance in 1988, so we will remove the older samples from the data before proceeding. We also need to ensure that the data are arranged in the data set in grid-column order. The code below loads the data, filters to retain the 1988 samples only, and then orders the data in grid-column order.
+
+## Plots in a rectangular spatial layout
+
+```{r}
+
+grid_veg <- read_csv(url("https://bit.ly/grid-veg"),
+    skip = 1L) %>%
+    mutate(across(ACHILMIL:`POPUL-SP`, ~ replace_na(.x, 0))) %>%
+        select(-("...1")) %>%
+        rename(label = "...2")
+
+grid <- read_csv(url("https://bit.ly/grid-predictors"), skip = 1L,
+    col_types = "-cccdddd") %>%
+    rename(label = "...2") %>%
+    mutate(Column = factor(str_sub(Plot, 2L, 2L)),
+           Plot = factor(Plot),
+           Row = factor(Row)) %>%
+    relocate(Column, .after = Row) %>%
+    arrange(Year, Column, Row)
+
+# grid 1988 data
+g88_veg <- grid %>%
+    left_join(grid_veg) %>%
+    filter(Year == 1988) %>%
+    select(c(label, ACHILMIL:`POPUL-SP`)) %>%
+    column_to_rownames("label")
+
+g88 <- grid %>%
+    filter(Year == 1988) %>%
+    column_to_rownames("label")
+```
+
+This leaves us with 20 samples arranged in a grid.
+
+We want to look at how the species abundances vary with `pH`, while controlling for potential spatial autocorrelation across the wetland. Fit an appropriate constrained ordination to estimate the effect of `pH` on species abundances, and test the estimated `pH` effect using an appropriate restricted permutation test.
+
+# Ohraz example
+
+The code below loads the Ohraz data and the experimental design data using slightly more modern code than was used in the slides.
+
+```{r ohraz}
+
+spp <- read_csv(url("https://bit.ly/ohraz-spp")) %>%
+    rename(label = "...1") %>%
+    janitor::clean_names()
+
+molinia <- spp %>%
+    select(label:molicaer)
+
+spp <- spp %>%
+    select(-molicaer) %>%
+    column_to_rownames("label")
+
+env <- read_csv(url("https://bit.ly/ohraz-env")) %>%
+    rename(label = "...1") %>%
+    mutate(across(c(mowing:removal, plotid), ~ factor(.x))) %>%
+    column_to_rownames("label")
+```
+
+# Hierarchical effects of crayfish
+
+The code below loads the `crayfish` data and the scale predictor variables (`design`) using slightly more modern code than was used in the slides.
+
+```{r crayfish}
+crayfish <- read_csv(url("https://bit.ly/crayfish-spp")) %>%
+    rename(label = "...1") %>%
+    janitor::clean_names() %>%
+    filter(!is.na(label)) %>%
+    column_to_rownames("label")
+
+design <- read_csv(url("https://bit.ly/crayfish-design")) %>%
+    rename(label = "...1") %>%
+    filter(!is.na(label)) %>%
+    mutate(across(Watershed:`Run Nested`, ~ factor(.x))) %>%
+    column_to_rownames("label")
+```
+
+Repeat the exercise from the slides, testing the different levels of the hierarchical scales of variation in crayfish species abundance.
+
+
+# Effect of ploughing time on weeds
+
+```{r plough-load}
+plough <- read_csv(url("https://bit.ly/plough-spp")) %>%
+    rename(label = "...1") %>%
+    select(-`...2`) %>%
+    janitor::clean_names() %>%
+    filter(!is.na(label)) %>%
+    column_to_rownames("label")
+
+plough_design <- read_csv(url("https://bit.ly/plough-design")) %>%
+    rename(label = "...1") %>%
+    select(-`...2`) %>%
+    janitor::clean_names() %>%
+    filter(!is.na(label)) %>%
+    column_to_rownames("label")
+```
+
+# A multivariate experiment with fixed factors
+
+This example uses a data set of Swedish pine forest undergrowth assemblages that were experimentally manipulated through the addition of nitrogen `N` and phosphorus `P`. There are 32 samples in 4 complete, randomized bloacks of 8 plots each. In each block, all combinations of 4 levels of nitrogen `N` (applied as ammonium nitrate) and 2 levels of phosphorus `P` (applied as compound PK fertilizer) were applied.
+
+```{r e40-load}
+e40_spp <- read_csv(url("https://bit.ly/e40-spp"), skip = 1L) %>%
+    rename(label = "...1") %>%
+    select(-`...2`) %>%
+    mutate(across(-label, ~ replace_na(.x, 0)),
+           across(-label, ~ log1p(.x))) %>%
+    column_to_rownames("label")
+
+e40_design <- read_csv(url("https://bit.ly/e40-design"), skip = 1L) %>%
+    rename(label = "...1") %>%
+    select(-`...2`) %>%
+    mutate(across(-label, ~ factor(.x))) %>%
+    column_to_rownames("label")
+```
+
+The levels of `N` are
+
+```{r}
+with(e40_design, levels(N))
+```
+
+where `N0` means no N addition
+
+The levels of `P` are
+
+```{r}
+with(e40_design, levels(P))
+```
+
+where `P0` means no P addition.
+
+The variable `Block` codes for the 4 blocks of 8 plots.
+
+In 1987 the undergrowth of the plots was surveyed. The percentage cover of plant species (including tree saplings, bryophytes, and lichens) was estimated and recorded on a ten-point scale. There are 103 species recorded. The ten-point scale values were re-expressed as the mid-points of the ten-point percentage scale in `e40_spp`. The species data are `log(x + 1)` transformed.
+
+The aim of the analysis is to test the effects of
+
+1. the N addition effect,
+2. the P addition effect,
+3. the combined effects of N and P additions
+4. the magnitude of the interaction effect
+
+using a combination of models and appropriate permutation tests.

@@ -1,0 +1,196 @@
+# The classic Dune Meadow data
+
+`dune` is a data frame of observations of 30 species at 20 sites. The species names are abbreviated to 4+4 letters (see `?make.cepnames`). The following names are changed from the original source (Jongman et al. 1987): *Leontodon autumnalis* to *Scorzoneroides*, and *Potentilla palustris* to *Comarum*.
+
+`dune.env` is a data frame of 20 observations on the following 5 variables:
+
+* `A1` a numeric vector of thickness of soil A1 horizon,
+
+* `Moisture` an ordered factor with levels: `1` < `2` < `4` < `5`,
+
+* `Management` a factor with levels: `BF` (Biological farming), `HF` (Hobby farming), `NM` (Nature Conservation Management), and `SF` (Standard Farming).
+
+`Use` an ordered factor of land-use with levels: `Hayfield` < `Haypastu` < `Pasture`.
+
+`Manure` an ordered factor with levels: `0` < `1` < `2` < `3` < `4`.
+
+The data are provided with vegan, so we can load them using
+
+```{r}
+data(dune, dune.env, package = "vegan")
+```
+
+In this exercise we'll generate an ordination of the dune meadow data and then plot the ordination using various tools to interpret the latent species-environment gradients we have identified in the data.
+
+We will begin by fitting a PCA on the Hellinger transformed species data
+
+```{r}
+ord <- rda(decostand(dune, method = "hellinger"))
+ord
+```
+
+Now we create plots of the ordination scores
+
+```{r}
+layout(matrix(1:2, ncol = 2))
+ordipointlabel(ord, display = "species", scaling = "symmetric")
+ordipointlabel(ord, display = "sites", scaling = "symmetric")
+layout(1)
+```
+
+If we wanted to plot both species and sites on the same plot, it can help to not label all the species, instead only labelling the ones whose abundances are well-fitted by the ordination axes being displayed. We can use the `goodness()` function to compute goodness of fit values for the species
+
+
+```{r}
+gf <- goodness(ord, model = "CA", display = "species", choices = 1:2)
+head(gf)
+```
+
+Note that the values displayed are cummulative, so the values in column `PC2` are the cummulative goodness of fit values over the two axes. We can, for example, identify those species whose fitted abundance on the two axes is 40% or greater.
+
+```{r}
+take <- gf[,2] >= 0.4
+```
+
+This results in `sum(take)` species to be labelled.
+
+We proceed by building up the plot from the basic building blocks
+
+```{r}
+scl <- "symmetric"
+plot(ord, type = "n", scaling = scl, display = c("species", "sites"))
+```
+
+next we'll add points for all the species, and sites, unlabelled
+
+```{r}
+points(ord, scaling = scl, display = "species", cex = 0.8, col = "red")
+points(ord, scaling = scl, display = "sites", cex = 0.8, col = "black")
+```
+
+Next we will add the species labels and the sites/samples
+
+```{r}
+ordipointlabel(ord, display = "sites", scaling = scl, add = TRUE)
+ordipointlabel(ord, display = "species", scaling = scl, add = TRUE, select = take)
+```
+
+What do you notice about the positions on the plot of the species that are not as well fitted by the two displayed axes?
+
+A final enhancement we might make to this is to colour the site/sample points according to one of the environmental variables in `dune.env`. One of the key variables is the management type for each of the dune meadow samples, so we will colour the sample pointa according to this variable, using the indexing trick I mentioned in the slides.
+
+Begin by choosing a vector of colours. Here I'll use a palette from ColorBrewer, and specify the colours using hexadecimal notation
+
+```{r}
+col_vec <- c("#1b9e77", "#d95f02", "#7570b3", "#e7298a")
+```
+
+Next we need to expand this vector of colours into one per sample, depending upon the management type
+
+```{r}
+cols <- with(dune.env, col_vec[Management])
+```
+
+Now we are ready to replot, reusing code from earlier, which I have gathered into a single code block
+
+```{r}
+## goodness of fit
+gf <- goodness(ord, model = "CA", display = "species", choices = 1:2)
+take <- gf[,2] >= 0.4 # which species to label
+scl <- "symmetric"    # what scaling to use
+
+## prepare the plotting device
+plot(ord, type = "n", scaling = scl, display = c("species", "sites"))
+
+## add points for the species
+points(ord, scaling = scl, display = "species", cex = 0.8, col = "red", pch = "+")
+
+## add points for the samples, colouring by management type
+points(ord, scaling = scl, display = "sites", pch = 19, col = cols)
+
+## next, label the samples and species points
+ordipointlabel(ord, display = "sites", scaling = scl, add = TRUE)
+ordipointlabel(ord, display = "species", scaling = scl, add = TRUE, select = take)
+
+## finally add a legend
+lvl <- with(dune.env, levels(Management))
+legend("topright", legend = lvl, bty = "n", col = col_vec, pch = 19)
+```
+
+
+## Using ggvegan
+
+We can do something similar with *ggvegan*, although the tools are not as well developed as the vegan tools for base graphics are/
+
+The convention with *ggplot2* is to `fortify()` the object we wish to plot, which basically means turn the object into a format that is suitable for plotting with `ggplot()`. *ggvegan* provides `fortify()` methods for many of the objects tht *vegan* creates, but not all are currently supported.
+
+We begin by fortifying the PCA ordination object we created earlier `ord`
+
+```{r}
+library("ggvegan")
+library("ggrepel")
+library("dplyr")
+
+# fortify the ordination
+ford <- fortify(ord, axes = 1:2, scaling = "symmetric")
+## not yet a tibble
+head(ford, 4)
+```
+
+Now we can produce a version of the plot we made earlier, but now using `ggplot()`
+
+```{r}
+ggplot(ford, aes(x = PC1, y = PC2)) +
+  geom_hline(yintercept = 0, colour = "steelblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, colour = "steelblue", alpha = 0.5) +
+  geom_point(data = filter(ford, Score == "sites")) +
+  geom_text_repel(data = filter(ford, Score == "sites"),
+                  mapping = aes(label = Label)) +
+  geom_point(data = filter(ford, Score == "species"), colour = "red", pch = 3, size = 2) +
+  geom_text_repel(data = filter(ford, Score == "species" & take),
+                  mapping = aes(label = Label)) +
+  coord_fixed()
+```
+
+If we want to use `ggplot()` to reproduce the plot where we coloured the sample points by the farm management type, we need to do a little data wrangling to combine the ordination results with the environmental data.
+
+```{r}
+# fortify the different scores into separate data frames
+site_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric", display = "sites")
+spp_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric", display = "species")
+```
+
+
+We need to link the site scores with the environmental data. If the order of the data is the same in the ordination (species) and the environmental data, as it is here, we can just use `bind_cols()` to link the two data objects.
+
+```{r}
+site_scrs <- site_scrs %>%
+  bind_cols(dune.env)
+```
+
+Now we can rerun the code above, but mapping the `Management` variable to the colour channel for the layer plotting the sample points
+
+```{r}
+ggplot(ford, aes(x = PC1, y = PC2)) +
+  geom_hline(yintercept = 0, colour = "steelblue", alpha = 0.5) +
+  geom_vline(xintercept = 0, colour = "steelblue", alpha = 0.5) +
+  geom_point(data = site_scrs,
+             mapping = aes(colour = Management)) +
+  geom_text_repel(data = site_scrs,
+                  mapping = aes(label = Label)) +
+  geom_point(data = spp_scrs, colour = "red", pch = 3, size = 1) +
+  geom_text_repel(data = filter(spp_scrs, take),
+                  mapping = aes(label = Label)) +
+  coord_fixed() +
+  theme(legend.position = "bottom") # move the legend
+```
+
+If the data are in different orders, we will need the sample labels *within* both data objects and join the two data objects using those labels. This operation is known as a *left join* and can be done using *dplyr*'s `left_join()` function, after
+
+```{r}
+site_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric",
+                     display = "sites") %>%
+  left_join(tibble::rownames_to_column(dune.env), by = c("Label" = "rowname")
+```
+
+and then we could proceed as above with the plot.
