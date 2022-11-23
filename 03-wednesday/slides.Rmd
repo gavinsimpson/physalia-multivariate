@@ -315,18 +315,16 @@ The WA scores are weighted averages of the species (responses) that are as close
 
 .row[
 
-.col-6[
-
 Because the LC scores are based on the constraints you can get odd results if you plot them for some models
 
-```{r lc-vs-wa-scores-1, echo = TRUE, fig.show = "none"}
+.col-6[
+
+```{r lc-vs-wa-scores-1, echo = TRUE, fig.keep = "none"}
 # example from Design Decision vignette
 data(dune, dune.env, package = "vegan")
 ord <- cca(dune ~ Moisture, data = dune.env)
 plot(ord, display = "lc", type = "points")
 ```
-
-`Moisture` doesn't vary *within* observations of the same `Moisture` class (or level) so no variation in the LC scores for samples in each class.
 
 ]
 
@@ -336,6 +334,8 @@ plot(ord, display = "lc", type = "points")
 ]
 ]
 
+`Moisture` doesn't vary *within* observations of the same `Moisture` class (or level) so no variation in the LC scores for samples in each class.
+
 
 ---
 
@@ -343,11 +343,11 @@ plot(ord, display = "lc", type = "points")
 
 .row[
 
-.col-6[
-
 Weighted average scores include the variation in the species composition
 
-```{r lc-vs-wa-scores-2, echo = TRUE, fig.show = "none"}
+.col-6[
+
+```{r lc-vs-wa-scores-2, echo = TRUE, fig.keep = "none"}
 # example from Design Decision vignette
 data(dune, dune.env, package = "vegan")
 ord <- cca(dune ~ Moisture, data = dune.env)
