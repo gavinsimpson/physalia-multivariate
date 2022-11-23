@@ -18,7 +18,7 @@ which provides a wide range of functionality covering inter alia ordination,
 diversity analysis, and ecological simulation. This workshop will offer
 participants a practical introduction to some of the most useful functions
 available within vegan. We will focus on the use of ordination methods and on 
-he use of restricted permutations to test a range of experimental designs.
+the use of restricted permutations to test a range of experimental designs.
 
 We will focus in particular on when and how to use multivariate methods
 including unconstrained and constrained ordination (CCA, RDA, Constrained PCoA),
@@ -32,7 +32,8 @@ constrained ordination model, to diagnostics, plotting, etc.
 * [Monday](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.html)
 * [Tuesday](https://gavinsimpson.github.io/physalia-multivariate/02-tuesday/slides.html)
 * [Wednesday](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/slides.html)
-    * [Computer exercise](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/constrained-ordination.html)
+    * [Ponds example](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/constrained-ordination.html)
+    * [Spring meadows example](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/spring-meadows.html)
 * [Thursday](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.html)
 * [Friday](https://gavinsimpson.github.io/physalia-multivariate/05-friday/slides.html)
 

@@ -442,6 +442,77 @@ plot(cca1)
 ]
 
 ---
+
+# LC vs WA scores
+
+In constrained ordinations there are two sets of "site" scores
+
+1. *linear combination* scores
+2. *weighted average* (or weighted summation) scores
+
+The LC scores are weighted &amp; scaled versions of the constraints (predictors)
+
+The WA scores are weighted averages of the species (responses) that are as close to the LC scores as possible
+
+---
+
+# LC vs WA scores
+
+.row[
+
+.col-6[
+
+Because the LC scores are based on the constraints you can get odd results if you plot them for some models
+
+
+```r
+# example from Design Decision vignette
+data(dune, dune.env, package = "vegan")
+ord &lt;- cca(dune ~ Moisture, data = dune.env)
+plot(ord, display = "lc", type = "points")
+```
+
+![](slides_files/figure-html/lc-vs-wa-scores-1-1.svg)&lt;!-- --&gt;
+
+`Moisture` doesn't vary *within* observations of the same `Moisture` class (or level) so no variation in the LC scores for samples in each class.
+
+]
+
+.col-6[
+![](slides_files/figure-html/lc-vs-wa-scores-1-1.svg)&lt;!-- --&gt;
+]
+]
+
+
+---
+
+# LC vs WA scores
+
+.row[
+
+.col-6[
+
+Weighted average scores include the variation in the species composition
+
+
+```r
+# example from Design Decision vignette
+data(dune, dune.env, package = "vegan")
+ord &lt;- cca(dune ~ Moisture, data = dune.env)
+plot(ord, display = "wa", type = "points")
+ordispider(ord, col = "red")
+text(ord, display = "cn", col = "blue")
+```
+
+![](slides_files/figure-html/lc-vs-wa-scores-2-1.svg)&lt;!-- --&gt;
+]
+
+.col-6[
+![](slides_files/figure-html/lc-vs-wa-scores-2-1.svg)&lt;!-- --&gt;
+]
+]
+
+---
 class: inverse middle center subsection
 
 # Model building

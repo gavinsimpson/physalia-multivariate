@@ -188,9 +188,10 @@ ggplot(ford, aes(x = PC1, y = PC2)) +
 If the data are in different orders, we will need the sample labels *within* both data objects and join the two data objects using those labels. This operation is known as a *left join* and can be done using *dplyr*'s `left_join()` function, after
 
 ```{r}
+# note we scramble the `dune.env` data to illustrate the point
 site_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric",
                      display = "sites") %>%
-  left_join(tibble::rownames_to_column(dune.env), by = c("Label" = "rowname")
+  left_join(tibble::rownames_to_column(dune.env[sample(nrow(dune.env)), ]), by = c("Label" = "rowname"))
 ```
 
 and then we could proceed as above with the plot.

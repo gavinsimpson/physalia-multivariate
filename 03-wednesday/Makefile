@@ -1,4 +1,4 @@
-all: slides purl ponds
+all: slides purl ponds meadows
 
 slides: slides.Rmd slides.css
 	Rscript -e "rmarkdown::render(\"slides.Rmd\")"
@@ -8,4 +8,7 @@ purl: slides.Rmd
 
 ponds: constrained-ordination.Rmd
 	Rscript -e "rmarkdown::render(\"constrained-ordination.Rmd\")"
+
+meadows: spring-meadows.Rmd
+	Rscript -e "rmarkdown::render(\"spring-meadows.Rmd\")"
 

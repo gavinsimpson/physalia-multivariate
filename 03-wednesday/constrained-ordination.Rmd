@@ -5,6 +5,11 @@ date: November 23, 2022
 output: html_document
 ---
 
+```{r setup-options, echo = FALSE, results = "hide", message = FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(cache = TRUE, dev = 'svg', echo = TRUE, message = FALSE, warning = FALSE, fig.height=6, fig.width = 1.777777*6)
+```
+
 # Abstract
 ```{r echo=FALSE,results="hide"}
 options(width = 65, digits = 4)

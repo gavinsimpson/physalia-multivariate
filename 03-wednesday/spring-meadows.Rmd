@@ -1,0 +1,161 @@
+---
+title: Spring meadows example
+author: Gavin Simpson
+date: November 23, 2022
+output: html_document
+---
+
+```{r setup-options, echo = FALSE, results = "hide", message = FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(cache = TRUE, dev = 'svg', echo = TRUE, message = FALSE, warning = FALSE, fig.height=6, fig.width = 1.777777*6)
+```
+
+In this example, we will use constrained ordination to explore the environmental controls on the species composition of the vegetation of spring meadows from the mountains of the westernmost Carpathians (Hájek et al, 2002). The species composition data are records of all vascular plants and bryophytes in spring fen meadows. In this field, the samples are commonly referred to as *relevés*. The data are cover estimates recorded using the Braun-Blanquet scale:
+
+* *r* <5% cover, very few individuals
+* *+* <5% cover, few individuals
+* *1* <5% cover, numerous individuals
+* *2* 5*&ndash;25% cover
+* *3* 25*&ndash;50% cover
+* *4* 50*&ndash;75% cover
+* *5* 75*&ndash;100% cover
+
+which is a method widely used in ecology to survey large areas rapidly. The Braun-Blanquet values have been recoded to the numeric values 1&ndash;7: on this scale the relationship with species cover is *not* linear, but rather corresponds approximately to a logarithmic transformation of the original cover values. In that sense then, the original cover values represented by the data have already been subjected to a log-transformation.
+
+The relevés are associated with a set of environmental data from measurements on the spring water chemistry, the organic content of the soil, and the slope of each sampling location.
+
+```{r load-spring}
+# load vegan, dplyr & readr
+library("vegan")
+library("dplyr")
+library("readr")
+
+# load the data
+spp <- read_csv("https://bit.ly/meadows-species") %>%
+    rename("sample_id" = "...1") %>%
+    tibble::column_to_rownames("sample_id")
+env <- read_csv("https://bit.ly/meadows-env") %>%
+    rename("sample_id" = "...1")
+```
+
+We can look at the number of species, samples, and environmental variables:
+
+```{r}
+dim(spp)
+dim(env)
+names(env)
+```
+
+We need to log-transform the ion concentration values, but not the other variables
+
+```{r}
+env <- env %>%
+    mutate(across(Ca:Cl, .fns = log10))
+```
+
+It is easier to do this in the data than in the formula for the ordination model, but of course you could do this in the formula too. It is easier to do this as a data processing step here, because we will standardise the environmental data prior to fitting the model, to illustrate how to get standardised effect sizes.
+
+To standardise the data we could use the `scale()` function, but it is instructive to see how data wrangling steps like this can be done with some simple *dplyr* commands.
+
+```{r}
+z_score <- function(x) {
+    (x - mean(x)) / sd(x)
+}
+env <- env %>%
+    mutate(across(-sample_id, .fns = z_score))
+```
+
+The final step is to remove the `sample_id` column:
+
+```{r}
+env <- env %>%
+    tibble::column_to_rownames("sample_id")
+```
+
+Now we can fit a CCA, downweighting rare taxa:
+
+```{r}
+ord <- cca(downweight(spp) ~ ., data = env)
+ord
+```
+
+We can do an omnibus test for the overall model using `anova()`
+
+```{r}
+set.seed(1)
+anova(ord, permutations = 999)
+```
+
+and we can also test the significance of the constrained axes in turn
+
+```{r}
+set.seed(42)
+anova(ord, permutations = 499, by = "axis", parallel = 4)
+```
+
+While the omnibus test indicates that the model includes some significant effects somewhere, the tests of the constrained axes indicates that most of the effect is in the first two constrained axes, suggesting that we have used too many superfluous environmental variables. This is also suggested by the strong arch in the fitted ordination
+
+```{r}
+plot(ord)
+```
+
+We can run forward selection with the adjusted $R^2$ stopping rules to select a more parsimonious model
+
+```{r, echo = TRUE, eval = FALSE}
+set.seed(67)
+lwr <- cca(downweight(spp) ~ 1, data = env)
+ord2 <- ordiR2step(lwr, scope = formula(ord),
+    permutations = how(nperm = 9999))
+```
+
+```{r, echo = FALSE, eval = TRUE}
+set.seed(67)
+lwr <- cca(downweight(spp) ~ 1, data = env)
+ord2 <- ordiR2step(lwr, scope = formula(ord), trace = FALSE,
+    permutations = how(nperm = 9999))
+```
+
+The resulting model includes seven environmental variables
+
+```{r}
+ord2$anova
+```
+
+An overall test of the significance can be computed using `anova()`
+
+```{r}
+set.seed(3)
+anova(ord2, permutations = how(nperm = 9999), parallel = 4)
+```
+
+and the marginal effects of the remaining variables can also be assessed
+
+```{r}
+set.seed(34)
+anova(ord2, by = "margin", permutations = how(nperm = 9999), parallel = 4)
+```
+
+For a more parsimonious model we might also consider dropping the effects o log `NH3` and log `Fe`:
+
+```{r}
+ord3 <- update(ord2, . ~ . - Fe - NH3)
+```
+
+```{r}
+set.seed(3)
+anova(ord3, permutations = how(nperm = 9999), parallel = 4)
+```
+
+```{r}
+set.seed(34)
+anova(ord3, by = "margin", permutations = how(nperm = 9999), parallel = 4)
+```
+
+We can prepare an ordination diagram of the fitted CCA, using the LC scores to limit the visual impact of the arch, which remains even now, because of the strong turnover in the species composition among sites
+
+```{r}
+plot(ord3, display = c("lc", "bp"), type = "n")
+points(ord3, display = "lc")
+ordipointlabel(ord3, display = "lc", add = TRUE)
+text(ord3, display = "bp", col = "blue")
+```

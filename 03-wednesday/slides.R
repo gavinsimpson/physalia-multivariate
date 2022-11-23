@@ -75,6 +75,38 @@ pcca
 plot(cca1)
 
 
+## ----lc-vs-wa-scores-1, echo = TRUE, fig.show = "none"------------------------
+# example from Design Decision vignette
+data(dune, dune.env, package = "vegan")
+ord <- cca(dune ~ Moisture, data = dune.env)
+plot(ord, display = "lc", type = "points")
+
+
+## ----lc-vs-wa-scores-1, echo = FALSE------------------------------------------
+# example from Design Decision vignette
+data(dune, dune.env, package = "vegan")
+ord <- cca(dune ~ Moisture, data = dune.env)
+plot(ord, display = "lc", type = "points")
+
+
+## ----lc-vs-wa-scores-2, echo = TRUE, fig.show = "none"------------------------
+# example from Design Decision vignette
+data(dune, dune.env, package = "vegan")
+ord <- cca(dune ~ Moisture, data = dune.env)
+plot(ord, display = "wa", type = "points")
+ordispider(ord, col = "red")
+text(ord, display = "cn", col = "blue")
+
+
+## ----lc-vs-wa-scores-2, echo = FALSE------------------------------------------
+# example from Design Decision vignette
+data(dune, dune.env, package = "vegan")
+ord <- cca(dune ~ Moisture, data = dune.env)
+plot(ord, display = "wa", type = "points")
+ordispider(ord, col = "red")
+text(ord, display = "cn", col = "blue")
+
+
 ## ----cca-model-build1---------------------------------------------------------
 vare.cca <- cca(varespec ~ Al + P*(K + Baresoil), data = varechem)
 vare.cca

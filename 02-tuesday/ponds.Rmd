@@ -34,7 +34,7 @@ pondspca <- rda(pondsenv, scale = TRUE)
 pondspca
 ```
 
-The ouput shows the results of the PCA, displaying the eigenvalues for each axis. Note that these values differ from the ones report by CANOCO, which scales the total variance (called inertia in **vegan**) to 1, `rda()` does not. To achieve a comparable set of eigenvalues simply divide each eigenvalue by the total inertia. This conveniently, is what the `summary()` method for `eigenvals()` does:
+The output shows the results of the PCA, displaying the eigenvalues for each axis. Note that these values differ from the ones report by CANOCO, which scales the total variance (called inertia in **vegan**) to 1, `rda()` does not. To achieve a comparable set of eigenvalues simply divide each eigenvalue by the total inertia. This conveniently, is what the `summary()` method for `eigenvals()` does:
 
 ```{r echo=TRUE}
 summary(eigenvals(pondspca))
@@ -89,7 +89,7 @@ biplot(pondspca, scaling = "species")
 
 **Are there any outliers sites on axes one or two?**
 
-Interpretting ordination diagrams can be improved by enhancing the plot with additional information, commonly in the form of response surfaces. Function `ordisurf()` generates response surfaces using a generalized additive model (GAM) to predict a response variable for the ordination configuration. The irregular configuration is then interpolated to a regular grid using linear interpolation routines.
+Interpreting ordination diagrams can be improved by enhancing the plot with additional information, commonly in the form of response surfaces. Function `ordisurf()` generates response surfaces using a generalized additive model (GAM) to predict a response variable for the ordination configuration. The irregular configuration is then interpolated to a regular grid using linear interpolation routines.
 
 ```{r echo=TRUE}
 plot(pondspca, scaling = "species", display = "sites")
@@ -120,13 +120,13 @@ summary(eigenvals(pondsca))
 
 ## The meaningful components
 
-As with PCA, a scree plot is a useful way of visualising the important components for further analysis. Comprison of the eignevalues of the CA with those expected under the broken-stick model is also useful.
+As with PCA, a scree plot is a useful way of visualising the important components for further analysis. Comparison of the eigenvalues of the CA with those expected under the broken-stick model is also useful.
 
 ```{r echo=TRUE}
 screeplot(pondsca, bstick = TRUE, type = "lines")
 ```
 
-**How many axes are iportant when compared with the null model?**
+**How many axes are important when compared with the null model?**
 
 ## CA Biplots
 
@@ -141,7 +141,7 @@ plot(pondsca)
 
 **Is there an arch apparent in the biplot?**
 
-It is useful to enhance these plots with further information to aid interpretation. One useful addition is to overlay measures of diversity on to the biplot. Diversity indices can be calculated using the `diversity()` function of **vegan**. One particular measure of diveristy is Hill's $\mathrm{N_2}$, which gives the effective number of occurrences of a species across all sites or the effective number of species in an individual plot. Hill's $\mathrm{N_2}$ is equivalent to the Inverse Simpson diversity measure we tell `diversity()` to use. The third argument is what Jari Oksanen refers to as the MARGIN; rows (1) or columns (2). For the effective number of occurences of a particular species then the calculation should be over the columns, but rows should be used to calculate the effective numbers of species per sample.
+It is useful to enhance these plots with further information to aid interpretation. One useful addition is to overlay measures of diversity on to the biplot. Diversity indices can be calculated using the `diversity()` function of **vegan**. One particular measure of diversity is Hill's $\mathrm{N_2}$, which gives the effective number of occurrences of a species across all sites or the effective number of species in an individual plot. Hill's $\mathrm{N_2}$ is equivalent to the Inverse Simpson diversity measure we tell `diversity()` to use. The third argument is what Jari Oksanen refers to as the MARGIN; rows (1) or columns (2). For the effective number of occurences of a particular species then the calculation should be over the columns, but rows should be used to calculate the effective numbers of species per sample.
 
 ```{r echo=TRUE,eval=TRUE}
 spp.n2 <- renyi(t(pondsdiat), scales = 2, hill = TRUE)
@@ -183,7 +183,7 @@ Non-metric multidimensional scaling can be performed using `metaMDS()`. Function
 ```{r}
 library(MASS)
 set.seed(123456)
-euclid.dis <- vegdist(pondsenv, "euclidean")
+euclid.dis <- vegdist(scale(pondsenv), "euclidean")
 nmds.env <- metaMDS(pondsenv, distance = "euclidean", trymax = 50)
 nmds.env
 ```
