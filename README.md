@@ -32,6 +32,7 @@ constrained ordination model, to diagnostics, plotting, etc.
 * [Monday](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.html)
 * [Tuesday](https://gavinsimpson.github.io/physalia-multivariate/02-tuesday/slides.html)
 * [Wednesday](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/slides.html)
+    * [Computer exercise](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/constrained-ordination.html)
 * [Thursday](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.html)
 * [Friday](https://gavinsimpson.github.io/physalia-multivariate/05-friday/slides.html)
 
