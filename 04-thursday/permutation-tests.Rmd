@@ -157,6 +157,16 @@ We want to look at how the species abundances vary with `pH`, while controlling 
 
 The code below loads the Ohraz data and the experimental design data using slightly more modern code than was used in the slides.
 
+Repeated observations of composition from an experiment
+
+* Factorial design (3 replicates)
+* Treatments: fertilisation, mowing, *Molinia* removal
+
+Test 1 of the hypotheses
+
+> There are *no* directional changes in species composition in time that are common to all treatments or specific treatments
+
+
 ```{r ohraz}
 
 spp <- read_csv(url("https://bit.ly/ohraz-spp")) %>%

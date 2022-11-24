@@ -1,72 +1,24 @@
 --- 
 title: "Analysing a randomised complete block design with vegan"
-status: publish
-layout: post
-published: true
-type: post
-tags:
-- vegan
-- permute
-- permutations
-active: blog
-category: R
+author: Gavin Simpson
+date: November 24, 2022
+output: html_document
 ---
 
-```{r, echo = FALSE, include = FALSE, cache = FALSE}
-render_jekyll()
-opts_knit$set(progress = TRUE, base.url = "{{ site.url }}/assets/img/posts/", base.dir = "/home/gavin/work/web/jekyll/blog/assets/img/posts/")
-opts_chunk$set(results = "hold",
-               fig.path = "randomized-complete-block-design-and-vegan-", 
-               comment = NA,
-               prompt = FALSE,
-               cache = TRUE,
-               cache.path = "../_knitr-cache/randomized-complete-block-design-and-vegan-", 
-               fig.show = "hold",
-               dev = "png",
-               dpi = 85,
-               tidy = FALSE,
-               fig.height = 7,
-               fig.width = 7,
-               dev.args = list(pointsize = 10))
-opts_chunk$set(fig.lp = "fig:")
+```{r setup-options, echo = FALSE, results = "hide", message = FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(cache = TRUE, dev = "svg", echo = TRUE, message = FALSE,
+  warning = FALSE, fig.height = 6, fig.width = 1.777777 * 6)
 ```
-
-It has been a long time coming. 
-[**Vegan**](http://cran.r-project.org/package=vegan) now has in-built, 
-native ability to use restricted permutation designs when testing 
-effects in constrained ordinations and in range of other methods. This 
-new-found functionality comes courtesy of Jari (mainly) and my efforts 
-to have vegan permutation routines use the 
-[**permute**](http://cran.r-project.org/package=permute) package. Jari 
-also cooked up a standard interface that we can use to drop this and 
-some extra features neatly into any function we want; this allows us to 
-have permutation tests run on many CPU cores in parallel, splitting the 
-computational burden and reducing the run time of tests, and also a 
-mechanism that allows users to pass a matrix of user-defined 
-permutations to be used in tests. These new features are now fully 
-working in the development version of **vegan**, which you can find on 
-[github](https://github.com/vegandevs/vegan), and which should be 
-released to CRAN shortly. Ahead of the release, I'm preparing some 
-examples to show off the new capabilities; first off I look at data 
-from a randomized, complete block design experiment analysed using RDA 
-& restricted permutations.
-
-To follow this example locally you'll need to have version 2.1-43 or 
-later of **vegan** installed. You can grab the [sources from 
-github](https://github.com/vegandevs/vegan) and build it yourself, or 
-grab a Windows binary from the [Appveyor Continuous integration 
-service](https://ci.appveyor.com/project/gavinsimpson/vegan/branch/master/artifacts) 
-that we're using to test on that platform --- you want the `.zip` file 
-from the Artefacts. Once you've sorted out the installation, we can 
-begin.
 
 ```{r, load-library}
 library("vegan")
 library("readxl")
+library("dplyr")
 ```
 
 We'll need **readxl**, and its `read_xlsx()` function, to read from the 
-XLS format files that the data for the example come as.
+XLS format files that the example data come as.
 
 The data set itself is quite simple and small, consisting of counts on 23 species from 16 plots, and arise from a randomised complete block designed experiment described by &Scaron;pa&#269;kov&aacute; and colleagues [-@Spackova1998-ad] and analysed by [@Smilauer2014-ac] in their recent book using Canoco v5.
 
@@ -79,7 +31,7 @@ The experiment tested the effects on seedling recruitment to a range of treatmen
 
 The treatments were replicated replicated in four, randomised complete blocks.
 
-The data are available from the accompanying website to the book *Multivariate Analysis of Ecological Data using CANOCO 5* [@Smilauer2014-ac]. They are supplied as XLS format files in a ZIP archive. We can read these into R directly from the website with a little bit of effort
+The data are available from the accompanying website to the book *Multivariate Analysis of Ecological Data using CANOCO 5* [@Smilauer2014-ac]. They are supplied as XLS format files in a ZIP archive. We can read these into R directly from the web with a little bit of effort
 
 ```{r, load-data}
 ## Download the excel data
@@ -94,10 +46,10 @@ excel_sheets(tf)
 ## read the xlsx file, sheet 2 contains species data, sheet 3 the env
 spp <- read_xlsx(tf, sheet = "seedlspe", skip = 1) %>%
   rename("sample_id" = "...1") %>%
-  tibble::column_to_rownames(sample_id)
-env <- read_xlsx(datpath, sheet = "seedldesign")%>%
+  tibble::column_to_rownames("sample_id")
+env <- read_xlsx(tf, sheet = "seedldesign")%>%
   rename("sample_id" = "...1") %>%
-  tibble::column_to_rownames(sample_id)
+  tibble::column_to_rownames("sample_id")
 ```
 
 The `block` variable is currently coded as an integer and needs 
@@ -115,7 +67,7 @@ decorana(spp)
 
 motivating the use of redundancy analysis (RDA). Additionally, we may 
 be interested in how the raw abundance of seedlings change following 
-experimental manipulation, o we may wish to focus on the proportional 
+experimental manipulation, so we may wish to focus on the proportional 
 differences between treatments. The first case is handled naturaly by 
 RDA. The second case will require some form of standardisation by 
 samples, say by sample totals.
@@ -205,14 +157,14 @@ between the other treatments lies primarily along axis two and is
 substantially less than that associated with the Moss & Litter removal.
 
 ```{r, biplot, fig = TRUE, fig.cap = "Figure 1: RDA biplot showing species scores and treatment centroids."}
-plot(mod1, display = c("species", "cn"), scaling = 1, type = "n",
+plot(mod1, display = c("species", "cn"), scaling = "sites", type = "n",
      xlim = c(-10.5, 1.5))
 text(mod1, display = "species", scaling = 1, cex = 0.8)
 text(mod1, display = "cn", scaling = 1, col = "blue", cex = 1.2,
      labels = c("Control", "Litter+Moss", "Litter", "Removal"))
 ```
 
-In the above figure, I used `scaling = 1`, so-called *inter-sample 
+In the above figure, I used `scaling = "sites:`, so-called *inter-sample 
 distance scaling*, as this best represents the centroid scores, which 
 are computed as the treatment-wise average of the sample scores.
 
@@ -271,7 +223,6 @@ set.seed(76)
 anova(mod2, permutations = h, parallel = 3)
 ```
 
-The results suggest no difference in species composition under the 
-experimental manipulation.
+The results suggest no difference in species composition under the experimental manipulation.
 
 ## References

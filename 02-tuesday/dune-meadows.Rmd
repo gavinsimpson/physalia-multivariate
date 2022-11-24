@@ -77,7 +77,7 @@ ordipointlabel(ord, display = "species", scaling = scl, add = TRUE, select = tak
 
 What do you notice about the positions on the plot of the species that are not as well fitted by the two displayed axes?
 
-A final enhancement we might make to this is to colour the site/sample points according to one of the environmental variables in `dune.env`. One of the key variables is the management type for each of the dune meadow samples, so we will colour the sample pointa according to this variable, using the indexing trick I mentioned in the slides.
+A final enhancement we might make to this is to colour the site/sample points according to one of the environmental variables in `dune.env`. One of the key variables is the management type for each of the dune meadow samples, so we will colour the sample points according to this variable, using the indexing trick I mentioned in the slides.
 
 Begin by choosing a vector of colours. Here I'll use a palette from ColorBrewer, and specify the colours using hexadecimal notation
 

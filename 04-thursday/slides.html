@@ -93,7 +93,7 @@ summary(pstat)
 ```
 ## 
 ##       statistic    SES   mean lower median  upper Pr(perm)  
-## Model    1.4441 2.2036 1.0145       0.9987 1.3516    0.027 *
+## Model    1.4441 1.9835 1.0311       1.0065 1.3833    0.036 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -329,6 +329,31 @@ If the split-plots are parallel time series &amp; `time` is an autocorrelated er
 
 ---
 
+# Split plot designs
+
+.center[
+&lt;img src="./resources/permutation-designs-sketch-1.png" width="1467" /&gt;
+]
+
+---
+
+# Split plot designs
+
+.center[
+&lt;img src="./resources/permutation-designs-sketch-2.png" width="1467" /&gt;
+]
+
+---
+
+# Split plot designs
+
+.center[
+&lt;img src="./resources/permutation-designs-sketch-3.png" width="1467" /&gt;
+]
+
+
+---
+
 # Mirrored permutations
 
 Mirroring in restricted permutations allows for isotropy in dependencies by reflecting the ordering of samples in time or spatial dimensions
@@ -544,7 +569,7 @@ env &lt;- transform(env, year = as.numeric(as.character(year)))
 
 ```r
 c1 &lt;- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
-(h &lt;- how(within = Within(type = "none"), plots = Plots(strata = env$plotid, type = "free")))
+(h &lt;- how(within = Within(type = "free"), plots = Plots(strata = env$plotid, type = "none")))
 ```
 
 ```
@@ -556,11 +581,11 @@ c1 &lt;- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Conditi
 ## 
 ## Plots:
 ##   Plots: env$plotid
-##   Permutation type: free
+##   Permutation type: none
 ##   Mirrored?: No
 ## 
 ## Within Plots:
-##   Permutation type: none
+##   Permutation type: free
 ## 
 ## Permutation details:
 ##   Number of permutations: 199
