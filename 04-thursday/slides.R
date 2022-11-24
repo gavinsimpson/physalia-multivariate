@@ -52,6 +52,18 @@ matrix(perm, ncol = 3)
 knitr::include_graphics("./resources/Toroidal_coord.png")
 
 
+## ----sketch-1, echo = FALSE, out.width = "90%", fig.align = "center"----------
+knitr::include_graphics("./resources/permutation-designs-sketch-1.png")
+
+
+## ----sketch-2, echo = FALSE, out.width = "90%", fig.align = "center"----------
+knitr::include_graphics("./resources/permutation-designs-sketch-2.png")
+
+
+## ----sketch-3, echo = FALSE, out.width = "90%", fig.align = "center"----------
+knitr::include_graphics("./resources/permutation-designs-sketch-3.png")
+
+
 ## ----cyclic-shift-mirror-figure, echo = FALSE---------------------------------
 knitr::include_graphics("./resources/cyclic-shifts-with-mirror-figure.svg")
 
@@ -104,7 +116,7 @@ env <- transform(env, year = as.numeric(as.character(year)))
 
 ## ----worked-example-devel-2---------------------------------------------------
 c1 <- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
-(h <- how(within = Within(type = "none"), plots = Plots(strata = env$plotid, type = "free")))
+(h <- how(within = Within(type = "free"), plots = Plots(strata = env$plotid, type = "none")))
 
 
 ## ----worked-example-devel-2a--------------------------------------------------

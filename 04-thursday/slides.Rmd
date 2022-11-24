@@ -300,31 +300,25 @@ If the split-plots are parallel time series & `time` is an autocorrelated error 
 
 # Split plot designs
 
-.center[
-```{r sketch-1, echo = FALSE}
+```{r sketch-1, echo = FALSE, out.width = "75%", fig.align = "center"}
 knitr::include_graphics("./resources/permutation-designs-sketch-1.png")
 ```
-]
 
 ---
 
 # Split plot designs
 
-.center[
-```{r sketch-2, echo = FALSE}
+```{r sketch-2, echo = FALSE, out.width = "75%", fig.align = "center"}
 knitr::include_graphics("./resources/permutation-designs-sketch-2.png")
 ```
-]
 
 ---
 
 # Split plot designs
 
-.center[
-```{r sketch-3, echo = FALSE}
+```{r sketch-3, echo = FALSE, out.width = "75%", fig.align = "center"}
 knitr::include_graphics("./resources/permutation-designs-sketch-3.png")
 ```
-]
 
 
 ---
