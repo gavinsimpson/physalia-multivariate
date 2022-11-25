@@ -87,7 +87,7 @@ Are there any differences between groups in terms of their dispersions?
 A permutation test can also be used, instead of assuming the data meet the assumptions of the ANOVA
 
 ```{r}
-permutest(disp, pairwise = TRUE, permutations = 999)
+permutest(disp, pairwise = TRUE, permutations = h)
 ```
 
 Here we asked for pariwise comparisons to investigate whether there are pairs of groups that have different dispersions instead of just looking at the overall test.

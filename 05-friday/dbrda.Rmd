@@ -59,10 +59,6 @@ Notice how we get a warning/message from *permute*
 
 This means that there are not a large number of permutations of these data owing to the block restriction.
 
-Note how with `adonis2()` we don't have the option of using `Condition()` in the model formula. As such we must restrict the permutations to within the blocks of the experimental design. We could also include the `block` effect in the model
-
 ```{r}
-ord2 <- adonis2(plough ~ ploughing_time + block, data = plough_design,
-    method = "bray", add = "lingoes", permutations = h, by = "margin")
-ord2
+plot(ord)
 ```
