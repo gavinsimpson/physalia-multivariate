@@ -1,0 +1,180 @@
+---
+title: Co-correspondence Analysis
+author: Gavin Simpson
+date: November 24, 2022
+output: html_document
+---
+
+```{r setup, echo = FALSE, results = "hide", message = FALSE, cache = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE)
+library("cocorresp")
+```
+
+Among the ordination methods available to ecologists there are methods that relate a species abundance or occurrence matrix to a matrix of explanatory variables. Known as constrained or canonical ordination methods, redundancy analysis (RDA) and Canonical Correspondence Analysis (CCA) are the most commonly encountered forms. A restriction of these methods is that they are only constrained if there are fewer explanatory variables as numbers of observations or species, whichever is lowest, - 1.
+
+Relating two species matrices is not possible using RDA or CCA unless the number of species in the data set playing the explanatory role is much smaller than the number of observations. Co-inertia analysis was invented as a solution to problems of this sort, but a deficiency is that it has an underlying linear response model like RDA.
+
+Co-correspondence analysis (Co-CA) combines the ideas of co-inertia analysis with the unimodal response model familiar to correspondence analysis (CA) or CCA methods. The aim is to related two species abundance or occurrence matrices such that the resulting decomposition into axes are those combinations that best explain the covariation between species and observations in the two matrices.
+
+There are two forms of Co-CA;
+
+1. Symmetric Co-CA, and
+2. Predictive Co-CA.
+
+In symmetric Co-CA, neither of the two abundance or occurrence matrices plays the predictive or explanatory role. This method is best thought of as identifying the common patterns between the two assemblages. In contrast, in predictive Co-CA a more direct regression model is fitted where one matrix plays the response role and the other the predictor role. In this way, one set of species data is used to predict the other.
+
+The key requirement for Co-CA is that the two assemblages have been collected at the same locations, just as you would if you wanted to explain species abundance as a function of environmental factors.
+
+## Symmetric Co-CA
+
+As an illustration of symmetric Co-CA, we look at common patterns in a data set of beetles and plants. The data are provided with **cocorresp**
+
+```{r load-data}
+library("cocorresp")
+data(beetles)
+## log transform the beetle data
+beetles <- log1p(beetles)
+data(plants)
+```
+
+The data are observations of beetle and vascular plant species abundance at 30 roadside verges in the Netherlands. There are `r ncol(beetles)` beetle taxa and `r ncol(plants)` vascular plant species. The abundances of the vascular plants are recorded on the 1--9 van der Maarel scale. To make the distributions of beetle species abundances more symmetric and stabilise variances, the counts are log transformed.
+
+Both forms of Co-CA are fitted using the `coca()` function. The call comprises
+
+1. a formula, where the left-hand side is a community data frame or matrix, and the right-hand side is typically a `.`,
+2. a `data` argument supplied a suitable data frame or matrix. This is the object used to form the terms on the right-hand side of the formula indicated by the `.` placeholder,
+3. the type of Co-CA model to fit, indicated by the `method` argument; options are `"symmetric"` and `"predictive"`.
+
+A symmetric Co-CA is fitted to the beetle and plant data sets as follows
+
+```{r fit-symcoca, message = TRUE}
+bp.sym <- coca(beetles ~ ., data = plants, method = "symmetric")
+```
+
+Notice that it shouldn't make any difference which of the matrices is specified on the right- or left-hand sides of the formula.
+
+Printing the resulting object provides a relatively compact summary of the Co-CA model fitted
+
+```{r print-symcoca}
+bp.sym
+```
+
+A screeplot provides a graphical summary of the dimensionality of the covariance between the two matrices.
+
+```{r screeplot-symcoca}
+screeplot(bp.sym)
+```
+
+From the screeplot, we see that most of the signal in the covariance is contained on the first 2--3 axes.
+
+We can refit the model retaining only the useful components, in part to see how much variation in the two species data sets is explained by the useful Co-CA axes:
+
+```{r}
+bp.sym <- coca(beetles ~ ., data = plants, method = "symmetric", n.axes = 3)
+summary(bp.sym)
+```
+
+**How much variation the beetle and plant data sets repectively is explained by the 3 axes?**
+
+The resulting symmetric co-correspondence analysis can be plotted in the form of a biplot, except now we have two sets of species (variable) scores and two sets of site (observations or sample) scores. The `biplot` method can be used to draw Co-CA biplots. The `which` argument selects which of the two assemblages are drawn:
+
+* `"y1"` indicates the species assemblage on the left-hand side of the formula,
+* `"y2"` indicates the species assemblage on the right-hand side of the formula.
+
+```{r plot-symcoca, fig.show = "hold"}
+layout(matrix(1:2, ncol = 2))
+biplot(bp.sym, which = "y1", main = "Beetles")
+biplot(bp.sym, which = "y2", main = "Plants")
+layout(1)
+```
+
+Some additional control is afforded by the `plot()` method, but good plots of the fitted Co-CA will often require the use of lower-level functions such as the `points()` and `scores()` methods, as well as using appropriate sets of scores or loadings.
+
+We can relate the Co-CA axes to environmental variables using the same idea as `envfit()`. First we look at the ordination of the beetles
+
+```{r}
+## load the environmental data
+data(verges)
+
+## fit vectors for the environmental data
+sol_b <- envfit(bp.sym, verges, which = "response")
+sol_b
+```
+
+Next we look at the plants ordination
+
+```{r}
+## fit vectors for the environmental data
+sol_p <- envfit(bp.sym, verges, which = "predictor")
+sol_p
+```
+
+And finally we can redraw the ordination diagrams with the vectors over plotted.
+
+```{r fig.show = "hold"}
+## plot the response matrix and the fitted vectors
+layout(matrix(1:2, ncol = 2))
+biplot(bp.sym, which = "y1", main = "Beetles")
+plot(sol_b)
+biplot(bp.sym, which = "y2", main = "Plants")
+plot(sol_p)
+layout(1)
+```
+
+## Predictive CoCA using Eigen-analysis
+
+We will now look briefly at predictive Co-CA, using a different version of the spring meadow data, where the species have been separated into vascular plants and bryophytes. We can use one group of species to predict the other, rather than treat them symmetrically as we did above.
+
+We start by loading cocorresp and the data sets, which come with the package
+
+```{r}
+library("cocorresp")
+data(bryophyte)
+data(vascular)
+```
+
+As this is an asymmetric method we need to get the roles of the two data sets specified correctly. Here we will try to predict the bryophytes from the vascular plants
+```{r}
+carp.pred <- coca(bryophyte ~ ., data = vascular)
+carp.pred
+```
+
+The printed output doesn't tell us very much. We need to do some subsequent steps to decide how many PLS axes to use to predict the bryophytes, which we do with a leave-one-out cross validation
+
+```{r}
+## determine important PLS components - takes a while
+crossval(bryophyte, vascular)
+```
+
+The best fit comes with 5 COCA axes, but there isn't much change in the cross-validatory fit (%) once we go beyond two PLS axes.
+
+We can also look at which axes explain statistically significant amounts of variance in the bryophyte data using a permutation test
+
+```{r}
+carp.perm <- permutest(carp.pred, permutations = 99)
+carp.perm
+```
+
+Only the first two appear important. We refit using only two axes:
+
+```{r}
+## 2 components again, refit
+carp.pred <- coca(y = bryophyte, x = vascular, n.axes = 2)
+carp.pred
+```
+
+Now we can use the summary output to look at how much variance in the bryophytes and vascular plants we can explain with the model
+
+```{r}
+summary(carp.pred)
+```
+
+Finally, we can also produce a pair of ordination diagrams of the estimated effects
+
+```{r}
+## drawn biplot
+layout(matrix(1:2, ncol = 2))
+biplot(carp.pred, which = "response")
+biplot(carp.pred, which = "predictor", type = "text")
+layout(1)
+```

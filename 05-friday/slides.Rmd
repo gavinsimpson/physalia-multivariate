@@ -44,7 +44,8 @@ theme_set(theme_minimal(base_size = 16, base_family = 'Fira Sans'))
 
 * PERMANOVA
 * Distance-based RDA
-* Co-correspondence analysis
+* Co-correspondence analysis (Co-CA)
+* Principal Response Curves (PRC)
 * Diagnostics
 
 ---
@@ -133,7 +134,7 @@ adonis2(dune ~ Management*A1, data = dune.env, by = "terms")
 
 ```{r adonis2-by-terms-flipped}
 data(dune, dune.env)
-adonis2(dune ~ A1*Management, data = dune.env, by = "terms")
+adonis2(dune ~ A1 * Management, data = dune.env, by = "terms")
 ```
 
 ---
@@ -142,7 +143,7 @@ adonis2(dune ~ A1*Management, data = dune.env, by = "terms")
 
 ```{r adonis2-by-margin}
 data(dune, dune.env)
-adonis2(dune ~ Management*A1, data = dune.env, by = "margin")
+adonis2(dune ~ Management * A1, data = dune.env, by = "margin")
 ```
 
 --
@@ -295,7 +296,7 @@ In *vegan*, db-RDA is implemented in `dbrda()`
 
 `capscale()` is *another* constrained form of PCO due to Legendre & Anderson (1999)
 
-It is *very* similar to `dbrda()` but handles the negative eigenvalue problem in a different way &mdash; it ignores them!
+It is *very* similar to `dbrda()`
 
 ---
 
@@ -406,8 +407,8 @@ env <- read_csv(url("https://bit.ly/ohraz-env")) %>%
 ohraz_dbrda <- dbrda(spp ~ year +
     year:mowing + year:fertilizer + year:removal +
     Condition(plotid), data = env, method = "bray", add = "lingoes")
-h <- how(within = Within(type = "none"),
-    plots = Plots(strata = env$plotid, type = "free"))
+h <- how(within = Within(type = "free"),
+    plots = Plots(strata = env$plotid, type = "none"))
 set.seed(42)
 anova(ohraz_dbrda, permutations = h, model = "reduced")
 ```
@@ -421,6 +422,68 @@ class: inverse middle center big-subsection
 
 # Co-correspondence analysis
 
+We may be interested in relating two species data sets to one another
+
+Can can't do this using CCA with one data set as the response and the other as the predictors, because this would be too many predictors
+
+We might also not want to treat one data set as the response, we might want to analyse the data symmetrically
+
+Co-correspondence Analysis (Co-CA) is a suitable method
+
+---
+
+# Co-correspondence analysis
+
+There are two types of Co-CA
+
+1. symmetric Co-CA, and
+
+2. predictive Co-CA
+
+Symmetric Co-CA finds axes in both data sets which maximise the covariation of the two data sets
+
+Predictive Co-CA finds directions in one data set which best predict the response data set
+
+---
+
+# Symmetric Co-CA
+
+```{r load-cocorresp-data}
+library("cocorresp")
+data(beetles)
+## log transform the beetle data
+beetles <- log1p(beetles)
+data(plants)
+```
+
+---
+
+# Symmetric Co-CA
+
+```{r fit-symcoca, message = TRUE}
+bp.sym <- coca(beetles ~ ., data = plants, method = "symmetric")
+bp.sym
+```
+
+---
+
+# Symmetric Co-CA
+
+```{r, out.width = "80%", fig.align = "center"}
+screeplot(bp.sym)
+```
+
+---
+
+# Symmetric Co-CA
+
+```{r plot-symcoca, fig.show = "hold", out.width = "80%", fig.align = "center"}
+layout(matrix(1:2, ncol = 2))
+biplot(bp.sym, which = "y1", main = "Beetles")
+biplot(bp.sym, which = "y2", main = "Plants")
+layout(1)
+```
+
 ---
 class: inverse middle center big-subsection
 
@@ -429,6 +492,132 @@ class: inverse middle center big-subsection
 ---
 
 # Principal Response Curves
+
+PRC is a special form of redundancy analysis (RDA) that is useful when you want to compare the development of a biological community in time, under different conditions (treatments)
+
+The different conditions don't have to be experimental; could be used for monitoring relative to a control site or control period
+
+---
+
+# Principal Response Curves
+
+PRC focuses on the temporally structured effects of different levels of a factor
+
+In standard RDA (etc) it is difficult to compare the temporal trajectories of plots as the time direction is usually a complex path through the ordination space
+
+PRC is designed to focus specifically on the temporal effects and their differences among sites
+
+Allows for a PRC diagram that displays these time-structured effects optimally
+
+---
+
+# Principal Response Curves
+
+Assume $k$ treatment levels in a factor $F$
+
+We observed community composition (abundance) at the same set of samples at (the same) multiple time points
+
+The time points are coded as $t$
+
+PRC fits a *partial* RDA of the form
+
+```{r, eval = FALSE}
+rda(comm ~ F:t + Condition(t), data = df)
+```
+
+As $t$ is partialled out, the PRC represents the overall **differences** among treatment level and how these difference change through time
+
+---
+
+# PRC &mdash; pyrifos example
+
+Data are log transformed abundances of aquatic invertebrate in twelve ditches studied in eleven times before and after an insecticide treatment
+
+12 mesocosms were allocated randomly to treatments, with 4 controls, while the remaining 8 mesocosms were treated with a dose of an insecticide, *chloropyrifos* (0.1, 0.9, 6, 44 μg/ L)
+
+Invertebrates were samples 11 times, from 4 weeks *prior* to treatment through 24 weeks post-treatment (132 samples total)
+
+.small[
+van den Brink, P.J. & ter Braak, C.J.F. (1999). Principal response curves: Analysis of time-dependent multivariate responses of biological community to stress. Environmental Toxicology and Chemistry, 18, 138–148.]
+
+---
+
+# PRC &mdash; pyrifos example
+
+```{r}
+data(pyrifos)
+dim(pyrifos)
+
+ditch <- gl(12, 1, length = 132)
+week <- gl(11, 12, labels = c(-4, -1, 0.1, 1, 2, 4, 8, 12, 15, 19, 24))
+dose <- factor(rep(c(0.1, 0, 0, 0.9, 0, 44, 6, 0.1, 44, 0.9, 0, 6), 11))
+```
+
+Important that the control (or reference) site is the reference (first) level of the "treatment" factor &mdash; use `relevel()`
+
+---
+
+# PRC &mdash; pyrifos example
+
+```{r}
+mod <- prc(pyrifos, dose, week)
+```
+
+.small[
+```{r}
+mod
+```
+]
+
+---
+
+# PRC &mdash; pyrifos example
+
+```{r}
+ctrl <- how(plots = Plots(strata = ditch,type = "free"),
+    within = Within(type = "series"), nperm = 99)
+anova(mod, permutations = ctrl, first = TRUE)
+```
+
+---
+
+# PRC &mdash; pyrifos example
+
+```{r, out.width = "90%", fig.align = "center"}
+plot(mod, species = FALSE, legpos = "topright")
+```
+
+---
+
+# PRC &mdash; pyrifos example
+
+.small[
+```{r, fig.keep = "none"}
+plot(mod, species = FALSE, legpos = "topright")
+logabu <- colSums(pyrifos)
+scrs <- scores(mod, display = "species", choices = 1)
+linestack(scrs[logabu > 150, , drop = FALSE]); axis(side = 2)
+```
+]
+
+.row[
+
+.col-9[
+```{r, echo = FALSE}
+plot(mod, species = FALSE, legpos = "topright")
+```
+]
+
+.col-3[
+```{r, fig.width = 3, fig.height = 7, echo = FALSE}
+logabu <- colSums(pyrifos)
+scrs <- scores(mod, display = "species", choices = 1, scaling = "symmetric")
+linestack(scrs[logabu > 150, , drop = FALSE])
+axis(side = 2)
+```
+]
+]
+
 
 ---
 class: inverse middle center big-subsection

@@ -37,7 +37,8 @@ class: inverse middle center big-subsection
 
 * PERMANOVA
 * Distance-based RDA
-* Co-correspondence analysis
+* Co-correspondence analysis (Co-CA)
+* Principal Response Curves (PRC)
 * Diagnostics
 
 ---
@@ -133,7 +134,7 @@ adonis2(dune ~ Management*A1, data = dune.env, by = "terms")
 
 ```r
 data(dune, dune.env)
-adonis2(dune ~ A1*Management, data = dune.env, by = "terms")
+adonis2(dune ~ A1 * Management, data = dune.env, by = "terms")
 ```
 
 ```
@@ -160,7 +161,7 @@ adonis2(dune ~ A1*Management, data = dune.env, by = "terms")
 
 ```r
 data(dune, dune.env)
-adonis2(dune ~ Management*A1, data = dune.env, by = "margin")
+adonis2(dune ~ Management * A1, data = dune.env, by = "margin")
 ```
 
 ```
@@ -404,7 +405,7 @@ In *vegan*, db-RDA is implemented in `dbrda()`
 
 `capscale()` is *another* constrained form of PCO due to Legendre &amp; Anderson (1999)
 
-It is *very* similar to `dbrda()` but handles the negative eigenvalue problem in a different way &amp;mdash; it ignores them!
+It is *very* similar to `dbrda()`
 
 ---
 
@@ -518,16 +519,16 @@ env &lt;- read_csv(url("https://bit.ly/ohraz-env")) %&gt;%
 ohraz_dbrda &lt;- dbrda(spp ~ year +
     year:mowing + year:fertilizer + year:removal +
     Condition(plotid), data = env, method = "bray", add = "lingoes")
-h &lt;- how(within = Within(type = "none"),
-    plots = Plots(strata = env$plotid, type = "free"))
+h &lt;- how(within = Within(type = "free"),
+    plots = Plots(strata = env$plotid, type = "none"))
 set.seed(42)
 anova(ohraz_dbrda, permutations = h, model = "reduced")
 ```
 
 ```
 ## Permutation test for dbrda under reduced model
-## Plots: env$plotid, plot permutation: free
-## Permutation: none
+## Plots: env$plotid, plot permutation: none
+## Permutation: free
 ## Number of permutations: 199
 ## 
 ## Model: dbrda(formula = spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env, add = "lingoes", method = "bray")
@@ -547,6 +548,97 @@ class: inverse middle center big-subsection
 
 # Co-correspondence analysis
 
+We may be interested in relating two species data sets to one another
+
+Can can't do this using CCA with one data set as the response and the other as the predictors, because this would be too many predictors
+
+We might also not want to treat one data set as the response, we might want to analyse the data symmetrically
+
+Co-correspondence Analysis (Co-CA) is a suitable method
+
+---
+
+# Co-correspondence analysis
+
+There are two types of Co-CA
+
+1. symmetric Co-CA, and
+
+2. predictive Co-CA
+
+Symmetric Co-CA finds axes in both data sets which maximise the covariation of the two data sets
+
+Predictive Co-CA finds directions in one data set which best predict the response data set
+
+---
+
+# Symmetric Co-CA
+
+
+```r
+library("cocorresp")
+data(beetles)
+## log transform the beetle data
+beetles &lt;- log1p(beetles)
+data(plants)
+```
+
+---
+
+# Symmetric Co-CA
+
+
+```r
+bp.sym &lt;- coca(beetles ~ ., data = plants, method = "symmetric")
+```
+
+```
+## 
+## Removed some species that contained no data in: beetles, plants
+```
+
+```r
+bp.sym
+```
+
+```
+## 
+## Symmetric Co-Correspondence Analysis
+## 
+## Call: symcoca(y = y, x = x, n.axes = n.axes, R0 = weights, symmetric =
+## symmetric, nam.dat = nam.dat)
+## 
+## Inertia:
+##          Total Explained Residual
+## beetles: 3.988     3.971    0.018
+## plants:  5.757     5.740    0.018
+```
+
+---
+
+# Symmetric Co-CA
+
+
+```r
+screeplot(bp.sym)
+```
+
+&lt;img src="slides_files/figure-html/unnamed-chunk-2-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Symmetric Co-CA
+
+
+```r
+layout(matrix(1:2, ncol = 2))
+biplot(bp.sym, which = "y1", main = "Beetles")
+biplot(bp.sym, which = "y2", main = "Plants")
+layout(1)
+```
+
+&lt;img src="slides_files/figure-html/plot-symcoca-1.svg" width="80%" style="display: block; margin: auto;" /&gt;
+
 ---
 class: inverse middle center big-subsection
 
@@ -555,6 +647,180 @@ class: inverse middle center big-subsection
 ---
 
 # Principal Response Curves
+
+PRC is a special form of redundancy analysis (RDA) that is useful when you want to compare the development of a biological community in time, under different conditions (treatments)
+
+The different conditions don't have to be experimental; could be used for monitoring relative to a control site or control period
+
+---
+
+# Principal Response Curves
+
+PRC focuses on the temporally structured effects of different levels of a factor
+
+In standard RDA (etc) it is difficult to compare the temporal trajectories of plots as the time direction is usually a complex path through the ordination space
+
+PRC is designed to focus specifically on the temporal effects and their differences among sites
+
+Allows for a PRC diagram that displays these time-structured effects optimally
+
+---
+
+# Principal Response Curves
+
+Assume `\(k\)` treatment levels in a factor `\(F\)`
+
+We observed community composition (abundance) at the same set of samples at (the same) multiple time points
+
+The time points are coded as `\(t\)`
+
+PRC fits a *partial* RDA of the form
+
+
+```r
+rda(comm ~ F:t + Condition(t), data = df)
+```
+
+As `\(t\)` is partialled out, the PRC represents the overall **differences** among treatment level and how these difference change through time
+
+---
+
+# PRC &amp;mdash; pyrifos example
+
+Data are log transformed abundances of aquatic invertebrate in twelve ditches studied in eleven times before and after an insecticide treatment
+
+12 mesocosms were allocated randomly to treatments, with 4 controls, while the remaining 8 mesocosms were treated with a dose of an insecticide, *chloropyrifos* (0.1, 0.9, 6, 44 μg/ L)
+
+Invertebrates were samples 11 times, from 4 weeks *prior* to treatment through 24 weeks post-treatment (132 samples total)
+
+.small[
+van den Brink, P.J. &amp; ter Braak, C.J.F. (1999). Principal response curves: Analysis of time-dependent multivariate responses of biological community to stress. Environmental Toxicology and Chemistry, 18, 138–148.]
+
+---
+
+# PRC &amp;mdash; pyrifos example
+
+
+```r
+data(pyrifos)
+dim(pyrifos)
+```
+
+```
+## [1] 132 178
+```
+
+```r
+ditch &lt;- gl(12, 1, length = 132)
+week &lt;- gl(11, 12, labels = c(-4, -1, 0.1, 1, 2, 4, 8, 12, 15, 19, 24))
+dose &lt;- factor(rep(c(0.1, 0, 0, 0.9, 0, 44, 6, 0.1, 44, 0.9, 0, 6), 11))
+```
+
+Important that the control (or reference) site is the reference (first) level of the "treatment" factor &amp;mdash; use `relevel()`
+
+---
+
+# PRC &amp;mdash; pyrifos example
+
+
+```r
+mod &lt;- prc(pyrifos, dose, week)
+```
+
+.small[
+
+```r
+mod
+```
+
+```
+## Call: prc(response = pyrifos, treatment = dose, time = week)
+## 
+##                Inertia Proportion Rank
+## Total         288.9920     1.0000     
+## Conditional    63.3493     0.2192   10
+## Constrained    96.6837     0.3346   44
+## Unconstrained 128.9589     0.4462   77
+## Inertia is variance 
+## 
+## Eigenvalues for constrained axes:
+##   RDA1   RDA2   RDA3   RDA4   RDA5   RDA6   RDA7   RDA8   RDA9  RDA10  RDA11 
+## 25.282  8.297  6.044  4.766  4.148  3.857  3.587  3.334  3.087  2.551  2.466 
+##  RDA12  RDA13  RDA14  RDA15  RDA16  RDA17  RDA18  RDA19  RDA20  RDA21  RDA22 
+##  2.209  2.129  1.941  1.799  1.622  1.579  1.440  1.398  1.284  1.211  1.133 
+##  RDA23  RDA24  RDA25  RDA26  RDA27  RDA28  RDA29  RDA30  RDA31  RDA32  RDA33 
+##  1.001  0.923  0.862  0.788  0.750  0.712  0.685  0.611  0.584  0.537  0.516 
+##  RDA34  RDA35  RDA36  RDA37  RDA38  RDA39  RDA40  RDA41  RDA42  RDA43  RDA44 
+##  0.442  0.417  0.404  0.368  0.340  0.339  0.306  0.279  0.271  0.205  0.179 
+## 
+## Eigenvalues for unconstrained axes:
+##    PC1    PC2    PC3    PC4    PC5    PC6    PC7    PC8 
+## 17.156  9.189  7.585  6.064  5.730  4.843  4.518  4.105 
+## (Showing 8 of 77 unconstrained eigenvalues)
+```
+]
+
+---
+
+# PRC &amp;mdash; pyrifos example
+
+
+```r
+ctrl &lt;- how(plots = Plots(strata = ditch,type = "free"),
+    within = Within(type = "series"), nperm = 99)
+anova(mod, permutations = ctrl, first = TRUE)
+```
+
+```
+## Permutation test for rda under reduced model
+## Plots: ditch, plot permutation: free
+## Permutation: series
+## Number of permutations: 99
+## 
+## Model: prc(response = pyrifos, treatment = dose, time = week)
+##          Df Variance      F Pr(&gt;F)   
+## RDA1      1   25.282 15.096   0.01 **
+## Residual 77  128.959                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+
+# PRC &amp;mdash; pyrifos example
+
+
+```r
+plot(mod, species = FALSE, legpos = "topright")
+```
+
+&lt;img src="slides_files/figure-html/unnamed-chunk-8-1.svg" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# PRC &amp;mdash; pyrifos example
+
+.small[
+
+```r
+plot(mod, species = FALSE, legpos = "topright")
+logabu &lt;- colSums(pyrifos)
+scrs &lt;- scores(mod, display = "species", choices = 1)
+linestack(scrs[logabu &gt; 150, , drop = FALSE]); axis(side = 2)
+```
+]
+
+.row[
+
+.col-9[
+![](slides_files/figure-html/unnamed-chunk-10-1.svg)&lt;!-- --&gt;
+]
+
+.col-3[
+![](slides_files/figure-html/unnamed-chunk-11-1.svg)&lt;!-- --&gt;
+]
+]
+
 
 ---
 class: inverse middle center big-subsection

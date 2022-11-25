@@ -42,6 +42,11 @@ constrained ordination model, to diagnostics, plotting, etc.
     * [Randomised Block](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/randomised-complete-block.html)
     * [Permutation test examples](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/permutation-tests-solutions.html)
 * [Friday](https://gavinsimpson.github.io/physalia-multivariate/05-friday/slides.html)
+    * [PDF](https://gavinsimpson.github.io/physalia-multivariate/05-friday/slides.pdf)
+    * [PERMANOVA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/permanova.html)
+    * [dbRDA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/dbrda.html)
+    * [PRC](https://gavinsimpson.github.io/physalia-multivariate/05-friday/prc.html)
+    * [Co-CA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/cocorrespondence-analysis.html)
 
 ## Target audience and assumed background
 

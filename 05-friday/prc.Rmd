@@ -1,0 +1,100 @@
+---
+title: Principal response curves
+author: Gavin Simpson
+date: November 24, 2022
+output: html_document
+---
+
+```{r ohraz}
+library("vegan")
+library("readr")
+library("dplyr")
+library("forcats")
+
+spp <- read_csv(url("https://bit.ly/ohraz-spp")) %>%
+    rename(label = "...1") %>%
+    janitor::clean_names()
+
+molinia <- spp %>%
+    select(label:molicaer)
+
+spp <- spp %>%
+    select(-molicaer) %>%
+    tibble::column_to_rownames("label")
+
+env <- read_csv(url("https://bit.ly/ohraz-env")) %>%
+    rename(label = "...1") %>%
+    mutate(across(c(mowing:removal, plotid), ~ factor(.x))) %>%
+    tibble::column_to_rownames("label")
+```
+
+We need to recode the variables to make this easier to understand for PRC
+
+```{r}
+env2 <- env %>%
+mutate(mowed = fct_recode(mowing, mowed = "Yes", unmowed = "No"),
+removed = fct_recode(removal, control = "No", removed = "Yes"),
+fertilized = fct_recode(fertilizer, fertilized = "Yes", unfertilized = "No"),
+removed = fct_relevel(removed, "control"),
+treatment = fct_cross(removed, mowed, fertilized),
+fyear = factor(year))
+```
+
+And we should log transform the species data as this is an RDA:
+```{r}
+log_spp <- log1p(spp)
+```
+
+The PRC can then be fitted using
+
+```{r}
+ohraz_prc <- prc(log_spp, env2$treatment, env2$fyear)
+```
+
+The permutation deisgn to use is
+
+```{r}
+h <- with(env2, how(plots = Plots(strata = plotid), nperm = 999))
+```
+
+And with this we can now test the first PRC (RDA) axis
+
+```{r}
+anova(ohraz_prc, permutations = h, first = TRUE)
+```
+
+**Are the time structured effects of the treatment significant?**
+
+We might also restrict the permutations within plots for time series
+
+```{r}
+h_time <- with(env2, how(plots = Plots(strata = plotid),
+    within = Within(type = "series"), nperm = 999))
+```
+
+This gives a stricter test, especially if there is residual autocorrelation
+
+```{r}
+anova(ohraz_prc, permutations = h_time, first = TRUE)
+```
+
+Does the effect remain after performing the stricter test?
+
+Plot the PRC, without the species scores
+
+```{r}
+plot(ohraz_prc, species = FALSE, legpos = "bottomleft", col = 1:8, lty = 1, lwd = 2)
+```
+
+**Which treatment levels/combinations lead to the largest changes in the species composition by the end of the experiment?**
+
+We can plot the species scores on a separate plot, retaining only those species that have a fit greater than 5%
+
+```{r}
+fit <- goodness(ohraz_prc, display = "species", choices = 1, scaling = "symmetric")
+scrs <- scores(ohraz_prc, display = "species", choices = 1, scaling = "symmetric")
+linestack(scrs[fit > 0.05, , drop = FALSE])
+axis(side = 2)
+```
+
+Suggest which species were affected most in the treatments that affected the composition the most.
