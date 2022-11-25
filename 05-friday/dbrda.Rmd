@@ -53,6 +53,10 @@ ord <- dbrda(plough ~ ploughing_time + Condition(block), data = plough_design,
 ord
 ```
 
+```{r}
+anova(ord, permutations = h)
+```
+
 Notice how we get a warning/message from *permute*
 
 > Set of permutations < 'minperm'. Generating entire set.

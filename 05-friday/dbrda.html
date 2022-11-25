@@ -430,6 +430,19 @@ ord</code></pre>
 ## 4562 2393 1319  460  221   23 
 ## 
 ## Constant added to distances: 3.727989e-12</code></pre>
+<pre class="r"><code>anova(ord, permutations = h)</code></pre>
+<pre><code>## Set of permutations &lt; &#39;minperm&#39;. Generating entire set.</code></pre>
+<pre><code>## Permutation test for dbrda under reduced model
+## Blocks:  block 
+## Permutation: free
+## Number of permutations: 1295
+## 
+## Model: dbrda(formula = plough ~ ploughing_time + Condition(block), data = plough_design, add = &quot;lingoes&quot;, method = &quot;bray&quot;)
+##          Df Variance      F Pr(&gt;F)   
+## Model     2    11664 3.8976  0.006 **
+## Residual  6     8978                 
+## ---
+## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
 <p>Notice how we get a warning/message from <em>permute</em></p>
 <blockquote>
 <p>Set of permutations &lt; ‘minperm’. Generating entire set.</p>
