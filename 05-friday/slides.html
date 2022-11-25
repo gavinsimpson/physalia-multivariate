@@ -985,6 +985,16 @@ If you have non-species responses, use RDA
 If you have species responses and want to model the raw abundances, use RDA with a log- or sqrt-transformation
 
 If you want to model relative compositional changes, use CCA or RDA with a hellinger transformation
+
+---
+
+# Overview
+
+Personally, I have most success with PCA/RDA on hellinger-transformed data whenever I was interested in modelling species compositional change
+
+When I have experimental data, gradient lengths are usually smaller and we are often more interested in modelling abundances, in which case RDA with a log-transformation is a good choice as it is closer to regression models I would fit
+
+Rarely will I choose PERMANOVA, dbRDA, NMDS, over PCA/RDA
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
