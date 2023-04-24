@@ -6,7 +6,7 @@ https://www.physalia-courses.org/
 
 ### Gavin Simpson
 
-#### 21&ndash;25th November, 2022
+#### 24&ndash;28th April, 2023
 
 ## Overview
 
