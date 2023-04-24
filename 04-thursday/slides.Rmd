@@ -1,7 +1,7 @@
 ---
 title: "Permutation tests"
 author: Gavin L. Simpson
-date: Novermber 24, 2022
+date: "April 27, 2023"
 fontsize: 10pt
 classoption: "compress, aspectratio=169"
 bibliography: "resources/vegan-refs.bib"
