@@ -334,6 +334,22 @@ Some use the term "distance coefficient" to only refer to those that are metric,
 
 ---
 
+# Metric coefficients
+
+Obey four rules
+
+1. minimum = 0: if $i = j$ then $d_{ij} = 0$
+
+2. positivity: if $i \neq j$ then $d_{ij} \gt 0$
+
+3. symmetry: $d_{ij} = d_{ji}$
+
+4. triangle inequality: $d_{ij} + d_{jk} \ge d_{ik}$
+
+Last rule states that the *sum* of 2 sides of a triangle in Euclidean space are necessarily $\ge$ the 3rd side
+
+---
+
 # Others types
 
 Semi-metrics do not obey the triangle inequality rule
@@ -370,22 +386,6 @@ Chi-square distances:
 dij <- vegdist(df, method = "chisq")
 knitr::kable(as.data.frame(as.matrix(dij)))
 ```
-
----
-
-# Metric coefficients
-
-Obey four rules
-
-1. minimum = 0: if $i = j$ then $d_{ij} = 0$
-
-2. positivity: if $i \neq j$ then $d_{ij} \gt 0$
-
-3. symmetry: $d_{ij} = d_{ji}$
-
-4. triangle inequality: $d_{ij} + d_{jk} \ge d_{ik}$
-
-Last rule states that the *sum* of 2 sides of a triangle in Euclidean space are necessarily $\ge$ the 3rd side
 
 ---
 
@@ -539,14 +539,14 @@ class: inverse middle center big-subsection
 * Unweighted group average
     * the average of the distances between the samples in one cluster and the samples of another,
     * intermediate between single and complete link methods,
-    * maximises the \alert{cophenetic correlation},
+    * maximises the **cophenetic correlation**,
     * may make compact clusters where none exist,
 
 ---
 
 # Clustering strategies
 * Minimum variance (Ward's method)
-    * fuse two groups if and only if neither group will combine with any other group to produce a lower within group \alert{sum of squares}
+    * fuse two groups if and only if neither group will combine with any other group to produce a lower within group **sum of squares**
     * forms compact clusters of equal size; even where none exist,
 
 ---
@@ -674,7 +674,7 @@ rect.hclust(tmp, 3, border = "red")
 ponds <- read.csv("data/pondsenv.csv")
 ponds.sc <- scale(ponds)
 heatmap(ponds.sc, main = "Ponds and pools",
-        ylab = "Ponds", xlab = "Hycrochemical variables",
+        ylab = "Ponds", xlab = "Hydrochemical variables",
         margin = c(6,5))
 ```
 ]

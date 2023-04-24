@@ -1,0 +1,402 @@
+---
+title: Cluster analysis
+author: Gavin Simpson
+date: September 19, 2020
+output: html_document
+---
+
+# Abstract
+
+This practical will use diatom and hydro-chemistry for a series of 30 ponds and
+pools from Southern England; including hierarchical, _k_-means and fuzzy
+clustering techniques. The ponds data-set consists of mean annual chemistry for
+30 lowland ponds and pools in south-east England spanning a range of water
+chemistry along a total phosphorus (TP) gradient. In addition, diatom data from
+the surface sediments in these ponds and pools are available. These chemistry
+and diatom data were collected as part of a surface-sediment diatom -- water
+chemistry data set used to generate a transfer function for inferring past TP
+values from fossil diatom assemblages preserved in lake sediment cores.
+
+# Tasks
+
+1. Use R to perform a nearest neighbour, furthest neighbour, unweighted group average, weighted group average and minimum variance cluster analysis of the standardised water chemistry, and compare the resulting classifications;
+2. Perform a *k*-means cluster analysis of the standardised water chemistry data and compare this classification with the agglomerative methods used in 1;
+3. Perform a cluster analysis of the Vltava river valley data
+
+# Hierarchical agglomerative cluster analysis
+
+Hierarchical agglomerative cluster analysis methods start with all samples in
+separate clusters and sequentially fuse together the two most similar clusters
+until all samples are in a single cluster. A variety of measures of similarity
+(distance) (using dissimilarity or distance coefficients) can be employed as
+can a range of different ways in which the clusters are fused (e.g. single
+link, group average link, minimum variance method).
+
+The functions `hclust()`, and `agnes()` (in package `cluster`) are the two standard functions for
+performing hierarchical agglomerative cluster analysis in R. The
+`dist()` function is used to create distance
+matrices using a variety of distance (or dissimilarity)
+coefficients. First, read in the **ponds** data set:
+
+```{r}
+ponds_url <- "https://bit.ly/pondsfull"
+ponds <- read.csv(url(ponds_url))
+names(ponds)
+rownames(ponds)
+str(ponds)
+```
+
+The `ponds` object you have just created
+contains observations on 30 ponds. Columns 1 through 48 of the
+`ponds` object contain the diatom counts of
+surface samples taken from each of the 30 ponds. The remaining
+columns contain the mean water chemistry data for each pond taken
+over the period represented by the diatom surface samples.
+
+For the sake of simplicity during the remainder of the practical,
+we should subset `ponds` into a new object
+containing just the standardised water chemistry data. As its
+name suggests, the `subset()` function can
+be used to return a subset of a data frame. The
+`scale()` function ca be used to center (using the
+`center` argument) or standardise (using the
+`scale` argument) the columns of a data
+frame or matrix.
+
+```{r}
+pondsenv <- subset(ponds, select = pH:Maxdepth)
+pondsenv <- scale(pondsenv, scale = TRUE, center = FALSE)
+```
+
+Using `subset()` we choose which columns to retain using
+the `select` argument and by stating the names of the
+columns. Note that we have standardised the columns of the
+`pondsenv` object (dividing the values in each column by
+the standard deviation of the values in that column) but we have not centered
+(i.e. subtracted the column mean from each value in that column) these data. We
+now proceed to perform a nearest neighbour clustering of the
+`pondsenv` data,
+
+```{r}
+env.ed <- dist(pondsenv)
+pond.slink <- hclust(env.ed, method = "single")
+pond.slink
+plot(pond.slink, hang = -0.01, main = "Ponds Hydrochemistry Data",
+     sub = "Single Link", ylab = "Dissimilarity", xlab = "")
+rect.hclust(pond.slink, k = 4, border = "red")
+cor(coph.slink <- cophenetic(pond.slink), env.ed)
+```
+
+In the first line, `dist()` is used to
+create a Euclidean distance matrix and store it in
+`env.ed` for use later in the practical when
+different clustering techniques are compared.
+`hclust()` performs the actual cluster
+analysis and requires a dissimilarity matrix from
+`dist()` and the clustering method to use to
+be given as arguments. The resulting `pond.slink` object contains the results
+needed to produce the dendrogram of the cluster analysis, but in
+keeping with R's philosophy, only a brief summary of the object is
+presented when the object's name is entered at the prompt.
+
+The dendrogram of the cluster analysis
+is produced using `plot()`, with the `hang` argument instructing the plot method
+to draw the labels of the nodes of the dendrogram at the baseline of the plot.
+`rect.hclust()` is used to cut the dendrogram into
+_k_ clusters (in this case 4) and then draw rectangles around the
+resulting _k_ clusters on the dendrogram. Finally, the cophenetic correlation is calculated, using the `cophenetic()` function to first generate the cophenetic distances between ponds from the
+dendrogram ^[The distances are stored in `coph.slink` for later
+use. This illustrates a useful feature of the R language; namely, we do not
+need to create an object before using it with separate commands. Here, the
+`coph.slink` object is both created and used as an argument to
+`cor()` in a single line of code], and then the
+`cor()` function to calculate the Pearson
+product moment correlation between the original Euclidean
+distances and the cophenetic distances. The cophenetic correlation
+is one measure of how well the dendrogram represents the original
+distance matrix and therefore, how well it represents the real
+distance between samples.
+
+An alternative way of visualising how faithfully a dendrogram
+represents the original dissimilarity matrix is via a Shepard-like
+plot. In a Shepard-like plot, the
+original distances (or dissimilarities) are plotted on the
+_x_-axis with the corresponding cophenetic distances plotted
+on the _y_-axis. A one to one line is drawn through the
+points to aid interpretation; deviations from the one to one line
+indicate how faithfully the original distances are represented
+from the dendrogram. If the dendrogram were able to fully
+represent the original distances, all the points would fall on the
+one to one line.
+
+```{r}
+plot(env.ed, coph.slink)
+abline(a = 0, b = 1)
+```
+
+**What does the Shepard-like plot indicate about the
+faithfulness of the nearest neighbour dendrogram in representing
+the original Euclidean distances?**
+
+**Repeat the above commands to perform the remaining
+clustering methods on the `pondsenv` data set. The commands
+needed are reproduced below. Try to come to a consensus as to how
+many clusters there are in the water chemistry data.**
+
+```{r, fig.show = "hide"}
+# complete link
+pond.clink <- hclust(env.ed, method = "complete")
+plot(pond.clink, hang = -0.01, main = "Ponds Hydrochemistry Data",
+     sub = "Complete Link", ylab = "Dissimilarity", xlab = "")
+rect.hclust(pond.clink, k = 4, border = "red")
+cor(coph.clink <- cophenetic(pond.clink), env.ed)
+plot(env.ed, coph.clink)
+abline(a = 0, b = 1)
+
+# average link
+pond.avg <- hclust(env.ed, method = "average")
+plot(pond.avg, hang = -0.01, main = "Ponds Hydrochemistry Data",
+     sub = "Average Link", ylab = "Dissimilarity", xlab = "")
+rect.hclust(pond.avg, k = 4, border = "red")
+cor(coph.avg <- cophenetic(pond.avg), env.ed)
+plot(env.ed, coph.avg)
+abline(a = 0, b = 1)
+
+# Ward's minimum variance clustering
+pond.min <- hclust(env.ed, method = "ward")
+plot(pond.min, hang = -0.01, main = "Ponds Hydrochemistry Data",
+     sub = "Minimum Variance", ylab = "Dissimilarity", xlab = "")
+rect.hclust(pond.min, k = 4, border = "red")
+cor(coph.min <- cophenetic(pond.min), env.ed)
+plot(env.ed, coph.min)
+abline(a = 0, b = 1)
+
+# weighted average link
+require("cluster")
+pond.wavg <- agnes(env.ed, method = "weighted")
+pond.wavg <- as.hclust(pond.wavg)
+plot(pond.wavg, hang = -0.01, main = "Ponds Hydrochemistry Data",
+     sub = "Weighted Average Link", ylab = "Dissimilarity", xlab = "")
+rect.hclust(pond.wavg, k = 4, border = "red")
+cor(coph.wavg <- cophenetic(pond.wavg), env.ed)
+plot(env.ed, coph.wavg)
+abline(a = 0, b = 1)
+```
+
+The final method applied, weighted group average clustering, is
+not implemented in tbase R.
+Instead, the `agnes()` function from the
+`cluster` package is used. The
+`as.hclust()` function is used to convert the output from
+`agnes()` into a `hclust()` object.
+
+All cluster methods are designed to find clusters in any given data-set and as
+such, it is important to produce a number of clusterings of a data-set using a
+range of cluster techniques to try to find some consensus or agreement between
+the results of the various techniques employed. There are a number of ways in
+which this can be done. One simple way is to calculate the cophenetic
+correlation between all available clusterings of a given data-set using the
+`cor()` function.
+
+```{r}
+cor(cbind(coph.slink, coph.clink, coph.avg, coph.wavg, coph.min, env.ed))
+```
+`cbind()` was used to bind each of the vectors of distances
+into a data frame object, because `cor()` expects to be
+passed a matrix like object as one of its arguments.
+
+**Are any of the clusterings closely correlated with each other and with
+the original Euclidean distances?**
+
+An alternative approach is to calculate the percentage of samples assigned to
+the same cluster and the Rand coefficient. The
+`compareMatchedClasses()` function in package
+`e1071` can be used to calculate these statistics. The
+function accepts two vectors of cluster memberships as arguments
+so can only be used directly to compare any two
+classifications\footnote{The function works correctly, the output
+just isn't very friendly.}. As such, we have written a simple
+function that allows us to run the function with a data frame as
+the main argument and print the results nicely in matrix format;
+`compCluster()`.
+
+```{r}
+# install.packages("e1071")
+require(e1071)
+mem.slink <- cutree(pond.slink, k = 4)
+mem.clink <- cutree(pond.clink, k = 4)
+mem.avg <- cutree(pond.avg, k = 4)
+mem.wavg <- cutree(pond.wavg, k = 4)
+mem.min <- cutree(pond.min, k = 4)
+members <- cbind(mem.slink, mem.clink, mem.avg, mem.wavg, mem.min)
+compareMatchedClasses(members)
+```
+
+The first five lines all utilise the `cutree()` function
+to return the cluster membership of each sample when the dendrogram is cut into
+the specified _k_ classes. In this case we have chosen to cut each
+dendrogram into _k_ = 4 classes. In each case,
+`cutree()` returns a vector of class member
+ships (1 - 4 in our case). Cohen's $\kappa$ is the percentage of data points
+(samples) in the same cluster adjusted for chance. The Rand index
+is also presented both unadjusted for and adjusted for chance.
+
+**Do any of the classifications show any consensus as the
+the resulting clusterings of the water chemistry data?**
+
+# _k_-means cluster analysis
+
+Agglomerative cluster analysis methods impose a hierarchy of between-sample
+distances; a hierarchy that is unlikely to exist in reality, but one which
+helps reduce the computational effort required to produce a clustering of the
+samples. Alternative solutions to the computational effort are available that
+do not impose a hierarchy on the data-set being clustered. The _k_-means
+clustering algorithm partitions a data-set into an _a priori_ defined
+number of clusters by minimising the total error sum of squares, $E_k^2$
+(TESS), which is to say that the distances between cluster members and the
+cluster centroid are minimised. The algorithm is, to a certain degree,
+sensitive to initial positions of the centroids of the clusters, which can
+result in the algorithm converging to a local minimum. The inital starting
+positions for the centroids are specified by the user, so care must be taken to
+ensure that the algorithm doesn't converge towards local minima.
+
+Several solutions can be used to help avoid convergence towards local minima:
+
+1. Provide an initial configuration based on an ecological hypothesis;
+2. Provide an initial configuration corresponding to the results of a hierarchical cluster analysis;
+3. Provide an initial configuration by choosing at random _k_ samples from the total data-set to act as the _k_ group centroids. It is important to remember that this solution may still lead to a local minimum. Therefore, this procedure should be repeated many (say 100) times each with a different set of random samples as the starting points. The solution that minimises $E_k^2$ should then be retained.
+
+It is easy, using the `kmeans()` function in R to
+implement solutions two or three from the list above, and for the purposes of
+this practical, you will provide the _k_-means algorithm with an initial
+configuration based on one of the hierachical cluster analyses performed
+earlier. We proceed by loading the `MASS` package, and
+creating a temporary matrix containing the water chemistry data to assist in
+calculating the initial starting configuration, which is stored in
+`initial`.
+
+```{r}
+require(MASS) #returns TRUE if loaded or is available to load FALSE if not
+pondsenv.mat <- as.matrix(pondsenv)
+# initial <- tapply(pondsenv.mat, list(rep(cutree(pond.avg, k = 4),
+#     ncol(pondsenv.mat)), col(pondsenv.mat)),
+# mean)
+# dimnames(initial) <- list(NULL, dimnames(pondsenv.mat)[[2]])
+# initial
+
+initial <- aggregate(pondsenv ~ cutree(pond.avg, k = 4), FUN = mean)[, -1]
+initial
+```
+
+The code producing `initial` looks a little daunting at
+first, but is easier to understand if it is broken down into its constituent
+parts. The first argument to `tapply()` is the temporary
+matrix of water chemistry data we just created (it needs to be a matrix,
+because `col()` and `ncol()` only
+work with a matrix object). The last argument is `mean`,
+and tells R to calculate the mean value of some combination of the values in
+`pondsenv.mat`.
+
+That combination is defined by the second (and most complicated) argument used
+above, which basically creates a list containing as its first object the
+cluster membership vector (from the average dendrogram cut into 4 clusters)
+repeated 15 times (from the number of columns in
+`pondsenv.mat`, returned by `ncol()`). The second object in the list is a matrix of
+integers indicating their column number in
+`pondsenv.mat`. What this list is used for is to produce a
+cross-classification table which defines the groups of values for which we want
+to calculate the mean water chemistry.
+
+If you don't understand this, don't worry about it; it is sufficient to know
+that for your own data all you need to do is replace the first argument with
+your own matrix of data, give your own dendrogram, specify _k_, and
+substitute your matrix of data into the `ncol()` and `col()` functions.
+
+The penultimate line of code above takes the column names from the
+original data frame and stores then as the column names for the
+`initial` object.
+
+Now that we have calculated the initial starting configuration, we
+can proceed with the _k_-means clustering:
+
+```{r}
+ponds.km <- kmeans(pondsenv, centers = initial)
+ponds.km
+```
+
+The `cluster` component of
+`ponds.km` contains the cluster membership for each of
+the 30 ponds. The `centers` component contains the water
+chemistry values for the cluster centers\footnote{These are the standardised
+values, not the data on the original scale}, whilst the
+`withinss` and `size` components
+contains the within cluster sum of squares (the sum of the distances of each
+cluster member to the cluster center, the error) and the number of objects
+within each of the clusters respectively.
+
+As the _k_-means method does not utilise a hierarchy in the
+analysis it is not possible to view the results of a
+_k_-means clustering in dendrogram form. An alternative is to
+plot the data and associated clustering on a biplot of the
+original data. The biplot could be produced using principal
+co-ordinates analysis (PCoA), non-metric multi-dimensional scaling
+(NMDS) or, as we shall now show, principal components analysis
+(PCA). Enter the following code chunk to display the results of
+the _k_-means clustering (after
+`identify()` you will need to click on the
+plotted points to identify them, end with a right click):
+
+```{r}
+ponds.pca <- prcomp(pondsenv)
+screeplot(ponds.pca)
+ponds.pred <- predict(ponds.pca, newdata = pondsenv)
+dimnames(ponds.km$centers)[[2]] <- dimnames(pondsenv)[[2]]
+pond.kmcenters <- predict(ponds.pca, ponds.km$centers)
+eqscplot(ponds.pred[, 1:2], type = "n", xlab = "First principal component",
+      ylab = "Second principal component", main = "K-means clustering")
+text(ponds.pred[, 1:2], labels = ponds.km$cluster, cex = 0.9,
+      col = ponds.km$cluster)
+points(pond.kmcenters[, 1:2], pch = 3, cex = 3)
+identify(ponds.pred[, 1:2], cex = 0.5)
+```
+
+The first line uses `princomp()` to calculate a
+principal components analysis of the ponds hydrochemical data. The
+next line displays a scree plot of the eigenvalues (More on scree
+plots in John's lecture on _Indirect Ordination_). The third
+line predicts where in the PCA space all the samples should lie,
+and the fourth line just adds the variable names from the
+`pondsenv` object to the names for the
+cluster centers. The `eqscplot()` function
+from the MASS package is used to plot the PCA results, but we
+suppress plotting of any of the data (`type = "n"`; this just sets up the axes and plotting region for
+us to plot on to. The final three lines do the actual plotting.
+Firstly, we plot each pond on the biplot using as a symbol a
+number representing which cluster that sample is in, and to help
+differentiate the clusters we plot them in different colours
+(`col = ponds.km$cluster`). The penultimate
+line add the cluster centers as large crosses.
+`identify()` is used to identify the
+samples. Click the left mouse button on each of the samples in the
+plot to display their sample ID. Press the right mouse button to
+finish.
+
+# Canine data
+
+```{r}
+canine <- read.csv(url("https://bit.ly/canine-data"))
+head(canine)
+rownames(canine) <- canine[, 1]
+canine <- canine[, -1]
+canine
+```
+
+# Vltava river valley forest vegatation
+
+Vegetation plots, located at even distances along transects following the steep valley slopes of Vltava river valley, collected during 2001-2003. Each transect starts at the valley bottom and ends up at the upper part of the valley slope. Altogether 97 plots located in 27 transects were collected, each of the size 10x15 m. In each plot, all tree, shrub and herb species were recorded and their abundances were estimated using 9-degree ordinal Braun-Blanquette scale (these values were consequently transformed into percentage scale).
+
+```{r, results = "hide"}
+v_url <- "https://bit.ly/vltava-spp"
+vltava <- read.delim (url(v_url), row.names = 1)
+head(vltava)
+```
