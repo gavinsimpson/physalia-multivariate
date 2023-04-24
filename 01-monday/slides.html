@@ -4,7 +4,7 @@
     <title>Dissimilarity, cluster analysis, diversity</title>
     <meta charset="utf-8" />
     <meta name="author" content="Gavin Simpson" />
-    <meta name="date" content="2022-11-21" />
+    <meta name="date" content="2023-04-24" />
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="slides.css" type="text/css" />
@@ -20,7 +20,7 @@ class: inverse, middle, left, my-title-slide, title-slide
 ### Gavin Simpson
 ]
 .date[
-### November 21, 2022
+### April 24, 2023
 ]
 
 ---
@@ -86,6 +86,24 @@ Typically comes with a measure of abundance
 "abundance" could also be whether each species is present or absent in the sample
 
 Relative abundance expresses the abundance of each species as its proportion out of the total abundance in each sample
+
+---
+
+# Data box
+
+&lt;img src="./resources/data-box-cropped.png" width="50%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Q and R mode
+
+Measuring dependence between variables (descriptors; species, environment) typically done using coefficients like Pearson's `\(r\)`
+
+Hence this mode of analysis is *R* mode
+
+*Q* mode relates to methods that focus on dependencies among objects (samples)
+
+Often difficult to identify the mode; PCA starts from a dispersion matrix of variables (R mode) but provides an ordination of the samples (Q mode)
 
 ---
 class: inverse middle center big-subsection
@@ -181,11 +199,11 @@ Simple matching coefficient
 
 # Measuring association &amp;mdash; quantitative data
 
-* Euclidean distance dominated by large values.
-* Manhattan distance less affected by large values.
-* Bray-Curtis sensitive to extreme values.
-* Similarity ratio (Steinhaus-Marczewski `\(\equiv\)` Jaccard) less dominated by extremes.
-* Chord distance, used for proportional data; _signal-to-noise_ measure.
+* Euclidean distance dominated by large values
+* Manhattan distance less affected by large values
+* Bray-Curtis treats all species with equal weight
+* Similarity ratio (Steinhaus-Marczewski `\(\equiv\)` Jaccard) less dominated by extremes
+* Chord distance, used for proportional data; _signal-to-noise_ measure
 
 .row[
 
@@ -227,6 +245,118 @@ Gower's coefficient
 `$$s_{ij} = \frac{\sum\limits^m_{i=1} w_{ijk}s_{ijk}}{\sum\limits^m_{i=1} w_{ijk}}$$`
 ]
 ]
+
+---
+
+# Double zero problem
+
+&lt;img src="./resources/response-curve.png" width="90%" style="display: block; margin: auto;" /&gt;
+
+---
+
+# Double zero problem
+
+If a species is present at sites `\(i\)` and `\(j\)` we take this as a reflection of the two sites' similarity
+
+If a species is *absent* from one of `\(i\)` or `\(j\)` we take this as a reflection of some ecological difference between the two sites
+
+But, what if the species is absent from *both* `\(i\)` and `\(j\)`?
+
+--
+
+The species could be absent for different reasons
+
+* too hot in `\(i\)` and too cold in `\(j\)`
+* too dry in `\(i\)` and to wet in `\(j\)`
+---
+
+# Double zero problem
+
+We may choose not to attach ecological meaning to a joint or *double* absence when computing association
+
+Coefficients that skip double zeroes are *asymmetric*
+
+Coefficients that do not skip double zeroes are *symmetric*
+
+---
+
+# Metrics
+
+Three types of quantitative distance coefficient
+
+1. Metric
+
+2. Semi-metric
+
+3. Non-metric
+
+Groups pertain to how the coefficient obeys certain metric rules
+
+Some use the term "distance coefficient" to only refer to those that are metric, using "dissimilarity" for other semi- and non-metrics
+
+---
+
+# Others types
+
+Semi-metrics do not obey the triangle inequality rule
+
+Non-metrics do not obey the positivity rule
+
+---
+
+# Species abundance paradox
+
+
+|   | y1| y2| y3|
+|:--|--:|--:|--:|
+|x1 |  0|  4|  8|
+|x2 |  0|  1|  1|
+|x3 |  1|  0|  0|
+
+Euclidean distances:
+
+
+|   |       x1|       x2|       x3|
+|:--|--------:|--------:|--------:|
+|x1 | 0.000000| 7.615773| 9.000000|
+|x2 | 7.615773| 0.000000| 1.732051|
+|x3 | 9.000000| 1.732051| 0.000000|
+
+---
+
+# Species abundance paradox
+
+
+|   | y1| y2| y3|
+|:--|--:|--:|--:|
+|x1 |  0|  4|  8|
+|x2 |  0|  1|  1|
+|x3 |  1|  0|  0|
+
+Chi-square distances:
+
+
+|   |        x1|        x2|       x3|
+|:--|---------:|---------:|--------:|
+|x1 | 0.0000000| 0.3600411| 4.009249|
+|x2 | 0.3600411| 0.0000000| 4.020779|
+|x3 | 4.0092486| 4.0207794| 0.000000|
+
+---
+
+# Metric coefficients
+
+Obey four rules
+
+1. minimum = 0: if `\(i = j\)` then `\(d_{ij} = 0\)`
+
+2. positivity: if `\(i \neq j\)` then `\(d_{ij} \gt 0\)`
+
+3. symmetry: `\(d_{ij} = d_{ji}\)`
+
+4. triangle inequality: `\(d_{ij} + d_{jk} \ge d_{ik}\)`
+
+Last rule states that the *sum* of 2 sides of a triangle in Euclidean space are necessarily `\(\ge\)` the 3rd side
 
 ---
 
@@ -1188,7 +1318,7 @@ In 1 we would C is downregulated &amp; A, B, D, &amp; E are upregulated
 
 .col-4[
 
-&lt;img src="resources/chap7-rnaseq-normalization-1.png" width="667" /&gt;
+![](resources/chap7-rnaseq-normalization-1.png)&lt;!-- --&gt;
 
 .smaller[Holmes &amp; Huber (2019) Modern Statistics for Modern Biology]
 ]
@@ -1230,7 +1360,7 @@ The _rlog_ transformation is ~ variance stabilizing, but handles highly varying 
 
 Comparison of three transformations
 
-&lt;img src="resources/chap7-rnaseq-meansd-1.png" width="2667" /&gt;
+![](resources/chap7-rnaseq-meansd-1.png)&lt;!-- --&gt;
 
 .smaller[Holmes &amp; Huber (2019) Modern Statistics for Modern Biology]
 

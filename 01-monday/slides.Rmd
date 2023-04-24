@@ -1,7 +1,7 @@
 ---
 title: "Dissimilarity, cluster analysis, diversity"
 author: "Gavin Simpson"
-date: "November 21, 2022"
+date: "April 24, 2023"
 output:
   xaringan::moon_reader:
     css: ['default', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css', 'slides.css']
@@ -28,6 +28,7 @@ library('dplyr')
 library('tidyr')
 library('ggplot2')
 library('gganimate')
+library('analogue')
 data(varespec, varechem)
 
 ## plot defaults
@@ -91,6 +92,26 @@ Typically comes with a measure of abundance
 "abundance" could also be whether each species is present or absent in the sample
 
 Relative abundance expresses the abundance of each species as its proportion out of the total abundance in each sample
+
+---
+
+# Data box
+
+```{r include-data-box, fig.align = "center", out.width = "50%"}
+knitr::include_graphics("./resources/data-box-cropped.png")
+```
+
+---
+
+# Q and R mode
+
+Measuring dependence between variables (descriptors; species, environment) typically done using coefficients like Pearson's $r$
+
+Hence this mode of analysis is *R* mode
+
+*Q* mode relates to methods that focus on dependencies among objects (samples)
+
+Often difficult to identify the mode; PCA starts from a dispersion matrix of variables (R mode) but provides an ordination of the samples (Q mode)
 
 ---
 class: inverse middle center big-subsection
@@ -214,11 +235,11 @@ $$d_{ij} = \frac{\sum\limits^m_{k=1}|x_{ik} - x_{jk}|}{\sum\limits^m_{k=1}(x_{ik
 
 # Measuring association &mdash; quantitative data
 
-* Euclidean distance dominated by large values.
-* Manhattan distance less affected by large values.
-* Bray-Curtis sensitive to extreme values.
-* Similarity ratio (Steinhaus-Marczewski $\equiv$ Jaccard) less dominated by extremes.
-* Chord distance, used for proportional data; _signal-to-noise_ measure.
+* Euclidean distance dominated by large values
+* Manhattan distance less affected by large values
+* Bray-Curtis treats all species with equal weight
+* Similarity ratio (Steinhaus-Marczewski $\equiv$ Jaccard) less dominated by extremes
+* Chord distance, used for proportional data; _signal-to-noise_ measure
 
 .row[
 
@@ -260,6 +281,111 @@ Gower's coefficient
 $$s_{ij} = \frac{\sum\limits^m_{i=1} w_{ijk}s_{ijk}}{\sum\limits^m_{i=1} w_{ijk}}$$
 ]
 ]
+
+---
+
+# Double zero problem
+
+```{r include-response-curve, fig.align = "center", out.width = "90%"}
+knitr::include_graphics("./resources/response-curve.png")
+```
+
+---
+
+# Double zero problem
+
+If a species is present at sites $i$ and $j$ we take this as a reflection of the two sites' similarity
+
+If a species is *absent* from one of $i$ or $j$ we take this as a reflection of some ecological difference between the two sites
+
+But, what if the species is absent from *both* $i$ and $j$?
+
+--
+
+The species could be absent for different reasons
+
+* too hot in $i$ and too cold in $j$
+* too dry in $i$ and to wet in $j$
+---
+
+# Double zero problem
+
+We may choose not to attach ecological meaning to a joint or *double* absence when computing association
+
+Coefficients that skip double zeroes are *asymmetric*
+
+Coefficients that do not skip double zeroes are *symmetric*
+
+---
+
+# Metrics
+
+Three types of quantitative distance coefficient
+
+1. Metric
+
+2. Semi-metric
+
+3. Non-metric
+
+Groups pertain to how the coefficient obeys certain metric rules
+
+Some use the term "distance coefficient" to only refer to those that are metric, using "dissimilarity" for other semi- and non-metrics
+
+---
+
+# Others types
+
+Semi-metrics do not obey the triangle inequality rule
+
+Non-metrics do not obey the positivity rule
+
+---
+
+# Species abundance paradox
+
+```{r spp-paradox-1, echo = FALSE}
+df <- data.frame(y1 = c(0,0,1), y2 = c(4,1,0), y3 = c(8,1,0))
+rownames(df) <- paste0("x", 1:3)
+knitr::kable(df)
+```
+
+Euclidean distances:
+
+```{r spp-paradox-2, echo = FALSE}
+dij <- vegdist(df, method = "euclidean")
+knitr::kable(as.data.frame(as.matrix(dij)))
+```
+
+---
+
+# Species abundance paradox
+
+```{r spp-paradox-1, echo = FALSE}
+```
+
+Chi-square distances:
+
+```{r spp-paradox-3, echo = FALSE}
+dij <- vegdist(df, method = "chisq")
+knitr::kable(as.data.frame(as.matrix(dij)))
+```
+
+---
+
+# Metric coefficients
+
+Obey four rules
+
+1. minimum = 0: if $i = j$ then $d_{ij} = 0$
+
+2. positivity: if $i \neq j$ then $d_{ij} \gt 0$
+
+3. symmetry: $d_{ij} = d_{ji}$
+
+4. triangle inequality: $d_{ij} + d_{jk} \ge d_{ik}$
+
+Last rule states that the *sum* of 2 sides of a triangle in Euclidean space are necessarily $\ge$ the 3rd side
 
 ---
 
