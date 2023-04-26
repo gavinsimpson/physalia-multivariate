@@ -1,20 +1,20 @@
 ---
 title: "Shallow Ponds"
 author: Gavin Simpson
-date: November 22, 2022
+date: April 25, 2023
 output: html_document
 ---
 
 # Abstract
 
-This practical will use the PONDS dataset to demonstrate methods of indirect gradient analysis (PCA, CA, and DCA) of species and environmental data. The file pondsenv.csv contains the species data (48 taxa) and pondsenv.csv contains the transformed environmental variables (15 variables) for 30 sites. You will use **vegan** to analyse these data using a variety of indirect ordination graphical display techniques.
+This practical will use the PONDS dataset to demonstrate methods of indirect gradient analysis (PCA, CA) of species and environmental data. The file pondsenv.csv contains the species data (48 taxa) and pondsenv.csv contains the transformed environmental variables (15 variables) for 30 sites. You will use **vegan** to analyse these data using a variety of indirect ordination graphical display techniques.
 
 ```{r echo=FALSE,results="hide"}
 library(mgcv)
 ```
 
 # Principal Components Analysis
-Principal Components Analysis (PCA) is a common statistical methods and is implemented in **R** by two functions in the standard installation (`prcomp()` and `princomp()`), as well as in numerous guises as part of other add-on packages. In this practical you will use the implimentation provided in the **vegan** package by Jari Oksanen. This is because you will be using **vegan** for the direct gradient analysis class and the **vegan** package provides a rich set of analysis and graphical tools that can be applied to a variety of ordination techniques. As such, you only have to learn a single set of commands to run a wide variety of analyses.
+Principal Components Analysis (PCA) is a common statistical methods and is implemented in **R** by two functions in the standard installation (`prcomp()` and `princomp()`), as well as in numerous guises as part of other add-on packages. In this practical you will use the implementation provided in the **vegan** package by Jari Oksanen. This is because you will be using **vegan** for the direct gradient analysis class and the **vegan** package provides a rich set of analysis and graphical tools that can be applied to a variety of ordination techniques. As such, you only have to learn a single set of commands to run a wide variety of analyses.
 
 Start **R** and load the **vegan** package for use. Read in the two data sets:
 
@@ -41,7 +41,7 @@ summary(eigenvals(pondspca))
 ```
 
 
-**What are the values of $\lambda_1$ and $\lambda_1$, the eigenvalues for axes one and two?**
+**What are the values of $\lambda_1$ and $\lambda_2$, the eigenvalues for axes one and two?**
 
 **How much of the total variance in the environmental data is explained by axes one and two individually and cummulatively?**
 
@@ -173,7 +173,7 @@ plot(pondsca, scaling = "sites", hill = TRUE,
 par(oldpar)
 ```
 
-**What effect does the choice of scaling have on the ordination plots? Use the code below to display the biplots with two different scalings.**
+**What effect does the choice of scaling have on the ordination plots? Use the code above to display the biplots with two different scalings.**
 
 
 # Non-metric multidimensional scaling
