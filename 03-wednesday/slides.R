@@ -75,7 +75,7 @@ pcca
 plot(cca1)
 
 
-## ----lc-vs-wa-scores-1, echo = TRUE, fig.show = "none"------------------------
+## ----lc-vs-wa-scores-1, echo = TRUE, fig.keep = "none"------------------------
 # example from Design Decision vignette
 data(dune, dune.env, package = "vegan")
 ord <- cca(dune ~ Moisture, data = dune.env)
@@ -89,7 +89,7 @@ ord <- cca(dune ~ Moisture, data = dune.env)
 plot(ord, display = "lc", type = "points")
 
 
-## ----lc-vs-wa-scores-2, echo = TRUE, fig.show = "none"------------------------
+## ----lc-vs-wa-scores-2, echo = TRUE, fig.keep = "none"------------------------
 # example from Design Decision vignette
 data(dune, dune.env, package = "vegan")
 ord <- cca(dune ~ Moisture, data = dune.env)

@@ -1,7 +1,7 @@
 ---
 title: Constrained ordination
 author: Gavin Simpson
-date: November 23, 2022
+date: April 26, 2023
 output: html_document
 ---
 
@@ -70,26 +70,24 @@ The `plot()` method is used to produce a triplot/biplot of the ordination result
 plot(ponds.cca)
 ```
 
-**Using the triplot, the biplot scores of the enviromental variables and the ordination axes, interpret the axes in terms of environmental gradients.**
+**Using the triplot, the biplot scores of the environmental variables and the ordination axes, interpret the axes in terms of environmental gradients.**
 
 **Indicate which species are characteristic of particular types of water.**
 
-## Comparison with un-constrained methods
+## Comparison with unconstrained methods
 
-Perform a CA and a DCA of the ponds diatom data:
+Perform a CA of the ponds diatom data:
 
 ```{r echo=TRUE,eval=TRUE}
 ponds.ca <- cca(diat)
 ponds.ca
-ponds.dca <- decorana(diat)
-ponds.dca
 ```
 
 Refer to the handout on indirect ordination for hints and answer the following question:
 
 **How does the result of the CCA compare to the results of the CA?**
 
-**Plot the CA/DCA biplots are compare the configuration of sites in these biplots to the one shown in the CCA triplot. Do they suggest that our measured environmental variables explain the main floristic gradients in the diatom data?**
+**Plot the CA biplot and compare the configuration of sites in this biplot to the one shown in the CCA triplot. Does this suggest that our measured environmental variables explain the main floristic gradients in the diatom data?**
 
 So far, you have used the default scaling (`scaling = "species"`) for the plots and summaries. Redraw the triplot using `scaling = "sites"`, to draw a triplot where the site scores are weighted averages of the species scores:
 
@@ -111,7 +109,7 @@ diat.n2 <- renyi(t(diat), scales = 2, hill = TRUE)
 ponds.n2 <- renyi(diat, scales = 2, hill = TRUE)
 ```
 
-Then we use these values to scale the plotting symbol used to display the sites of the species and use `identify()` to label the outlier spescies/sites (remember to click on some species [red crosses] to label them and right click on the graph to finish). Firstly for the species:
+Then we use these values to scale the plotting symbol used to display the sites of the species and use `identify()` to label the outlier species/sites (remember to click on some species [red crosses] to label them and right click on the graph to finish). Firstly for the species:
 
 ```{r echo=TRUE,eval=TRUE}
 sppN2 <- plot(ponds.cca, display = "species", type = "n")
@@ -150,7 +148,7 @@ sort(ponds.n2, decreasing = TRUE)
 
 ### How significant are the constraints?
 
-The CCA model we have built is a weighted, multivariate multiple regression and just as in regression, we want to achieve as parsimonious a model as possible, one that adequately describes the species environmental relationships without being overly complex. Whilst it is common for users to throw as many constraints as possible at a CCA this has the effect of _reducing_ the contraints on the ordination (it becomes more like the CA the more constraints you use) and of building an overly complex model that is over fitted to that particular data set. In this section you will look at some of the model building/selection tools available within **R** and **vegan**.
+The CCA model we have built is a weighted, multivariate multiple regression and just as in regression, we want to achieve as parsimonious a model as possible, one that adequately describes the species environmental relationships without being overly complex. Whilst it is common for users to throw as many constraints as possible at a CCA this has the effect of _reducing_ the constraints on the ordination (it becomes more like the CA the more constraints you use) and of building an overly complex model that is over fitted to that particular data set. In this section you will look at some of the model building/selection tools available within **R** and **vegan**.
 
 Firstly, we should look for redundant constraints&mdash;environmental variables that are highly corellated with each other are prime candidates for exclusion from the model. Produce a corellation matrix of the environmental data set and calculate the variance inflation factors for each variable.
 
@@ -175,7 +173,7 @@ Note that this uses random permutations hence we set a seed.
 
 **Is the full model significant at the 0.01 level?**
 
-Canoco also reports the species:environment correlation&mdash;the correlation between the sites scores that are weighted averages of the species scores and the site score that are linear combinations of the environmental data. Function `spenvcor()` calculates the correlation between the two sets of site scores.
+Canoco also reports the species:environment correlation&mdash;the correlation between the sites scores that are weighted averages of the species scores and the site score that are linear combinations of the environmental data. Function `spenvcor()` calculates this correlation between the two sets of site scores.
 
 ```{r }
 spenvcor(ponds.cca)
@@ -185,12 +183,12 @@ spenvcor(ponds.cca)
 
 **What does this tell you about the relationships between the species and the environmental data?**
 
-### Fowards selection and backwards elimination
+### Foward selection and backwards elimination
 Whilst automated model building methods are not the panacea that many people think they are, they can be a useful aid when model building with lots of environmental variables.
 
-The model selection tools available in **vegan** are different to those available in CANOCO, and are based on the concept of AIC, a fairly new concept for CCA as CCA is not based on concepts of deviance and log likelihoods (from which AIC was derived). Instead features of the CCA results are converted into a deviance by calculating the Chi-square of the residual data matrix after fitting constraints (in RDA, deviance is taken to be the residual sum of squares instead). From here an AIC statistic can be calculated, the details of which are given in the reference quoted in the help page for `deviance.cca()` (type `?deviance.cca` at the **R** prompt to read this page if you so wish).
+The model selection tools available in **vegan** are different to those available in CANOCO, and are based on the concept of AIC, a fairly new concept for CCA as CCA is not based on concepts of deviance and log likelihoods (from which AIC was derived). Instead, features of the CCA results are converted into a deviance by calculating the Chi-square of the residual data matrix after fitting constraints (in RDA, deviance is taken to be the residual sum of squares instead). From here an AIC statistic can be calculated, the details of which are given in the reference quoted in the help page for `deviance.cca()` (type `?deviance.cca` at the **R** prompt to read this page if you so wish).
 
-Before we begin, note that the author of **vegan**, Jari Oksanen, is not convinced about all aspects of this approach, and advocates checking the results manually&mdash;which is good advice seeing as you should not be relying on automated model selection tools anyway!
+Before we begin, note that the author of **vegan**, Jari Oksanen, is not convinced about all aspects of this approach, and advocates checking the results manually &mdash; which is good advice seeing as you should not be relying on automated model selection tools anyway!
 
 To begin, define a null model to which we will sequentially add variables in order of added importance:
 
@@ -199,7 +197,7 @@ mod0 <- cca(diat ~ 1, data = env)
 mod0
 ```
 
-As you can see, this is an unconstrained model or a CA. Function `step.cca()` is used to _step_ forwards or backwards through a series of nested models adding or dropping an explanatory variable at each iteration ^[`step()` is a generic function and `step` methods can be written for different modelling functions. This means you only need to use the generic `step()` and **R** take care of finding and using the correct method for the object you are running `step()` on. Another example of a generic is `anova()`, which you used earlier&mdash;what you actually used was `anova.cca()`]. To use `step()` we need to define an upper and lower scope for the stepping to place over. We will use `mod0` as the lower scope and `ponds.cca` (the full model) as the upper scope when performing forward selection&mdash;this is reversed when performing backwards elimination.
+As you can see, this is an unconstrained model or a CA. Function `step.cca()` is used to _step_ forwards or backwards through a series of nested models adding or dropping an explanatory variable at each iteration ^[`step()` is a generic function and `step` methods can be written for different modelling functions. This means you only need to use the generic `step()` and **R** take care of finding and using the correct method for the object you are running `step()` on. Another example of a generic is `anova()`, which you used earlier &mdash; what you actually used was `anova.cca()`]. To use `step()` we need to define an upper and lower scope for the stepping to place over. We will use `mod0` as the lower scope and `ponds.cca` (the full model) as the upper scope when performing forward selection &mdash; this is reversed when performing backwards elimination.
 
 ```{r echo=TRUE,eval=FALSE}
 mod <- step(ponds.cca, scope = list(lower = formula(mod0),
@@ -210,7 +208,7 @@ mod <- step(ponds.cca, scope = list(lower = formula(mod0),
                          upper = formula(ponds.cca)), test = "perm", trace = FALSE)
 ```
 
-You should have seen lots of output flash across the screen. At each stage, the effect of adding/dropping a variable is evaluated in terms of a permutation test. In the above example, we used both forwards and backwards elmination at each step.
+You should have seen lots of output flash across the screen. At each stage, the effect of adding/dropping a variable is evaluated in terms of a permutation test. In the above example, we used both forwards and backwards elimination at each step.
 
 Print out the record of the steps:
 
@@ -224,7 +222,7 @@ We see that we started with the full model and calcium was dropped from the full
 mod
 ```
 
-The final model contains two variables&mdash;secchi disk depth and maximum pond depth. Test this model and see how significant the effects of the constraints are:
+The final model contains two variables &mdash; secchi disk depth and maximum pond depth. Test this model and see how significant the effects of the constraints are:
 
 ```{r echo=TRUE,eval=FALSE}
 anova(mod)
@@ -275,7 +273,7 @@ plot(mod.fwd)
 
 **Which variables has forward selection chosen?**
 
-This highlights one of the problems with automatic model building tools. As a description of the data, `mod.delete` seems a nicer plot, but it retains a number environmental variables that are very correlated. Forward selection produces a model with a single environmental variable. So which to use? And therein lies the problem. There is no substitution for rolling up ones sleeves and getting involved in building and checking lots of candidate models.
+This highlights one of the problems with automatic model building tools. As a description of the data, `mod.delete` seems a nicer plot, but it retains a number of environmental variables that are very correlated. Forward selection produces a model with a single environmental variable. So which to use? And therein lies the problem. There is no substitution for rolling up ones sleeves and getting involved in building and checking lots of candidate models.
 
 As a starter, we could look at the significance of the terms in `mod.delete`:
 
@@ -283,7 +281,7 @@ As a starter, we could look at the significance of the terms in `mod.delete`:
 anova(mod.delete, by = "margin")
 ```
 
-Here, the significance of terms are assessed marginally. A number of the environmental variables are not significant under this test. As a strategy for producing a parsimonius model, we might proceed by removing the variable that contributes the least here, NO<sub>3</sub>.
+Here, the significance of terms are assessed marginally. A number of the environmental variables are not significant under this test. As a strategy for producing a parsimonious model, we might proceed by removing the variable that contributes the least here, NO<sub>3</sub>.
 
 **As an exercise if you have time, try dropping out terms and rerun `anova` to try to produce a parsimonious model.**
 
@@ -304,9 +302,9 @@ mod.r2step$anova
 **Using `anova()` test the individual marginal effects of the terms retained in `mod.r2step`. Do all the terms have statistically significant marginal effects?**
 
 ## Partial CCA models
-There are occaisions where we might wish to fit a model to our species data after controlling for the effects of one or more environmental variables. These models are known as partial constrained ordinations&mdash;the effect of the one or more environmental variables are partialled out, and a CCA/RDA model is applied to explain the residual variation.
+There are occasions where we might wish to fit a model to our species data after controlling for the effects of one or more environmental variables. These models are known as partial constrained ordinations &mdash; the effect of the one or more environmental variables are partialled out, and a CCA/RDA model is applied to explain the residual variation.
 
-In **vegan** partial models are fitted using the `Condition()` function within the model formula describing the model you wish to fit. The `Condition()` function is used to _condition_ the model on the set of covariables and fit a model to the residuals of the conditioned model. Multiple variables can be included within `Condition()`, separated by a `+`. Partial models can also be used to evaluate the significance of adding a new variable to a model already containing one or more variables&mdash;partial out the existing variables and fit a model with the new variable of interest, using `anova()` to assess the effect of adding this new variable.
+In **vegan** partial models are fitted using the `Condition()` function within the model formula describing the model you wish to fit. The `Condition()` function is used to _condition_ the model on the set of covariables and fit a model to the residuals of the conditioned model. Multiple variables can be included within `Condition()`, separated by a `+`. Partial models can also be used to evaluate the significance of adding a new variable to a model already containing one or more variables &mdash; partial out the existing variables and fit a model with the new variable of interest, using `anova()` to assess the effect of adding this new variable.
 
 Say we were interested in investigating the effects of the hydrochemical variables on diatom distributions in the Ponds dataset, after controlling for the effects of `Maxdepth` and `Secchid`, we would fit this model in **R** like so:
 
