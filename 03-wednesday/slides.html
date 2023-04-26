@@ -1071,12 +1071,15 @@ Spring fen meadow vegetation in westernmost Carpathian mountains
 
 
 ```r
-## load vegan
-library("vegan")
+# load vegan, dplyr &amp; readr
+library("vegan"); library("dplyr"); library("readr")
 
-## load the data
-spp &lt;- read.csv("data/meadow-spp.csv", header = TRUE, row.names = 1)
-env &lt;- read.csv("data/meadow-env.csv", header = TRUE, row.names = 1)
+# load the data
+spp &lt;- read_csv("https://bit.ly/meadows-species") %&gt;%
+    rename("sample_id" = "...1") %&gt;%
+    tibble::column_to_rownames("sample_id")
+env &lt;- read_csv("https://bit.ly/meadows-env") %&gt;%
+    rename("sample_id" = "...1")
 ```
 
 ---

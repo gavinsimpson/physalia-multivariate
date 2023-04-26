@@ -190,12 +190,15 @@ anova(mods, by = "margin")
 
 
 ## ----meadows-setup------------------------------------------------------------
-## load vegan
-library("vegan")
+# load vegan, dplyr & readr
+library("vegan"); library("dplyr"); library("readr")
 
-## load the data
-spp <- read.csv("data/meadow-spp.csv", header = TRUE, row.names = 1)
-env <- read.csv("data/meadow-env.csv", header = TRUE, row.names = 1)
+# load the data
+spp <- read_csv("https://bit.ly/meadows-species") %>%
+    rename("sample_id" = "...1") %>%
+    tibble::column_to_rownames("sample_id")
+env <- read_csv("https://bit.ly/meadows-env") %>%
+    rename("sample_id" = "...1")
 
 
 ## ----meadows-cca-full---------------------------------------------------------
