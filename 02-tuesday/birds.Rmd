@@ -3,6 +3,7 @@
 This data set is on bird assemblages in a montane forest in the Velka Fatra Mountains (Slovak Republic).
 
 ```{r, message=FALSE}
+library("vegan")
 library("readr")
 library("tidyr")
 library("dplyr")
