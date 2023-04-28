@@ -1,0 +1,48 @@
+---
+title: Linear Discriminants Analysis
+author: Gavin Simpson
+date: April 28, 2023
+output: html_document
+---
+
+On the first day we discussed *cluster analysis* and *classification* as being *unsupervised* and *supervised* methods respectively. In *cluster analysis* we attempt to identify group structure in the data, but we don't know the groups ahead of time. In *classification*, we do know the groups (hence it is supervised) and we try to find prediction rules from among the variables that best predict to which group individual samples belong.
+
+*Classification* is a large area of statistics and computer science with tens if not hundreds of classification modelling methods available. Linear discriminant analysis is the classical multivariate technique for finding prediction rules that best explain and hence predict the known groups.
+
+LDA finds axes that are linear combinations of the variables that best predict the grouping variable. We can think of these axes or linear combinations as being those directions in the multivariate space of the variables that best separate the group centroids. Axes subsequent to the first LDA axis are subject to the usual constraint that they be orthogonal to earlier axes. If this sounds familiar, it is. LDA is a special case of Canonical Correspondence Analysis, with the groups being the species.
+
+We can fit an LDA using the `lda()` function of the **MASS** package, which ships with R. To illustrate the method, we'll use a data set of morphological measurements on the fruits of two species of *Betula* (Birch)
+
+1. *Betula pubescens* (tree birch), and
+2. *Betula nana* (dwarf birch)
+
+The fruits from these species are readily found in lake sediments and are used to help reconstruct climate in the late-glacial and Holocene periods. However, many of the fruits we find in these old sediments lack their wings, with only the fruit body being preserved. If we can predict which species of *Betula* a fruit body belongs, we could improve climate reconstructions.
+
+Here we use a data set of 50 fruits from each species where seven (7) morphological measurements have been made on the fruit bodies. We will use LDA to build a model to predict to which species each of the 100 fruits belongs, and then we will use this LDA model to predict for 45 fossil, wingless *Betula* fruits from Eigebakken, a late-glacial site in south-west Norway. Fossil fruits 1-15 and 40-45 are from the Allerød interstadial, fossil fruits 16-22 and from the Younger Dryas, and fruits 23-39 are from the early Holocene.
+
+```{r}
+library("vegan")
+library("readr")
+library("dplyr")
+library("MASS")
+
+modern <- read_csv("https://bit.ly/betula-modern") %>%
+  mutate(species = factor(species))
+
+fossil <- read_csv("https://bit.ly/betula-fossil") %>%
+  mutate(period = rep(c("Alerod", "Younger Dryas", "early Holocene", "Alerod"),
+    times = c(15, 7, 17, 6)))
+```
+
+```{r fit-lda}
+m_lda <- lda(species ~ ., data = modern)
+m_lda
+```
+
+```{r predict-fossil}
+pred <- predict(m_lda, newdata = fossil)
+
+pred$class
+
+round(pred$posterior, 3)
+```
