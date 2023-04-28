@@ -47,6 +47,7 @@ constrained ordination model, to diagnostics, plotting, etc.
     * [dbRDA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/dbrda.html)
     * [PRC](https://gavinsimpson.github.io/physalia-multivariate/05-friday/prc.html)
     * [Co-CA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/cocorrespondence-analysis.html)
+    * [Variation partitioning](https://gavinsimpson.github.io/physalia-multivariate/05-friday/variation-partitioning.html)
 
 ## Target audience and assumed background
 
