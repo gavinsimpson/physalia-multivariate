@@ -379,7 +379,7 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <pre><code>## Rows: 12 Columns: 15
-## ── Column specification ──────────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
 ## chr  (2): ...1, ...2
 ## dbl (13): Che alb, Pol per, Pol avi, Spe arv, Mat rec, Gna uli, Cap bur, Ste...
@@ -395,7 +395,7 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 <pre><code>## New names:
 ## Rows: 12 Columns: 4
 ## ── Column specification
-## ────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (4): ...1, ...2, Block, Treatmnt
 ## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column
 ## types or set `show_col_types = FALSE` to quiet this message.
@@ -404,6 +404,17 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 <p>We are interested in the effect of ploughing time and wish to remove any possible effect of the blocks. We cannot achieve this by using <code>block</code> as a covariate (in <code>Condition()</code>) when we estimate the model using PERMANOVA. Instead we will have to include <code>block</code> in our model as a variable. Some zero abundances are recorded as <code>NA</code> values, so we must replace those with 0s before we proceed. Instead of log-transforming the species counts, we might use a non-Euclidean dissimilarity coefficient with PERMANOVA instead of RDA.</p>
 <pre class="r"><code>plough &lt;- plough %&gt;%
     mutate(across(che_alb:ape_spi, .fns = tidyr::replace_na, replace = 0))</code></pre>
+<pre><code>## Warning: There was 1 warning in `mutate()`.
+## ℹ In argument: `across(che_alb:ape_spi, .fns = tidyr::replace_na, replace = 0)`.
+## Caused by warning:
+## ! The `...` argument of `across()` is deprecated as of dplyr 1.1.0.
+## Supply arguments directly to `.fns` through an anonymous function instead.
+## 
+##   # Previously
+##   across(a:b, mean, na.rm = TRUE)
+## 
+##   # Now
+##   across(a:b, \(x) mean(x, na.rm = TRUE))</code></pre>
 <p>A correct permutation test for these data should keep samples contained at the block level and only permute within, not between, blocks.</p>
 <pre class="r"><code>h &lt;- with(plough_design,
     how(blocks = block, nperm = 999))</code></pre>
@@ -420,7 +431,7 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 ## 
 ## adonis2(formula = plough ~ ploughing_time, data = plough_design, permutations = h, method = &quot;bray&quot;, add = &quot;lingoes&quot;)
 ##                Df SumOfSqs      R2      F Pr(&gt;F)   
-## ploughing_time  2  0.29341 0.24029 1.4233  0.006 **
+## ploughing_time  2  0.29341 0.24029 1.4233  0.004 **
 ## Residual        9  0.92768 0.75971                 
 ## Total          11  1.22109 1.00000                 
 ## ---
@@ -443,8 +454,8 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 ## 
 ## adonis2(formula = plough ~ ploughing_time + block, data = plough_design, permutations = h, method = &quot;bray&quot;, add = &quot;lingoes&quot;, by = &quot;margin&quot;)
 ##                Df SumOfSqs      R2      F Pr(&gt;F)   
-## ploughing_time  2  0.29341 0.24029 3.6163  0.004 **
-## block           3  0.68427 0.56038 5.6225  0.004 **
+## ploughing_time  2  0.29341 0.24029 3.6163  0.006 **
+## block           3  0.68427 0.56038 5.6225  0.006 **
 ## Residual        6  0.24341 0.19934                 
 ## Total          11  1.22109 1.00000                 
 ## ---
@@ -480,22 +491,24 @@ disp</code></pre>
 ## Residuals  9 0.128831 0.0143146</code></pre>
 <p>Are there any differences between groups in terms of their dispersions?</p>
 <p>A permutation test can also be used, instead of assuming the data meet the assumptions of the ANOVA</p>
-<pre class="r"><code>permutest(disp, pairwise = TRUE, permutations = 999)</code></pre>
+<pre class="r"><code>permutest(disp, pairwise = TRUE, permutations = h)</code></pre>
+<pre><code>## Set of permutations &lt; &#39;minperm&#39;. Generating entire set.</code></pre>
 <pre><code>## 
 ## Permutation test for homogeneity of multivariate dispersions
+## Blocks:  block 
 ## Permutation: free
-## Number of permutations: 999
+## Number of permutations: 1295
 ## 
 ## Response: Distances
 ##           Df   Sum Sq   Mean Sq      F N.Perm Pr(&gt;F)
-## Groups     2 0.005309 0.0026544 0.1854    999  0.837
+## Groups     2 0.005309 0.0026544 0.1854    999  0.594
 ## Residuals  9 0.128831 0.0143146                     
 ## 
 ## Pairwise comparisons:
 ## (Observed p-value below diagonal, permuted p-value above diagonal)
 ##          pltime 1 pltime 2 pltime 3
-## pltime 1           0.95400    0.608
-## pltime 2  0.95708             0.499
+## pltime 1           0.92800    0.439
+## pltime 2  0.95708             0.304
 ## pltime 3  0.63784  0.51344</code></pre>
 <p>Here we asked for pariwise comparisons to investigate whether there are pairs of groups that have different dispersions instead of just looking at the overall test.</p>
 <p>Tukey’s honest significant differences can also be used to pairwise compare the groups; while this is a parametric test, the confidence intervals are constructed to account for multiple comparisons</p>

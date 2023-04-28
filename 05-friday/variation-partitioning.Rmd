@@ -1,0 +1,183 @@
+---
+title: Variation partitioning
+author: Gavin Simpson
+date: April 28, 2023
+output: html_document
+---
+
+The data used in this example come from a field fertilisation experiment (Py&#353;ek & Lep&#353; 1991). A barley field was fertilised with three types of nitrogen fertiliser
+
+1. ammonium sulphate,
+2. calcium-ammonium nitrate, and
+3. liquid urea
+
+and two different total nitrogen doses.
+
+In 122 plot, the weed community species composition was recorded using Braun-Blanquet scale, and transformed to the ordinal 1&ndash;7 ordinal scale. The % cover of barley was also estimated for all plots. The aim of this analysis is to consider how species composition of the weed community changes following application of the nitrogen-based fertiliser. A problem however is that the fertiliser may change the composition of the weed community, but it will also increase the cover of barley in the fields, which will indirectly affect the composition of the weeds. Here we will attempt to partition variation in the composition of the weed community into a component that is explained by the dose of the nitrogen fertiliser applied and that component that can be explained by the change in the cover of barley.
+
+```{r show-varparts, echo = FALSE}
+library("vegan")
+showvarparts(2, labels = c("dose", "cover", "shared", "residual"), Xnames = NULL)
+```
+
+Load the data
+
+```{r load-fertil}
+library("vegan")
+library("readr")
+library("dplyr")
+
+fspp <- read_csv("https://bit.ly/fertil-sp") %>%
+  tibble::column_to_rownames("sample")
+
+fenv <- read_csv("https://bit.ly/fertil-env") %>%
+  tibble::column_to_rownames("sample")
+```
+
+## Variation partitioning by hand
+
+First, fit the three RDA models we need to decompose variation in the weed community data:
+
+```{r m-all}
+# all fractions [dose + cover + shared]:
+m_all <- rda(fspp ~ dose + cover, data = fenv)
+```
+
+```{r m-dose}
+# fractions [dose + shared]:
+m_dose <- rda(fspp ~ dose, data = fenv)
+```
+
+```{r m-cover}
+# fractions [cover + shared]:
+m_cover <- rda(fspp ~ cover, data = fenv)
+```
+
+Next, compute the adjusted R^2^ for each model
+
+```{r r2-adj}
+# fraction [dose + shared + cover]
+dsc <- RsquareAdj(m_all)$adj.r.squared
+dsc
+ 
+# fraction [dose + shared]:
+ds <- RsquareAdj(m_dose)$adj.r.squared
+ds
+ 
+# fraction [cover + shared]:
+cs <- RsquareAdj(m_cover)$adj.r.squared
+cs
+```
+
+Now we can compute the variation of the specific components
+
+1. the unique `dose` component is computed from `dsc - cs`
+2. the unique `cover` component is computed from `dsc - ds`
+3. the shared component is computed as `(ds + cs) - dsc`
+
+If the last one is not clear, `ds + cs` could be written `d2sc = dssc` and by subtracting a `d` a `c` and one `s` we get the unique shared component `s`. Another way to think of it is that each of the two models we fitted with a single covariate contains an estimate of the *shared* component, so the sum of their variations explained contains $2 \times \text{shared}$, while `m_all` only contains a single estimate of the `shared` component.
+
+The unique and shared components can be computed using
+
+```{r compute-components}
+dose_r2   <- dsc - cs
+cover_r2  <- dsc - ds
+shared_r2 <- (ds + cs) - dsc
+```
+
+The adjusted R^2^ components are then
+
+* `dose` = `r round(dose_r2, 2)`
+* `cover` = `r round(cover_r2, 2)`
+* `shared` = `r round(shared_r2, 2)`
+
+The residual or unexplained variation is computed from the total intertia minus the inertia of the full model `m_all`
+
+```{r}
+var_resid <- m_all$tot.chi - sum(eigenvals(m_all, model = "constrained"))
+var_resid
+```
+
+The variation explained by each component needs some additional models fitting, from which we can extract the sum of the constrained eigenvalues for the model to get the individual components
+
+```{r var-models}
+# unique dose
+dose <- rda(fspp ~ dose + Condition(cover), data = fenv)
+sum(eigenvals(dose, model = "constrained"))
+
+# unique cover
+cover <- rda(fspp ~ cover + Condition(dose), data = fenv)
+sum(eigenvals(cover, model = "constrained"))
+```
+
+You can also do it using the original models and the same sums as for R^2^:
+
+```{r var-comps}
+var_dsc <- sum(eigenvals(m_all, model = "constrained"))
+var_ds  <- sum(eigenvals(m_dose, model = "constrained"))
+var_cs  <- sum(eigenvals(m_cover, model = "constrained"))
+
+var_dose   <- var_dsc - var_cs
+var_cover  <- var_dsc - var_ds
+var_shared <- (var_ds + var_cs) - var_dsc
+```
+
+The advantage of knowing how to get the estimate unique components directly is that you can test those components with a permutation test, as shown above.
+
+For printing, let's combine these into a table
+
+```{r table}
+results <- data.frame(Component = c("Total", "Dose", "Cover", "Shared", "Unexplained"),
+    Variation = c(m_all$tot.chi, var_dose, var_cover, var_shared, var_resid),
+    R2_adj = c(100, dose_r2, cover_r2, shared_r2, 1 - sum(dose_r2, cover_r2, shared_r2)))
+results
+```
+
+Rendering the table with `knitr::kable()` (and rounding to 3 digits) we get
+
+```{r, echo = FALSE}
+knitr::kable(results, digits = 3)
+```
+
+## Variation partitioning the easy way
+
+Vegan contains function `varpart()` which can do the variation partitioning automatically for up to four components. What we did above is for two components. Doing the variation partitioning by hand for three components is relatively simple, but needs a quiet room and good bookkeeping skills to be sure to fit all the required models and do the maths needed to compute the shared components. Doing this by hand for four components takes a lot of time and care.
+
+```{r varpart}
+vp <- varpart (fspp, ~ dose, ~ cover, data = fenv)
+vp
+```
+
+The `Testable` column contains an indicator of whether you can test the components. Here was can test all but the *shared* and *residual* components. For higher order variation partitioning, different components will be testable.
+
+We have fitted all the models needed to test all the `Testable` components. These tests are:
+
+```{r testing-testable}
+# [a+c] = [dose + shared]
+set.seed(1)
+anova(m_dose)
+
+# [b+c] = [cover + shared]
+set.seed(1)
+anova(m_dose)
+
+# [a+b+c] = [dose + cover + shared]
+set.seed(1)
+anova(m_all)
+
+# [a] = [dose]
+set.seed(1)
+anova(dose)
+
+# [b] = [cover]
+set.seed(1)
+anova(cover)
+```
+
+The notation in the table `X1 | X2` means that we have `Y ~ X1 + Condition(X2)` and note that we can have multiple variables in one or more of the components.
+
+We can plot the venn diagram
+
+```{r venn}
+plot(vp, digits = 2, Xnames = c("dose", "cover"), bg = c("navy", "tomato"))
+```
