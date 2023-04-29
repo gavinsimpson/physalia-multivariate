@@ -143,11 +143,11 @@ Now we can produce a version of the plot we made earlier, but now using `ggplot(
 ggplot(ford, aes(x = PC1, y = PC2)) +
   geom_hline(yintercept = 0, colour = "steelblue", alpha = 0.5) +
   geom_vline(xintercept = 0, colour = "steelblue", alpha = 0.5) +
-  geom_point(data = filter(ford, Score == "sites")) +
-  geom_text_repel(data = filter(ford, Score == "sites"),
+  geom_point(data = dplyr::filter(ford, Score == "sites")) +
+  geom_text_repel(data = dplyr::filter(ford, Score == "sites"),
                   mapping = aes(label = Label)) +
-  geom_point(data = filter(ford, Score == "species"), colour = "red", pch = 3, size = 2) +
-  geom_text_repel(data = filter(ford, Score == "species" & take),
+  geom_point(data = dplyr::filter(ford, Score == "species"), colour = "red", pch = 3, size = 2) +
+  geom_text_repel(data = dplyr::filter(ford, Score == "species" & take),
                   mapping = aes(label = Label)) +
   coord_fixed()
 ```

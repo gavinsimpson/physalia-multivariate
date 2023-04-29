@@ -90,7 +90,7 @@ A permutation test can also be used, instead of assuming the data meet the assum
 permutest(disp, pairwise = TRUE, permutations = h)
 ```
 
-Here we asked for pariwise comparisons to investigate whether there are pairs of groups that have different dispersions instead of just looking at the overall test.
+Here we asked for pairwise comparisons to investigate whether there are pairs of groups that have different dispersions instead of just looking at the overall test.
 
 Tukey's honest significant differences can also be used to pairwise compare the groups; while this is a parametric test, the confidence intervals are constructed to account for multiple comparisons
 

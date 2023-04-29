@@ -431,7 +431,7 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 ## 
 ## adonis2(formula = plough ~ ploughing_time, data = plough_design, permutations = h, method = &quot;bray&quot;, add = &quot;lingoes&quot;)
 ##                Df SumOfSqs      R2      F Pr(&gt;F)   
-## ploughing_time  2  0.29341 0.24029 1.4233  0.004 **
+## ploughing_time  2  0.29341 0.24029 1.4233  0.003 **
 ## Residual        9  0.92768 0.75971                 
 ## Total          11  1.22109 1.00000                 
 ## ---
@@ -454,8 +454,8 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 ## 
 ## adonis2(formula = plough ~ ploughing_time + block, data = plough_design, permutations = h, method = &quot;bray&quot;, add = &quot;lingoes&quot;, by = &quot;margin&quot;)
 ##                Df SumOfSqs      R2      F Pr(&gt;F)   
-## ploughing_time  2  0.29341 0.24029 3.6163  0.006 **
-## block           3  0.68427 0.56038 5.6225  0.006 **
+## ploughing_time  2  0.29341 0.24029 3.6163  0.005 **
+## block           3  0.68427 0.56038 5.6225  0.005 **
 ## Residual        6  0.24341 0.19934                 
 ## Total          11  1.22109 1.00000                 
 ## ---
@@ -501,16 +501,16 @@ disp</code></pre>
 ## 
 ## Response: Distances
 ##           Df   Sum Sq   Mean Sq      F N.Perm Pr(&gt;F)
-## Groups     2 0.005309 0.0026544 0.1854    999  0.594
+## Groups     2 0.005309 0.0026544 0.1854    999  0.598
 ## Residuals  9 0.128831 0.0143146                     
 ## 
 ## Pairwise comparisons:
 ## (Observed p-value below diagonal, permuted p-value above diagonal)
 ##          pltime 1 pltime 2 pltime 3
-## pltime 1           0.92800    0.439
-## pltime 2  0.95708             0.304
+## pltime 1           0.93000    0.449
+## pltime 2  0.95708             0.297
 ## pltime 3  0.63784  0.51344</code></pre>
-<p>Here we asked for pariwise comparisons to investigate whether there are pairs of groups that have different dispersions instead of just looking at the overall test.</p>
+<p>Here we asked for pairwise comparisons to investigate whether there are pairs of groups that have different dispersions instead of just looking at the overall test.</p>
 <p>Tukey’s honest significant differences can also be used to pairwise compare the groups; while this is a parametric test, the confidence intervals are constructed to account for multiple comparisons</p>
 <pre class="r"><code>## Tukey&#39;s Honest Significant Differences
 (disp_HSD &lt;- TukeyHSD(disp))</code></pre>

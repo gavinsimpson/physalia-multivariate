@@ -341,7 +341,7 @@ Err&hellip; isn't that what `adonis2()` was developed to do?
 
 `dbrda()` can use `Condition()` in the formula to fit partial db-RDA
 
-`Condition()` is often needed to provide correct restricted perumtation tests
+`Condition()` is often needed to provide correct restricted permutation tests
 
 ---
 
