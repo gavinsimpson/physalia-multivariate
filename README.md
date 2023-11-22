@@ -6,7 +6,7 @@ https://www.physalia-courses.org/
 
 ### Gavin Simpson
 
-#### 24&ndash;28th April, 2023
+#### 27 November &ndash; 1st December, 2023
 
 ## Overview
 
@@ -77,8 +77,8 @@ practical exercises throughout the course.
 
 ### R
 
-Please be sure to have at least version 4.1 &mdash; *and preferably version
-4.2* &mdash; of R installed. Note that R and RStudio are two different things:
+Please be sure to have at least version 4.2 &mdash; *and preferably version
+4.3* &mdash; of R installed. Note that R and RStudio are two different things:
 it is not sufficient to just update RStudio, you also need to update R by
 installing new versions as they are released.
 
