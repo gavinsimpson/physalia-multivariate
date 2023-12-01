@@ -46,6 +46,7 @@ theme_set(theme_minimal(base_size = 16, base_family = 'Fira Sans'))
 * Distance-based RDA
 * Co-correspondence analysis (Co-CA)
 * Principal Response Curves (PRC)
+* Mantel test
 * Diagnostics
 
 ---
