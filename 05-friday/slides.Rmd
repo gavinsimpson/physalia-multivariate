@@ -745,7 +745,7 @@ The Mantel test is a test of the correlation between two distance matrices
 
 It should only be used to test hypotheses about distances, not about raw data
 
-The Mantel test between $\mathbf{D_Y}$ and $\mathbf{D_Y}$ derived from raw data $\mathbf{Y}$ and $\mathbf{X}$ is not equivalent to
+The Mantel test between $\mathbf{D_Y}$ and $\mathbf{D_X}$ is not equivalent to
 
 1. a test of the correlation coefficient betwen two vectors of raw data, or
 2. a test of a linear regression of $\mathbf{y}$ on matrix $\mathbf{X}$, or
