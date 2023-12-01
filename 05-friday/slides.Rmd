@@ -1,7 +1,7 @@
 ---
 title: "Other topics"
 author: Gavin L. Simpson
-date: "April 28, 2023"
+date: "December 1, 2023"
 fontsize: 10pt
 classoption: "compress, aspectratio=169"
 bibliography: "resources/vegan-refs.bib"
@@ -271,7 +271,7 @@ class: inverse middle center big-subsection
 
 # Distance-based RDA
 
-Multiple models that all do something Similar
+Multiple models that all do something similar
 
 1. `adonis()` (deprecated)
 2. `adonis2()`
@@ -618,6 +618,138 @@ axis(side = 2)
 ]
 ]
 
+---
+
+# Mantel test
+
+The Mantel test is used to compare two similarity or distance matrices computed for the same set of samples
+
+We might compare
+
+* ecological distances  with
+* geographical distances
+
+E.g.
+
+* `vegdist(spp, method = foo)`, &
+* `vegdist(coords, method = "euclidean")`
+
+---
+
+# Mantel test
+
+The classical Mantel test involves unrolling one triangle of each distance matrix & computing the crossproduct (sum of the scalar products) of the two vectors
+
+.row[
+
+.col-6[
+```{r}
+df <- data.frame(y1 = c(0, 0, 1),
+    y2 = c(4, 1, 0),
+    y3 = c(8, 1, 0))
+D <- as.matrix(vegdist(df))
+D
+D[upper.tri(D)] # unroll
+```
+]
+
+.col-6[
+```{r}
+crossprod(1:3, 1:3)
+
+sum(1:3 * 1:3)
+```
+]
+]
+
+This yields the Matel statistic $z_{M}$
+
+---
+
+# Mantel test
+
+Alternatively we might standaridize the two vectors of distances before computing the crossproduct, and then divide the crossproduct by $(n(n - 1) / 2) - 1$, the number of distances in each triangle minus 1
+
+This yields statisic $r_{M}$
+
+$r_{M}$ is bounded between -1 and +1 and behavles like a correlation coefficient
+
+Or we might convert the distances to ranks before computing $r_{M}$, which yields the Spearman correlation of the distance vectors
+
+---
+
+# Mantel test
+
+Indeed, the Mantel statistic can be seen as the correlation between two distance matrices $\mathbf{D_Y}$ and $\mathbf{D_X}$
+
+Which is what *vegan* computes via `mantel()` using one of the Pearson, Spearman, or Kendall correlations
+
+---
+
+# Mantel test
+
+However, we can't test this correlation in the usual way: there are $(n(n-1)) / 2$ distances from only $n$ objects
+
+Mantel developed an asymptotic test using math
+
+In *vegan* we test the correlation coefficient via a permutation test
+
+We permute the rows _and_ columns of $\mathbf{D_X}$
+
+---
+
+# Mantel test Lichen pastures
+
+Is vegetation in the lichen pastures related to the environment?
+
+```{r}
+data(varespec, varechem, package = "vegan")
+D_veg <- vegdist(varespec) # Bray-Curtis
+D_env <- vegdist(scale(varechem), "euclidean")
+mantel(D_veg, D_env, permutations = how(nperm = 999))
+```
+---
+
+# Mantel test Orabatid mites
+
+Does Orabatid mite composition **similarity** decrease with distance?
+
+```{r}
+data(mite, mite.xy, package = "vegan")
+D_mite <- vegdist(mite) # Bray-Curtis
+D_xy <- vegdist(mite.xy, "euclidean")
+mantel(D_mite, D_xy, permutations = how(nperm = 999), method = "spearman")
+```
+
+???
+
+Ecological theory sometimes predicts relationships between distance matrices. E.g. in the Neutral Theory, which predicts a monotonic declining relationship between community composition similarity and geographic separation, distance decay of community similarity
+
+Yes, the coef is positive with distance and we we used a dissimilarity matrix for composition
+
+---
+
+# Partial Mantel test
+
+Say we have $\mathbf{D}_1$, $\mathbf{D}_2$, and $\mathbf{D}_3$
+
+The _partial_ Mantel statistic $r_M(\mathbf{D}_1\mathbf{D}_2 \boldsymbol{\cdot} \mathbf{D})$ is the correlation between $\mathbf{D}_1$ and $\mathbf{D}_2$, while controlling for the effects of $\mathbf{D}_3$
+
+In *vegan* this is available via `mantel.partial()`
+
+---
+
+# Mantel test
+
+The Mantel test is a test of the correlation between two distance matrices
+
+It should only be used to test hypotheses about distances, not about raw data
+
+The Mantel test between $\mathbf{D_Y}$ and $\mathbf{D_Y}$ derived from raw data $\mathbf{Y}$ and $\mathbf{X}$ is not equivalent to
+
+1. a test of the correlation coefficient betwen two vectors of raw data, or
+2. a test of a linear regression of $\mathbf{y}$ on matrix $\mathbf{X}$, or
+3. a test in canonial analysis of multivariate $\mathbf{Y}$ on $\mathbf{X}$
 
 ---
 class: inverse middle center big-subsection
