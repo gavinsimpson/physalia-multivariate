@@ -209,6 +209,10 @@ Repeat the exercise from the slides, testing the different levels of the hierarc
 
 # Effect of ploughing time on weeds
 
+Post (1986) carried out an experiment to investigate the effect of time of ploughing on the subsequent weed composition in summer barley fields. Three different ploughin times were used. There are 13 weed species observed in 12 plots in a randomized block experiment of four complete blocks of three plots each.
+
+Traditionally, a multivariate ANOVA could have been used to analyses data like this. However, as there are more species (response variables; 13) than there are samples (12), MANOVA cannot be used. Instead, RDA is a useful option.
+
 ```{r plough-load}
 plough <- read_csv(url("https://bit.ly/plough-spp")) %>%
     rename(label = "...1") %>%
@@ -223,6 +227,14 @@ plough_design <- read_csv(url("https://bit.ly/plough-design")) %>%
     janitor::clean_names() %>%
     filter(!is.na(label)) %>%
     column_to_rownames("label")
+```
+
+We are interested in the effect of ploughing time and wish to remove any possible effect of the blocks. We achieve this by using `block` as a covariate (in `Condition()`). As the data are counts, a log-transformation is suggested (because we can't do a multivariate Poisson GLM to analyses these data.) Some zero abundances are recorded as `NA` values, so we must replace those with 0s before we proceed.
+
+```{r}
+plough <- plough %>%
+    mutate(across(che_alb:ape_spi, .fns = tidyr::replace_na, replace = 0))
+log_plough <- log1p(plough)
 ```
 
 # A multivariate experiment with fixed factors
