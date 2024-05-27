@@ -35,7 +35,8 @@ We are interested in the effect of ploughing time and wish to remove any possibl
 
 ```{r}
 plough <- plough %>%
-    mutate(across(che_alb:ape_spi, .fns = tidyr::replace_na, replace = 0))
+  mutate(across(che_alb:ape_spi,
+    .fns = \(x) tidyr::replace_na(x, replace = 0)))
 ```
 
 A correct permutation test for these data should keep samples contained at the block level and only permute within, not between, blocks.
@@ -49,7 +50,7 @@ The model and tests are specified as
 
 ```{r}
 ord <- dbrda(plough ~ ploughing_time + Condition(block), data = plough_design,
-    method = "bray", add = "lingoes")
+    distance = "bray", add = "lingoes")
 ord
 ```
 

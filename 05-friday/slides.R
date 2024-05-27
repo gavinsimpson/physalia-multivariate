@@ -138,7 +138,7 @@ bp.sym <- coca(beetles ~ ., data = plants, method = "symmetric")
 bp.sym
 
 
-## ---- out.width = "80%", fig.align = "center"---------------------------------
+## ----out.width = "80%", fig.align = "center"----------------------------------
 screeplot(bp.sym)
 
 
@@ -149,7 +149,7 @@ biplot(bp.sym, which = "y2", main = "Plants")
 layout(1)
 
 
-## ---- eval = FALSE------------------------------------------------------------
+## ----eval = FALSE-------------------------------------------------------------
 ## rda(comm ~ F:t + Condition(t), data = df)
 
 
@@ -176,26 +176,55 @@ ctrl <- how(plots = Plots(strata = ditch,type = "free"),
 anova(mod, permutations = ctrl, first = TRUE)
 
 
-## ---- out.width = "90%", fig.align = "center"---------------------------------
+## ----out.width = "90%", fig.align = "center"----------------------------------
 plot(mod, species = FALSE, legpos = "topright")
 
 
-## ---- fig.keep = "none"-------------------------------------------------------
+## ----fig.keep = "none"--------------------------------------------------------
 plot(mod, species = FALSE, legpos = "topright")
 logabu <- colSums(pyrifos)
 scrs <- scores(mod, display = "species", choices = 1)
 linestack(scrs[logabu > 150, , drop = FALSE]); axis(side = 2)
 
 
-## ---- echo = FALSE------------------------------------------------------------
+## ----echo = FALSE-------------------------------------------------------------
 plot(mod, species = FALSE, legpos = "topright")
 
 
-## ---- fig.width = 3, fig.height = 7, echo = FALSE-----------------------------
+## ----fig.width = 3, fig.height = 7, echo = FALSE------------------------------
 logabu <- colSums(pyrifos)
 scrs <- scores(mod, display = "species", choices = 1, scaling = "symmetric")
 linestack(scrs[logabu > 150, , drop = FALSE])
 axis(side = 2)
+
+
+## -----------------------------------------------------------------------------
+df <- data.frame(y1 = c(0, 0, 1),
+    y2 = c(4, 1, 0),
+    y3 = c(8, 1, 0))
+D <- as.matrix(vegdist(df))
+D
+D[upper.tri(D)] # unroll
+
+
+## -----------------------------------------------------------------------------
+crossprod(1:3, 1:3)
+
+sum(1:3 * 1:3)
+
+
+## -----------------------------------------------------------------------------
+data(varespec, varechem, package = "vegan")
+D_veg <- vegdist(varespec) # Bray-Curtis
+D_env <- vegdist(scale(varechem), "euclidean")
+mantel(D_veg, D_env, permutations = how(nperm = 999))
+
+
+## -----------------------------------------------------------------------------
+data(mite, mite.xy, package = "vegan")
+D_mite <- vegdist(mite) # Bray-Curtis
+D_xy <- vegdist(mite.xy, "euclidean")
+mantel(D_mite, D_xy, permutations = how(nperm = 999), method = "spearman")
 
 
 ## ----goodness-----------------------------------------------------------------
