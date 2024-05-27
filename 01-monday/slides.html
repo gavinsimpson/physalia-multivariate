@@ -4,7 +4,8 @@
     <title>Dissimilarity, cluster analysis, diversity</title>
     <meta charset="utf-8" />
     <meta name="author" content="Gavin Simpson" />
-    <meta name="date" content="2023-04-24" />
+    <meta name="date" content="2027-05-27" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="slides.css" type="text/css" />
@@ -20,7 +21,7 @@ class: inverse, middle, left, my-title-slide, title-slide
 ### Gavin Simpson
 ]
 .date[
-### April 24, 2023
+### May 27, 2027
 ]
 
 ---
@@ -382,7 +383,7 @@ Two key functions
 2. `decostand()`
 
 
-```r
+``` r
 data(varespec)
 
 euc_dij &lt;- vegdist(varespec, method = "euclidean")
@@ -1026,7 +1027,7 @@ Three popular ones are
 # Diversity metrics
 
 
-```r
+``` r
 data(BCI)
 H &lt;- diversity(BCI)
 head(H)
@@ -1037,7 +1038,7 @@ head(H)
 ## 4.018412 3.848471 3.814060 3.976563 3.969940 3.776575
 ```
 
-```r
+``` r
 D1 &lt;- diversity(BCI, index = "simpson")
 head(D1)
 ```
@@ -1047,7 +1048,7 @@ head(D1)
 ## 0.9746293 0.9683393 0.9646078 0.9716117 0.9678267 0.9627557
 ```
 
-```r
+``` r
 D2 &lt;- diversity(BCI, index = "invsimpson", base = 2)
 head(D2)
 ```
@@ -1064,7 +1065,7 @@ head(D2)
 ## Richness
 
 
-```r
+``` r
 head(specnumber(BCI)) # species richness
 ```
 
@@ -1073,7 +1074,7 @@ head(specnumber(BCI)) # species richness
 ##  93  84  90  94 101  85
 ```
 
-```r
+``` r
 head(rowSums(BCI &gt; 0)) # simple
 ```
 
@@ -1085,7 +1086,7 @@ head(rowSums(BCI &gt; 0)) # simple
 ## Pielou's Evenness `\(J\)`
 
 
-```r
+``` r
 J &lt;- H / log(specnumber(BCI))
 head(J)
 ```
@@ -1114,7 +1115,7 @@ Corresponding Hill's numbers are
 # Diversity &amp;mdash; R&amp;eacute;nyi entropy &amp; Hill's numbers
 
 
-```r
+``` r
 R &lt;- renyi(BCI, scales = 2)
 head(R)
 ```
@@ -1124,7 +1125,7 @@ head(R)
 ## 3.674161 3.452678 3.341263 3.561778 3.436618 3.290256
 ```
 
-```r
+``` r
 N2 &lt;- renyi(BCI, scales = 2, hill = TRUE)
 head(N2) # inverse simpson
 ```
@@ -1139,7 +1140,7 @@ head(N2) # inverse simpson
 # Diversity &amp;mdash; R&amp;eacute;nyi entropy &amp; Hill's numbers
 
 
-```r
+``` r
 k &lt;- sample(nrow(BCI), 6)
 R &lt;- renyi(BCI[k,])
 plot(R)
@@ -1217,7 +1218,7 @@ Rarefaction gives the expected number of species rarefied from `\(N\)` to `\(n\)
 .row[
 .col-6[
 
-```r
+``` r
 rs &lt;- rowSums(BCI)
 quantile(rs)
 ```
@@ -1227,7 +1228,7 @@ quantile(rs)
 ## 340.0 409.0 428.0 443.5 601.0
 ```
 
-```r
+``` r
 Srar &lt;- rarefy(BCI, min(rs))
 head(Srar)
 ```
@@ -1237,7 +1238,7 @@ head(Srar)
 ## 84.33992 76.53165 79.11504 82.46571 86.90901 78.50953
 ```
 
-```r
+``` r
 rarecurve(BCI, sample = min(rs))
 ```
 ]
