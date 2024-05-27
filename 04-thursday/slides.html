@@ -4,7 +4,8 @@
     <title>Permutation tests</title>
     <meta charset="utf-8" />
     <meta name="author" content="Gavin L. Simpson" />
-    <meta name="date" content="2023-04-27" />
+    <meta name="date" content="2024-05-30" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="slides.css" type="text/css" />
@@ -20,7 +21,7 @@ class: inverse, middle, left, my-title-slide, title-slide
 ### Gavin L. Simpson
 ]
 .date[
-### April 27, 2023
+### May 30, 2024
 ]
 
 ---
@@ -84,7 +85,7 @@ Evaluate whether `\(F\)` is unusually large relative to the null (permutation) d
 .row[
 .col-6[
 
-```r
+``` r
 cca1 &lt;- cca(varespec ~ ., data = varechem)
 pstat &lt;- permustats(anova(cca1))
 summary(pstat)
@@ -94,7 +95,7 @@ summary(pstat)
 ```
 ## 
 ##       statistic    SES   mean lower median  upper Pr(perm)  
-## Model    1.4441 2.2865 1.0158       1.0011 1.3634    0.021 *
+## Model    1.4441 2.0883 1.0369       1.0163 1.3789     0.03 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -702,12 +703,15 @@ summary(eigenvals(m.pca))
 # Crayfish &amp;mdash; Unconstrained
 
 
-```r
+``` r
 layout(matrix(1:2, ncol = 2))
 biplot(m.pca, type = c("text", "points"), scaling = "species")
 set.seed(23)
 ev.pca &lt;- envfit(m.pca ~ Watershed, data = design, scaling = "species")
 plot(ev.pca, labels = levels(design$Watershed), add = FALSE)
+```
+
+``` r
 layout(1)
 ```
 .center[
@@ -977,6 +981,7 @@ ctrl &lt;- how(nperm = 499, within = Within(type = "free"),
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
+
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
