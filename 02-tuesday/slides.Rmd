@@ -1,7 +1,7 @@
 ---
 title: "Unconstrained ordination"
 author: "Gavin Simpson"
-date: "April 25, 2023"
+date: "May 28, 2024"
 output:
   xaringan::moon_reader:
     css: ['default', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css', 'slides.css']
@@ -1377,7 +1377,7 @@ ford <- fortify(ord, axes = 1:2)
 head(ford, 4)
 
 blue <- "#025196"
-filter(ford, Score == "sites") %>%
+filter(ford, score == "sites") %>%
     ggplot(aes(x = PC1, y = PC2)) +
     geom_hline(yintercept = 0, colour = blue) +
     geom_vline(xintercept = 0, colour = blue) +

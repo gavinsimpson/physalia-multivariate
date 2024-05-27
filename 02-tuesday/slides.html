@@ -4,7 +4,8 @@
     <title>Unconstrained ordination</title>
     <meta charset="utf-8" />
     <meta name="author" content="Gavin Simpson" />
-    <meta name="date" content="2023-04-25" />
+    <meta name="date" content="2024-05-28" />
+    <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
     <link rel="stylesheet" href="slides.css" type="text/css" />
@@ -20,7 +21,7 @@ class: inverse, middle, left, my-title-slide, title-slide
 ### Gavin Simpson
 ]
 .date[
-### April 25, 2023
+### May 28, 2024
 ]
 
 ---
@@ -163,7 +164,7 @@ Each of these subsequent axes is uncorrelated with previous axes &amp;mdash; the
 **vegan** is an add-on package
 
 
-```r
+``` r
 ## install.packages("vegan") # Only need if you've never installed before
 library("vegan")
 data(varespec)
@@ -177,7 +178,7 @@ data(varechem)
 # Vegetation in lichen pastures &amp;mdash; species
 
 
-```r
+``` r
 class(varespec)
 ```
 
@@ -185,7 +186,7 @@ class(varespec)
 ## [1] "data.frame"
 ```
 
-```r
+``` r
 dim(varespec)                               # number of samples, species
 ```
 
@@ -193,7 +194,7 @@ dim(varespec)                               # number of samples, species
 ## [1] 24 44
 ```
 
-```r
+``` r
 head(varespec[,1:6], n = 5)
 ```
 
@@ -224,7 +225,7 @@ This arrangement is back-to-front if you are used to OTU like data
 Also have associated soil physical and chemical measurements at the 24 sites
 
 
-```r
+``` r
 head(varechem)
 ```
 
@@ -260,7 +261,7 @@ PCA is fitted using `rda()`
 * To scale all variables to be &amp;mu; = 0, &amp;sigma;&lt;sup&gt;2&lt;/sup&gt; = 1: `scale = TRUE`
 
 
-```r
+``` r
 pca &lt;- rda(decostand(varespec, method = "hellinger"), scale = TRUE)
 pca
 ```
@@ -286,7 +287,7 @@ pca
 PCA of the covariance matrix &amp;mdash; default is `scale = FALSE`
 
 
-```r
+``` r
 rda(decostand(varespec, method = "hellinger"), scale = FALSE)
 ```
 
@@ -312,7 +313,7 @@ How **vegan** scales the eigenvalues is different to *Canoco*
 # Vegetation in lichen pastures &amp;mdash; PCA
 
 
-```r
+``` r
 biplot(pca, scaling = "symmetric")
 ```
 
@@ -331,7 +332,7 @@ biplot(pca, scaling = "symmetric")
 .col-6[
 
 
-```r
+``` r
 biplot(pca, scaling = "symmetric")
 ```
 
@@ -349,7 +350,7 @@ biplot(pca, scaling = "symmetric")
 Eigenvalues are the amount of variance (inertia) explained by each axis
 
 
-```r
+``` r
 head(eigenvals(pca), 5)
 ```
 
@@ -360,7 +361,7 @@ head(eigenvals(pca), 5)
 ]
 .col-6[
 
-```r
+``` r
 screeplot(pca, bstick = TRUE, type = "l",
           main = NULL)
 ```
@@ -376,7 +377,7 @@ screeplot(pca, bstick = TRUE, type = "l",
 The `summary()` method provides additional information
 
 
-```r
+``` r
 summary(eigenvals(pca))
 ```
 
@@ -453,7 +454,7 @@ So, not very realistic, but it is surprisingly robust at times to violation of t
 .col-5[
 
 
-```r
+``` r
 ca &lt;- cca(varespec)
 plot(ca)
 ```
@@ -489,7 +490,7 @@ class: inverse middle center huge-subsection
 - It is not a problem if you have all your data in a single file/object; just subset it into two data frames after reading it into R
 
 
-```r
+``` r
 spp &lt;- allMyData[, 1:20] ## columns 1-20 contain the species data
 env &lt;- allMyData[, 21:26] ## columns 21-26 contain the environmental data
 ```
@@ -507,7 +508,7 @@ For various reasons to fit a CA we use the `cca()` function
 Store the fitted CA in `ca1` and print it to view the results
 
 
-```r
+``` r
 ca1 &lt;- cca(varespec)
 ca1
 ```
@@ -573,7 +574,7 @@ For CA (`cca()`)  use `hill = TRUE` to get Hill's scaling scores (negative scali
 Don't rummage around in the objects returned by *vegan* functions &amp;mdash; unless you know what you're doing
 
 
-```r
+``` r
 head(scores(pca, choices = 1:3, display = "species", scaling = "species", correlation = TRUE))
 ```
 
@@ -603,7 +604,7 @@ head(scores(pca, choices = 1:3, display = "species", scaling = "species", correl
 .col-6[
 
 
-```r
+``` r
 plot(ca1, choices = c(1,3),
      scaling = "symmetric")
 ```
@@ -675,7 +676,7 @@ Distortion can be measured as
 Default dissimilarity in `vegdist()` is Bray-Curtis
 
 
-```r
+``` r
 pco1 &lt;- wcmdscale(vegdist(varespec), eig = TRUE)
 round(eigenvals(pco1), 3)
 ```
@@ -686,7 +687,7 @@ round(eigenvals(pco1), 3)
 ## [21] -0.048 -0.054 -0.074
 ```
 
-```r
+``` r
 pco2 &lt;- wcmdscale(vegdist(varespec), eig = TRUE, add = "lingoes")
 round(eigenvals(pco2), 3)
 ```
@@ -707,7 +708,7 @@ Can plot the PCoA using `plot()` and add *species scores*
 .row[
 .col-6[
 
-```r
+``` r
 pco &lt;- wcmdscale(vegdist(varespec), eig = TRUE)
 
 ## plot
@@ -774,7 +775,7 @@ Half-change units: samples separated by a distance of 1 correspond, on average, 
 **vegan** implements all these ideas via the `metaMDS()` wrapper
 
 
-```r
+``` r
 data(dune)
 set.seed(10)
 (sol &lt;- metaMDS(dune, trace = FALSE))
@@ -806,7 +807,7 @@ set.seed(10)
 If no convergent solutions, continue iterations from previous best solution
 
 
-```r
+``` r
 (sol &lt;- metaMDS(dune, previous.best = sol, trace = FALSE))
 ```
 
@@ -834,7 +835,7 @@ If no convergent solutions, continue iterations from previous best solution
 # NMDS in vegan
 
 
-```r
+``` r
 layout(matrix(1:2, ncol = 2))
 plot(sol, main = "Dune NMDS plot"); stressplot(sol, main = "Shepard plot")
 layout(1)
@@ -854,7 +855,7 @@ Fit NMDS solutions for a number of `k`
 .row[
 .col-6[
 
-```r
+``` r
 k_vec &lt;- 1:10
 stress &lt;- numeric(length(k_vec))
 dune_dij &lt;- metaMDSdist(dune, trace = FALSE)
@@ -869,7 +870,7 @@ for(i in seq_along(k_vec)) {
 Need to use the helper functions to do this right
 
 
-```r
+``` r
 plot(k_vec, stress, type = "b", ylab = "Stress",
      xlab = "Dimensions")
 ```
@@ -887,34 +888,34 @@ plot(k_vec, stress, type = "b", ylab = "Stress",
 A goodness of fit statistic `\(g_i\)` can be computed for the observations; defined such that `\(\sum_{i=1}^{n} g_i^2 = S^2\)`
 
 
-```r
+``` r
 (g &lt;- goodness(sol))
 ```
 
 ```
-##  [1] 0.0008413322 0.0014436954 0.0005931447 0.0010673136 0.0008359822
-##  [6] 0.0006836062 0.0010013178 0.0007222658 0.0007036269 0.0009243645
-## [11] 0.0003849299 0.0005012098 0.0008889085 0.0011565531 0.0013128102
-## [16] 0.0006928218 0.0008133972 0.0005597081 0.0008862855 0.0006112743
+##  [1] 0.0008487538 0.0014513346 0.0005971627 0.0010616996 0.0008339878
+##  [6] 0.0006953648 0.0010054591 0.0007267314 0.0007159582 0.0009232736
+## [11] 0.0003858679 0.0004959386 0.0008907895 0.0011693824 0.0013153473
+## [16] 0.0006883817 0.0008173042 0.0005619978 0.0008899897 0.0006130169
 ```
 
-```r
+``` r
 sum(g^2)
 ```
 
 ```
-## [1] 1.518778e-05
+## [1] 1.530527e-05
 ```
 
-```r
+``` r
 sol$stress^2
 ```
 
 ```
-## [1] 1.518778e-05
+## [1] 1.530527e-05
 ```
 
-```r
+``` r
 all.equal(sqrt(sum(g^2)), sol$stress)
 ```
 
@@ -965,7 +966,7 @@ For categorical `\(\boldsymbol{y}\)`, `envfit()` finds averages of scores for ea
 `envfit()` with formula
 
 
-```r
+``` r
 set.seed(42)
 ev &lt;- envfit(pca ~ ., data = varechem,
              choices = 1:2,
@@ -977,7 +978,7 @@ ev
 or data frames
 
 
-```r
+``` r
 envfit(pca, varechem,
        choices = 1:2, scaling = "symmetric",
        permutations = 1000)
@@ -1064,7 +1065,7 @@ Permutation test shuffles the `\(\boldsymbol{y}\)` to generate distribution of `
 .row[
 .col-6[
 
-```r
+``` r
 plot(ev, add = FALSE) # oops bug!
 ```
 ]
@@ -1081,7 +1082,7 @@ plot(ev, add = FALSE) # oops bug!
 .row[
 .col-6[
 
-```r
+``` r
 plot(pca, display = "sites", type = "n",
      scaling = "symmetric")
 points(pca, display = "sites",
@@ -1119,7 +1120,7 @@ Fitting a 10 basis function isotropic surface
 .col-6[
 
 
-```r
+``` r
 surf &lt;- ordisurf(pca ~ Ca,
                  data = varechem,
                  knots = 10,
@@ -1142,7 +1143,7 @@ surf &lt;- ordisurf(pca ~ Ca,
 # Smooth surfaces
 
 
-```r
+``` r
 summary(surf)
 ```
 
@@ -1193,7 +1194,7 @@ To produce better plots you need to know some base graphics skills *and* make us
 .col-6[
 
 
-```r
+``` r
 set.seed(10)
 ordipointlabel(pca,
                display = "sites",
@@ -1218,7 +1219,7 @@ Iteratively finds space to draw labels so they don't overplot
 .col-6[
 
 
-```r
+``` r
 plot(pca, display = "sites",
      scaling = "symmetric", type = "n")
 points(pca, display = "sites",
@@ -1247,7 +1248,7 @@ ordipointlabel(pca,
 .col-6[
 
 
-```r
+``` r
 disp &lt;- "species"
 scl &lt;- "symmetric"
 plot(pca, display = disp,
@@ -1278,7 +1279,7 @@ How successful `ordipointlabel()` is depends on how much you plot &amp; how big 
 .col-6[
 
 
-```r
+``` r
 disp &lt;- c("sites", "species")
 scl &lt;- "symmetric"
 plot(pca, display = disp,
@@ -1313,7 +1314,7 @@ With base graphics you are in control of *everything*
 .col-6[
 
 
-```r
+``` r
 data(dune, dune.env)
 col_vec &lt;- c("red", "blue", "orange", "grey")
 disp &lt;- "sites"
@@ -1347,7 +1348,7 @@ Convex hulls around groups of data
 .col-6[
 
 
-```r
+``` r
 disp &lt;- "sites"
 scl &lt;- "symmetric"
 
@@ -1379,7 +1380,7 @@ Draws ellipsoid hulls &amp; standard error &amp; deviation ellipses
 .col-6[
 
 
-```r
+``` r
 disp &lt;- "sites"
 scl &lt;- "symmetric"
 
@@ -1415,7 +1416,7 @@ The **ggvegan** package is in development
 .row[
 .col-6[
 
-```r
+``` r
 ## library('remotes')
 ## install_github("gavinsimpson/ggvegan")
 library('ggvegan')
@@ -1437,7 +1438,7 @@ autoplot(ord)
 The **ggvegan** package is in development
 
 
-```r
+``` r
 # Install src from github
 remotes::install_github("gavinsimpson/ggvegan")
 # or binary from R-universe:
@@ -1456,23 +1457,23 @@ install.packages('ggvegan')
 .row[
 .col-6[
 
-```r
+``` r
 ford &lt;- fortify(ord, axes = 1:2)
 ## not yet a tibble
 head(ford, 4)
 ```
 
 ```
-##     Score    Label         PC1         PC2
-## 1 species Achimill -0.22413552  0.05704791
-## 2 species Agrostol  0.41424457 -0.18006829
-## 3 species Airaprae -0.03506944  0.15464367
-## 4 species Alopgeni  0.13865500 -0.31844362
+##     score    label         PC1         PC2
+## 1 species Achimill  0.22413552 -0.05704791
+## 2 species Agrostol -0.41424457  0.18006829
+## 3 species Airaprae  0.03506944 -0.15464367
+## 4 species Alopgeni -0.13865500  0.31844362
 ```
 
-```r
+``` r
 blue &lt;- "#025196"
-filter(ford, Score == "sites") %&gt;%
+filter(ford, score == "sites") %&gt;%
     ggplot(aes(x = PC1, y = PC2)) +
     geom_hline(yintercept = 0, colour = blue) +
     geom_vline(xintercept = 0, colour = blue) +
