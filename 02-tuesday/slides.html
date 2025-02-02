@@ -4,7 +4,7 @@
     <title>Unconstrained ordination</title>
     <meta charset="utf-8" />
     <meta name="author" content="Gavin Simpson" />
-    <meta name="date" content="2024-05-28" />
+    <meta name="date" content="2025-02-11" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
@@ -21,7 +21,7 @@ class: inverse, middle, left, my-title-slide, title-slide
 ### Gavin Simpson
 ]
 .date[
-### May 28, 2024
+### February 11, 2025
 ]
 
 ---
@@ -132,6 +132,8 @@ Each of these subsequent axes is uncorrelated with previous axes &amp;mdash; the
 ---
 
 # Principal Components Analysis
+
+
 
 
 
@@ -255,24 +257,29 @@ head(varechem)
 
 # Vegetation in lichen pastures &amp;mdash; PCA
 
-PCA is fitted using `rda()`
+PCA is fitted using `pca()`
 
 * Provide a data frame of observations on one or more variables
 * To scale all variables to be &amp;mu; = 0, &amp;sigma;&lt;sup&gt;2&lt;/sup&gt; = 1: `scale = TRUE`
 
 
 ``` r
-pca &lt;- rda(decostand(varespec, method = "hellinger"), scale = TRUE)
-pca
+ord &lt;- pca(decostand(varespec, method = "hellinger"), scale = TRUE)
+ord
 ```
 
 ```
-## Call: rda(X = decostand(varespec, method = "hellinger"), scale = TRUE)
+## Call: pca(X = decostand(varespec, method = "hellinger"), scale = TRUE)
+## 
+## -- Model Summary --
 ## 
 ##               Inertia Rank
 ## Total              44     
 ## Unconstrained      44   23
-## Inertia is correlations 
+## 
+## Inertia is correlations
+## 
+## -- Eigenvalues --
 ## 
 ## Eigenvalues for unconstrained axes:
 ##   PC1   PC2   PC3   PC4   PC5   PC6   PC7   PC8 
@@ -288,16 +295,21 @@ PCA of the covariance matrix &amp;mdash; default is `scale = FALSE`
 
 
 ``` r
-rda(decostand(varespec, method = "hellinger"), scale = FALSE)
+pca(decostand(varespec, method = "hellinger"), scale = FALSE)
 ```
 
 ```
-## Call: rda(X = decostand(varespec, method = "hellinger"), scale = FALSE)
+## Call: pca(X = decostand(varespec, method = "hellinger"), scale = FALSE)
+## 
+## -- Model Summary --
 ## 
 ##               Inertia Rank
 ## Total          0.3647     
 ## Unconstrained  0.3647   23
-## Inertia is variance 
+## 
+## Inertia is variance
+## 
+## -- Eigenvalues --
 ## 
 ## Eigenvalues for unconstrained axes:
 ##     PC1     PC2     PC3     PC4     PC5     PC6     PC7     PC8 
@@ -314,7 +326,7 @@ How **vegan** scales the eigenvalues is different to *Canoco*
 
 
 ``` r
-biplot(pca, scaling = "symmetric")
+biplot(ord, scaling = "symmetric")
 ```
 
 &lt;img src="slides_files/figure-html/vare-pca-1c-1.svg" width="95%" /&gt;
@@ -333,7 +345,7 @@ biplot(pca, scaling = "symmetric")
 
 
 ``` r
-biplot(pca, scaling = "symmetric")
+biplot(ord, scaling = "symmetric")
 ```
 
 ![](slides_files/figure-html/vare-pca-2-1.svg)&lt;!-- --&gt;
@@ -351,7 +363,7 @@ Eigenvalues are the amount of variance (inertia) explained by each axis
 
 
 ``` r
-head(eigenvals(pca), 5)
+head(eigenvals(ord), 5)
 ```
 
 ```
@@ -362,7 +374,7 @@ head(eigenvals(pca), 5)
 .col-6[
 
 ``` r
-screeplot(pca, bstick = TRUE, type = "l",
+screeplot(ord, bstick = TRUE, type = "l",
           main = NULL)
 ```
 
@@ -378,7 +390,7 @@ The `summary()` method provides additional information
 
 
 ``` r
-summary(eigenvals(pca))
+summary(eigenvals(ord))
 ```
 
 ```
@@ -455,8 +467,8 @@ So, not very realistic, but it is surprisingly robust at times to violation of t
 
 
 ``` r
-ca &lt;- cca(varespec)
-plot(ca)
+ord_ca &lt;- ca(varespec)
+plot(ord_ca)
 ```
 
 ![](slides_files/figure-html/vare-ca-1-1.svg)&lt;!-- --&gt;
@@ -516,10 +528,15 @@ ca1
 ```
 ## Call: cca(X = varespec)
 ## 
+## -- Model Summary --
+## 
 ##               Inertia Rank
 ## Total           2.083     
 ## Unconstrained   2.083   23
-## Inertia is scaled Chi-square 
+## 
+## Inertia is scaled Chi-square
+## 
+## -- Eigenvalues --
 ## 
 ## Eigenvalues for unconstrained axes:
 ##    CA1    CA2    CA3    CA4    CA5    CA6    CA7    CA8 
@@ -546,10 +563,10 @@ How we scale scores is controlled via the `scaling` argument
 - `scaling = 1` &amp;mdash; Focus on sites, scale site scores by `\(\lambda_i\)`
 - `scaling = 2` &amp;mdash; Focus on species, scale species scores by `\(\lambda_i\)`
 - `scaling = 3` &amp;mdash; Symmetric scaling, scale both scores by `\(\sqrt{\lambda_i}\)`
-- `scaling = -1` &amp;mdash; As above, but for `rda()` get correlation scores
-- `scaling = -2` &amp;mdash; for `cca()` multiply results by `\(\sqrt{(1/(1-\lambda_i))}\)`
+- `scaling = -1` &amp;mdash; As above, but for `pca()` &amp; `rda()` get correlation scores
+- `scaling = -2` &amp;mdash; for `ca()` or `cca()` multiply results by `\(\sqrt{(1/(1-\lambda_i))}\)`
 - `scaling = -3` &amp;mdash; this is Hill's scaling
-- `scaling &lt; 0` &amp;mdash; For `rda()` divide species scores by species' `\(\sigma\)`
+- `scaling &lt; 0` &amp;mdash; For `pca()`, `rda()` divide species scores by species' `\(\sigma\)`
 - `scaling = 0` &amp;mdash; raw scores
 
 ---
@@ -563,9 +580,9 @@ Use the text names instead:
 * `scaling = "species"` means `scaling = 3`
 * `scaling = "symmetric"` means `scaling = 3`
 
-For PCA (`rda()`) use `correlation = TRUE` to get the correlation scores (negative scaling)
+For PCA (`pca()`) use `correlation = TRUE` to get the correlation scores (negative scaling)
 
-For CA (`cca()`)  use `hill = TRUE` to get Hill's scaling scores (negative scaling)
+For CA (`ca()`)  use `hill = TRUE` to get Hill's scaling scores (negative scaling)
 
 ---
 
@@ -575,7 +592,7 @@ Don't rummage around in the objects returned by *vegan* functions &amp;mdash; un
 
 
 ``` r
-head(scores(pca, choices = 1:3, display = "species", scaling = "species", correlation = TRUE))
+head(scores(ord, choices = 1:3, display = "species", scaling = "species", correlation = TRUE))
 ```
 
 ```
@@ -605,7 +622,7 @@ head(scores(pca, choices = 1:3, display = "species", scaling = "species", correl
 
 
 ``` r
-plot(ca1, choices = c(1,3),
+plot(ord_ca, choices = c(1,3),
      scaling = "symmetric")
 ```
 
@@ -677,24 +694,29 @@ Default dissimilarity in `vegdist()` is Bray-Curtis
 
 
 ``` r
-pco1 &lt;- wcmdscale(vegdist(varespec), eig = TRUE)
+pco1 &lt;- pco(vegdist(varespec), eig = TRUE)
 round(eigenvals(pco1), 3)
 ```
 
 ```
-##  [1]  1.755  1.133  0.443  0.370  0.245  0.196  0.175  0.128  0.097  0.076
-## [11]  0.064  0.058  0.039  0.017  0.005  0.000 -0.006 -0.013 -0.025 -0.038
-## [21] -0.048 -0.054 -0.074
+##   MDS1   MDS2   MDS3   MDS4   MDS5   MDS6   MDS7   MDS8   MDS9  MDS10  MDS11 
+##  1.755  1.133  0.443  0.370  0.245  0.196  0.175  0.128  0.097  0.076  0.064 
+##  MDS12  MDS13  MDS14  MDS15  iMDS1  iMDS2  iMDS3  iMDS4  iMDS5  iMDS6  iMDS7 
+##  0.058  0.039  0.017  0.005  0.000 -0.006 -0.013 -0.025 -0.038 -0.048 -0.054 
+##  iMDS8 
+## -0.074
 ```
 
 ``` r
-pco2 &lt;- wcmdscale(vegdist(varespec), eig = TRUE, add = "lingoes")
+pco2 &lt;- pco(vegdist(varespec), eig = TRUE, add = "lingoes")
 round(eigenvals(pco2), 3)
 ```
 
 ```
-##  [1] 1.829 1.208 0.517 0.444 0.319 0.270 0.249 0.203 0.171 0.150 0.138 0.132
-## [13] 0.114 0.091 0.079 0.074 0.068 0.061 0.049 0.037 0.026 0.020
+##  MDS1  MDS2  MDS3  MDS4  MDS5  MDS6  MDS7  MDS8  MDS9 MDS10 MDS11 MDS12 MDS13 
+## 1.829 1.208 0.517 0.444 0.319 0.270 0.249 0.203 0.171 0.150 0.138 0.132 0.114 
+## MDS14 MDS15 MDS16 MDS17 MDS18 MDS19 MDS20 MDS21 MDS22 
+## 0.091 0.079 0.074 0.068 0.061 0.049 0.037 0.026 0.020
 ```
 
 *Note there's one fewer dimensions after correction*
@@ -709,13 +731,13 @@ Can plot the PCoA using `plot()` and add *species scores*
 .col-6[
 
 ``` r
-pco &lt;- wcmdscale(vegdist(varespec), eig = TRUE)
+pco3 &lt;- pco(vegdist(varespec), eig = TRUE)
 
 ## plot
-plot(pco)
+plot(pco3)
 
 ## get PCoA scores
-scrs &lt;- scores(pco, choices = 1:2)
+scrs &lt;- scores(pco3, choices = 1:2)
 
 ## take WA of PCoA scores,
 ## weight by abundance
@@ -893,10 +915,10 @@ A goodness of fit statistic `\(g_i\)` can be computed for the observations; defi
 ```
 
 ```
-##  [1] 0.0008487538 0.0014513346 0.0005971627 0.0010616996 0.0008339878
-##  [6] 0.0006953648 0.0010054591 0.0007267314 0.0007159582 0.0009232736
-## [11] 0.0003858679 0.0004959386 0.0008907895 0.0011693824 0.0013153473
-## [16] 0.0006883817 0.0008173042 0.0005619978 0.0008899897 0.0006130169
+##  [1] 0.0008559796 0.0014569292 0.0006071222 0.0010337685 0.0008109554
+##  [6] 0.0006932209 0.0009813765 0.0007284320 0.0007316829 0.0009052744
+## [11] 0.0004102242 0.0004846332 0.0008688444 0.0011563520 0.0013120348
+## [16] 0.0007051008 0.0008226499 0.0005374015 0.0008933316 0.0006139805
 ```
 
 ``` r
@@ -904,7 +926,7 @@ sum(g^2)
 ```
 
 ```
-## [1] 1.530527e-05
+## [1] 1.513378e-05
 ```
 
 ``` r
@@ -912,7 +934,7 @@ sol$stress^2
 ```
 
 ```
-## [1] 1.530527e-05
+## [1] 1.513378e-05
 ```
 
 ``` r
@@ -968,7 +990,7 @@ For categorical `\(\boldsymbol{y}\)`, `envfit()` finds averages of scores for ea
 
 ``` r
 set.seed(42)
-ev &lt;- envfit(pca ~ ., data = varechem,
+ev &lt;- envfit(ord ~ ., data = varechem,
              choices = 1:2,
              scaling = "symmetric",
              permutations = 1000)
@@ -979,7 +1001,7 @@ or data frames
 
 
 ``` r
-envfit(pca, varechem,
+envfit(ord, varechem,
        choices = 1:2, scaling = "symmetric",
        permutations = 1000)
 ```
@@ -1083,9 +1105,9 @@ plot(ev, add = FALSE) # oops bug!
 .col-6[
 
 ``` r
-plot(pca, display = "sites", type = "n",
+plot(ord, display = "sites", type = "n",
      scaling = "symmetric")
-points(pca, display = "sites",
+points(ord, display = "sites",
        scaling = "symmetric")
 plot(ev, add = TRUE)
 ```
@@ -1121,7 +1143,7 @@ Fitting a 10 basis function isotropic surface
 
 
 ``` r
-surf &lt;- ordisurf(pca ~ Ca,
+surf &lt;- ordisurf(ord ~ Ca,
                  data = varechem,
                  knots = 10,
                  isotropic = TRUE,
@@ -1196,7 +1218,7 @@ To produce better plots you need to know some base graphics skills *and* make us
 
 ``` r
 set.seed(10)
-ordipointlabel(pca,
+ordipointlabel(ord,
                display = "sites",
                scaling = "symmetric")
 ```
@@ -1220,13 +1242,13 @@ Iteratively finds space to draw labels so they don't overplot
 
 
 ``` r
-plot(pca, display = "sites",
+plot(ord, display = "sites",
      scaling = "symmetric", type = "n")
-points(pca, display = "sites",
+points(ord, display = "sites",
        scaling = "symmetric", pch = 19,
        col = "#025196")
 set.seed(10)
-ordipointlabel(pca,
+ordipointlabel(ord,
                display = "sites",
                scaling = "symmetric",
                add = TRUE)
@@ -1251,13 +1273,13 @@ ordipointlabel(pca,
 ``` r
 disp &lt;- "species"
 scl &lt;- "symmetric"
-plot(pca, display = disp,
+plot(ord, display = disp,
      scaling = scl, type = "n")
-points(pca, display = disp,
+points(ord, display = disp,
        scaling = scl, pch = 19,
        col = "#025196")
 set.seed(10)
-ordipointlabel(pca,
+ordipointlabel(ord,
                display = disp,
                scaling = scl,
                add = TRUE)
@@ -1282,16 +1304,16 @@ How successful `ordipointlabel()` is depends on how much you plot &amp; how big 
 ``` r
 disp &lt;- c("sites", "species")
 scl &lt;- "symmetric"
-plot(pca, display = disp,
+plot(ord, display = disp,
      scaling = scl, type = "n")
-points(pca, display = disp[1],
+points(ord, display = disp[1],
        scaling = scl, pch = 19,
        col = "#025196")
-points(pca, display = disp[2],
+points(ord, display = disp[2],
        scaling = scl, pch = 19,
        col = "#fdb338")
 set.seed(10)
-ordipointlabel(pca,
+ordipointlabel(ord,
                display = disp,
                scaling = scl,
                add = TRUE,
@@ -1320,12 +1342,13 @@ col_vec &lt;- c("red", "blue", "orange", "grey")
 disp &lt;- "sites"
 scl &lt;- "symmetric"
 
-ord &lt;- rda(decostand(dune, method="hellinger"))
+d_ord &lt;- decostand(dune, method = "hellinger") |&gt;
+  pca()
 
-plot(ord, type = "n", scaling = scl,
+plot(d_ord, type = "n", scaling = scl,
      display = disp)
 cols &lt;- with(dune.env, col_vec[Management])
-points(ord, display = disp, scaling = scl,
+points(d_ord, display = disp, scaling = scl,
        pch = 19, col = cols, cex = 2)
 lvl &lt;- with(dune.env, levels(Management))
 legend("topright", legend = lvl,
@@ -1352,15 +1375,15 @@ Convex hulls around groups of data
 disp &lt;- "sites"
 scl &lt;- "symmetric"
 
-plot(ord, type = "n", scaling = scl,
+plot(d_ord, type = "n", scaling = scl,
      display = disp)
-ordihull(ord, groups = dune.env$Management,
+ordihull(d_ord, groups = dune.env$Management,
          col = col_vec,
          scaling = scl, lwd = 2)
-ordispider(ord, groups = dune.env$Management,
+ordispider(d_ord, groups = dune.env$Management,
            col = col_vec,
            scaling = scl, label = TRUE)
-points(ord, display = disp, scaling = scl,
+points(d_ord, display = disp, scaling = scl,
        pch = 21, col = "red", bg = "yellow")
 ```
 
@@ -1384,20 +1407,20 @@ Draws ellipsoid hulls &amp; standard error &amp; deviation ellipses
 disp &lt;- "sites"
 scl &lt;- "symmetric"
 
-plot(ord, type = "n", scaling = scl,
+plot(d_ord, type = "n", scaling = scl,
      display = disp)
 ## ellipsoid hull
-ordiellipse(ord, groups = dune.env$Management,
+ordiellipse(d_ord, groups = dune.env$Management,
             kind = "ehull", col = col_vec,
             scaling = scl, lwd = 2)
 ## standard error of centroid  ellipse
-ordiellipse(ord, groups = dune.env$Management,
+ordiellipse(d_ord, groups = dune.env$Management,
             draw = "polygon", col = col_vec,
             scaling = scl, lwd = 2)
-ordispider(ord, groups = dune.env$Management,
+ordispider(d_ord, groups = dune.env$Management,
            col = col_vec,
            scaling = scl, label = TRUE)
-points(ord, display = disp, scaling = scl,
+points(d_ord, display = disp, scaling = scl,
        pch = 21, col = "red", bg = "yellow")
 ```
 
@@ -1422,7 +1445,7 @@ The **ggvegan** package is in development
 library('ggvegan')
 library('ggplot2')
 
-autoplot(ord)
+autoplot(d_ord)
 ```
 ]
 
@@ -1464,11 +1487,11 @@ head(ford, 4)
 ```
 
 ```
-##     score    label         PC1         PC2
-## 1 species Achimill  0.22413552 -0.05704791
-## 2 species Agrostol -0.41424457  0.18006829
-## 3 species Airaprae  0.03506944 -0.15464367
-## 4 species Alopgeni -0.13865500  0.31844362
+##     score    label        PC1         PC2
+## 1 species Callvulg -0.2093899  0.09675599
+## 2 species Empenigr  0.4144765  0.14879137
+## 3 species Rhodtome  0.6697053 -0.16259319
+## 4 species Vaccmyrt  0.6187605 -0.18139933
 ```
 
 ``` r

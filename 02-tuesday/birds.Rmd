@@ -1,3 +1,8 @@
+---
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 # Birds Data
 
 This data set is on bird assemblages in a montane forest in the Velka Fatra Mountains (Slovak Republic).

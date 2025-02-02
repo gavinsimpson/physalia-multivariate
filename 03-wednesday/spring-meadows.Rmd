@@ -3,6 +3,8 @@ title: Spring meadows example
 author: Gavin Simpson
 date: May 29, 2024
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup-options, echo = FALSE, results = "hide", message = FALSE}
@@ -61,14 +63,14 @@ To standardise the data we could use the `scale()` function, but it is instructi
 z_score <- function(x) {
     (x - mean(x)) / sd(x)
 }
-env <- env %>%
+env <- env |>
     mutate(across(-sample_id, .fns = z_score))
 ```
 
 The final step is to remove the `sample_id` column:
 
 ```{r}
-env <- env %>%
+env <- env |>
     tibble::column_to_rownames("sample_id")
 ```
 

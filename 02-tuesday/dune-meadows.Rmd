@@ -1,3 +1,9 @@
+---
+title: Dutch Dune Meadows
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
 # The classic Dune Meadow data
 
 `dune` is a data frame of observations of 30 species at 20 sites. The species names are abbreviated to 4+4 letters (see `?make.cepnames`). The following names are changed from the original source (Jongman et al. 1987): *Leontodon autumnalis* to *Scorzoneroides*, and *Potentilla palustris* to *Comarum*.
@@ -17,6 +23,7 @@
 The data are provided with vegan, so we can load them using
 
 ```{r}
+library("vegan")
 data(dune, dune.env, package = "vegan")
 ```
 
@@ -25,7 +32,7 @@ In this exercise we'll generate an ordination of the dune meadow data and then p
 We will begin by fitting a PCA on the Hellinger transformed species data
 
 ```{r}
-ord <- rda(decostand(dune, method = "hellinger"))
+ord <- pca(decostand(dune, method = "hellinger"))
 ord
 ```
 
@@ -56,23 +63,29 @@ This results in `sum(take)` species to be labelled.
 
 We proceed by building up the plot from the basic building blocks
 
-```{r}
+```{r initial-plot, eval=FALSE}
 scl <- "symmetric"
 plot(ord, type = "n", scaling = scl, display = c("species", "sites"))
 ```
 
 next we'll add points for all the species, and sites, unlabelled
 
-```{r}
+```{r add-points, eval=FALSE}
 points(ord, scaling = scl, display = "species", cex = 0.8, col = "red")
 points(ord, scaling = scl, display = "sites", cex = 0.8, col = "black")
 ```
 
 Next we will add the species labels and the sites/samples
 
-```{r}
+```{r, add-point-labels, eval = FALSE}
 ordipointlabel(ord, display = "sites", scaling = scl, add = TRUE)
 ordipointlabel(ord, display = "species", scaling = scl, add = TRUE, select = take)
+```
+
+```{r show-complete-plot, echo = FALSE}
+<<initial-plot>>
+<<add-points>>
+<<add-point-labels>>
 ```
 
 What do you notice about the positions on the plot of the species that are not as well fitted by the two displayed axes?
@@ -143,12 +156,14 @@ Now we can produce a version of the plot we made earlier, but now using `ggplot(
 ggplot(ford, aes(x = PC1, y = PC2)) +
   geom_hline(yintercept = 0, colour = "steelblue", alpha = 0.5) +
   geom_vline(xintercept = 0, colour = "steelblue", alpha = 0.5) +
-  geom_point(data = dplyr::filter(ford, Score == "sites")) +
-  geom_text_repel(data = dplyr::filter(ford, Score == "sites"),
-                  mapping = aes(label = Label)) +
-  geom_point(data = dplyr::filter(ford, Score == "species"), colour = "red", pch = 3, size = 2) +
-  geom_text_repel(data = dplyr::filter(ford, Score == "species" & take),
-                  mapping = aes(label = Label)) +
+  geom_point(data = dplyr::filter(ford, score == "sites")) +
+  geom_text_repel(data = dplyr::filter(ford, score == "sites"),
+                  mapping = aes(label = label)) +
+  geom_point(data = dplyr::filter(ford, score == "species"), colour = "red", pch = 3, size = 2) +
+  geom_text_repel(data = 
+                    dplyr::filter(ford, score == "species") |>
+                    dplyr::filter(take),
+                  mapping = aes(label = label)) +
   coord_fixed()
 ```
 
@@ -164,7 +179,7 @@ spp_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric", display = "species")
 We need to link the site scores with the environmental data. If the order of the data is the same in the ordination (species) and the environmental data, as it is here, we can just use `bind_cols()` to link the two data objects.
 
 ```{r}
-site_scrs <- site_scrs %>%
+site_scrs <- site_scrs |>
   bind_cols(dune.env)
 ```
 
@@ -175,12 +190,12 @@ ggplot(ford, aes(x = PC1, y = PC2)) +
   geom_hline(yintercept = 0, colour = "steelblue", alpha = 0.5) +
   geom_vline(xintercept = 0, colour = "steelblue", alpha = 0.5) +
   geom_point(data = site_scrs,
-             mapping = aes(colour = Management)) +
+             mapping = aes(colour = Management)) + # +<<
   geom_text_repel(data = site_scrs,
-                  mapping = aes(label = Label)) +
+                  mapping = aes(label = label)) +
   geom_point(data = spp_scrs, colour = "red", pch = 3, size = 1) +
   geom_text_repel(data = filter(spp_scrs, take),
-                  mapping = aes(label = Label)) +
+                  mapping = aes(label = label)) +
   coord_fixed() +
   theme(legend.position = "bottom") # move the legend
 ```
@@ -190,8 +205,9 @@ If the data are in different orders, we will need the sample labels *within* bot
 ```{r}
 # note we scramble the `dune.env` data to illustrate the point
 site_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric",
-                     display = "sites") %>%
-  left_join(tibble::rownames_to_column(dune.env[sample(nrow(dune.env)), ]), by = c("Label" = "rowname"))
+                     display = "sites") |>
+  left_join(tibble::rownames_to_column(dune.env[sample(nrow(dune.env)), ]),
+            by = c("label" = "rowname"))
 ```
 
 and then we could proceed as above with the plot.

@@ -3,6 +3,8 @@ title: Vltava forest data
 author: Gavin Simpson
 date: April 24, 2023
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 # Vltava river valley forest vegetation
 
@@ -12,7 +14,7 @@ Vegetation plots, located at even distances along transects following the steep 
 library("vegan")
 
 v_url <- "https://bit.ly/vltava-spp"
-vltava <- read.delim (url(v_url), row.names = 1)
+vltava <- read.delim(url(v_url), row.names = 1)
 head(vltava)
 ```
 
@@ -20,13 +22,15 @@ We fit 4 clustering methods:
 
 ```{r transform}
 vltava_sqrt <- sqrt(vltava)
-dis <- vegdist(decostand(vltava, method = "hellinger"),
-    method = "euclidean")
+# dis <- vegdist(decostand(vltava, method = "hellinger"),
+#     method = "euclidean")
+dis <- vegdist(vltava, method = "hellinger")
+dis_sqrt <- vegdist(vltava_sqrt, method = "euclidean")
 
-cl_single   <- hclust (dis, method = 'single')
-cl_complete <- hclust (dis, 'complete')
-cl_average  <- hclust (dis, "average")
-cl_ward     <- hclust (dis, "ward.D2")
+cl_single   <- hclust(dis, method = 'single')
+cl_complete <- hclust(dis, 'complete')
+cl_average  <- hclust(dis, "average")
+cl_ward     <- hclust(dis, "ward.D2")
 ```
 
 Plot the dendrograms
@@ -47,9 +51,11 @@ set.seed(42)
 vltava_hell <- decostand(vltava, method = "hellinger")
 cas_km <- cascadeKM(vltava_hell, 1, 10)
 
+set.seed(5698)
+cas_km_2 <- cascadeKM(vltava_hell, 1, 10)
 
 set.seed(42)
-cas_km <- cascadeKM(sqrt(vltava), 1, 10)
+cas_km_sqrt <- cascadeKM(sqrt(vltava), 1, 10)
 ```
 
 We can plot this

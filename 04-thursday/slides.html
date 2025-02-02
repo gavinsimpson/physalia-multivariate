@@ -95,7 +95,7 @@ summary(pstat)
 ```
 ## 
 ##       statistic    SES   mean lower median  upper Pr(perm)  
-## Model    1.4441 2.0883 1.0369       1.0163 1.3789     0.03 *
+## Model    1.4441 2.0362 1.0449       1.0357 1.3928    0.033 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -709,9 +709,6 @@ biplot(m.pca, type = c("text", "points"), scaling = "species")
 set.seed(23)
 ev.pca &lt;- envfit(m.pca ~ Watershed, data = design, scaling = "species")
 plot(ev.pca, labels = levels(design$Watershed), add = FALSE)
-```
-
-``` r
 layout(1)
 ```
 .center[

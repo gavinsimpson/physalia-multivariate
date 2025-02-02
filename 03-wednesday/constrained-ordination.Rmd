@@ -3,6 +3,8 @@ title: Constrained ordination
 author: Gavin Simpson
 date: May 29, 2024
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 ```{r setup-options, echo = FALSE, results = "hide", message = FALSE}
@@ -17,7 +19,7 @@ library(mgcv)
 ```
 
 # Canonical Correspondence Analysis
-In this part of the practical you will use the `cca()` function from package **vegan** to perform a canonical correspondence analysis (CCA) of the diatom species data and the enviromental data. Begin by loading **vegan** and reading in the data sets:
+In this part of the practical you will use the `cca()` function from package **vegan** to perform a canonical correspondence analysis (CCA) of the diatom species data and the environmental data. Begin by loading **vegan** and reading in the data sets:
 
 ```{r echo=TRUE}
 library("vegan")
@@ -45,7 +47,7 @@ ponds.cca
 
 The formula means the diatom data matrix `diat` is modelled by everything in the environmental data matrix `env`. We use the data argument to inform R of where to look for the explanatory variables. The `.` is an **R** shortcut that saves you from having to type out the full formula.
 
-**What are the values of $\lambda_1$ and $\lambda_1$, the eigenvalues for constrained axes one and two?**
+**What are the values of $\lambda_1$ and $\lambda_2$, the eigenvalues for constrained axes one and two?**
 
 **What is the total variance (inertia) in the diatom data?**
 
@@ -56,7 +58,6 @@ The formula means the diatom data matrix `diat` is modelled by everything in the
 The `summary()` method provides further, detailed results of the CCA:
 
 ```{r echo=TRUE,eval=FALSE}
-# output not show, it's long!
 summary(ponds.cca)
 ```
 

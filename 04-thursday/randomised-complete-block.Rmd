@@ -27,7 +27,7 @@ The experiment tested the effects on seedling recruitment to a range of treatmen
  * control
  * removal of litter
  * removal of the dominant species *Nardus stricta*
- * removal of litter and moss (mos couldn't be removed without also removing litter)
+ * removal of litter and moss (moss couldn't be removed without also removing litter)
 
 The treatments were replicated replicated in four, randomised complete blocks.
 
@@ -52,6 +52,18 @@ env <- read_xlsx(tf, sheet = "seedldesign")%>%
   tibble::column_to_rownames("sample_id")
 ```
 
+If the above code block doesn't work for you (you get an error), then make sure you are in the `04-thursday` directory (folder) and have set that directory was the working directory for your R session, and then run
+
+```{r, eval = FALSE}
+spp <- read_xlsx("data/seedlings.xlsx", sheet = "seedlspe", skip = 1) %>%
+  rename("sample_id" = "...1") %>%
+  tibble::column_to_rownames("sample_id")
+
+env <- read_xlsx("data/seedlings.xlsx", sheet = "seedldesign")%>%
+  rename("sample_id" = "...1") %>%
+  tibble::column_to_rownames("sample_id")
+```
+
 The `block` variable is currently coded as an integer and needs 
 converting to a factor if we are to use it correctly in the analysis
 
@@ -68,7 +80,7 @@ decorana(spp)
 motivating the use of redundancy analysis (RDA). Additionally, we may 
 be interested in how the raw abundance of seedlings change following 
 experimental manipulation, so we may wish to focus on the proportional 
-differences between treatments. The first case is handled naturaly by 
+differences between treatments. The first case is handled naturally by 
 RDA. The second case will require some form of standardisation by 
 samples, say by sample totals.
 
@@ -208,7 +220,7 @@ p2axis <- anova(mod1, permutations = h, parallel = 3, by = "axis")
 p2axis
 ```
 
-## Chages in relative seedling composition
+## Changes in relative seedling composition
 
 As mentioned earlier, interest is also, perhaps predominantly, in whether any of the treatments have different species composition. To test this hypothesis we standardise by the sample (row) norm using `decostand()`. Alternatively we could have used `method = "total"` to work with proportional abundances. We then repeat the earlier steps, this time using only model-based permutations owing to their greater power.
 
@@ -217,7 +229,7 @@ spp.norm <- decostand(spp, method = "normalize", MARGIN = 1)
 
 mod2 <- rda(spp.norm ~ treatment + Condition(block), data = env)
 mod2
-eigenvals(mod2) / mod2$tot.chi
+summary(eigenvals(mod2))
 
 set.seed(76)
 anova(mod2, permutations = h, parallel = 3)

@@ -1,8 +1,10 @@
 ---
 title: Permutation tests answers
 author: Gavin Simpson
-date: November 24, 2022
+date: May 30, 2024
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Abstract
@@ -168,7 +170,7 @@ m4
 anova(m4, permutations = split_h)
 
 m4 <- rda(fungi_all ~ Age + Treatment + Treatment:Age + 
-            Condition(SoilType + Treatment:SoilType),
+            Condition(Stand + SoilType + Treatment:SoilType),
           data = design_all)
 
 

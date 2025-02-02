@@ -1,7 +1,8 @@
 ---
-title: "Dissimilarity, cluster analysis, diversity"
+title: "Multivariate data"
+subtitle: "Dissimilarity, clustering, diversity"
 author: "Gavin Simpson"
-date: "May 27, 2024"
+date: "February 10, 2024"
 output:
   xaringan::moon_reader:
     css: ['default', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css', 'slides.css']
@@ -393,13 +394,13 @@ knitr::kable(as.data.frame(as.matrix(dij)))
 
 * Can transform the variables (e.g. species) or the samples to improve the gradient separation of the dissimilarity coefficient.
 * No transformation of variables or samples leads to a situation of quantity domination &mdash; big values dominate $d_{ij}$.
-* Normalise samples &mdash;gives all samples equal weight.
+* Normalise samples &mdash; gives all samples equal weight.
 * Normalise variables;
     * gives all variables equal weight,
     * inflates the influence of rare species.
 * Double (_Wisconsin_) transformation; normalise variables then samples.
-* Noy-Meir _et al_. (1975) _J. Ecology_ **63**; 779--800.
-* Faith _et al_. (1987) _Vegetatio_ **69**; 57--68.
+* Noy-Meir _et al_. (1975) _J. Ecology_ **63**; 779--800
+* Faith _et al_. (1987) _Vegetatio_ **69**; 57--68
 
 ---
 
@@ -1456,3 +1457,5 @@ L. Kaufman & P.J. Rousseeuw, 1990, Finding groups in data. An introduction to cl
 P. Legendre & L. Legendre, 1998, Numerical ecology. Elsevier (Third English Edition)
 
 M. H. H. Stevens, 2009, A Primer of Ecology with R. Springer
+
+D. Borcard, *et al*, 2018. Numerical Ecology with R. Springer

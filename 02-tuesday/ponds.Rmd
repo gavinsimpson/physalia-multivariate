@@ -3,11 +3,13 @@ title: "Shallow Ponds"
 author: Gavin Simpson
 date: April 25, 2023
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Abstract
 
-This practical will use the PONDS dataset to demonstrate methods of indirect gradient analysis (PCA, CA) of species and environmental data. The file pondsenv.csv contains the species data (48 taxa) and pondsenv.csv contains the transformed environmental variables (15 variables) for 30 sites. You will use **vegan** to analyse these data using a variety of indirect ordination graphical display techniques.
+This practical will use the PONDS dataset to demonstrate methods of indirect gradient analysis (PCA, CA) of species and environmental data. The file pondsdiat.csv contains the species data (48 taxa) and pondsenv.csv contains the transformed environmental variables (15 variables) for 30 sites. You will use **vegan** to analyse these data using a variety of indirect ordination graphical display techniques.
 
 ```{r echo=FALSE,results="hide"}
 library(mgcv)
@@ -48,11 +50,8 @@ summary(eigenvals(pondspca))
 For a longer print out of the results of the PCA and to display the species and site scores a `summary()` method is available. This truncates the output to the first six axes but this can be changed using the `axes` argument.
 
 ```{r echo=TRUE,eval=FALSE}
-# output not show as it is large!
-summary(pondspca, scaling = "species")
+summary(pondspca)
 ```
-
-The use of the `scaling` argument is redundant in this case as the default is `scaling = "species"` but it is included here to illustrate a common argument that can be specified by the user.
 
 ## The meaningful components
 

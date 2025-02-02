@@ -6,7 +6,7 @@ https://www.physalia-courses.org/
 
 ### Gavin Simpson
 
-#### 27 November &ndash; 1st December, 2023
+#### 10th &ndash; 13th February, 2025
 
 ## Overview
 
@@ -20,7 +20,7 @@ participants a practical introduction to some of the most useful functions
 available within vegan. We will focus on the use of ordination methods and on 
 the use of restricted permutations to test a range of experimental designs.
 
-We will focus in particular on when and how to use multivariate methods
+In particular, we discuss when and how to use multivariate methods
 including unconstrained and constrained ordination (CCA, RDA, Constrained PCoA),
 as well as between-group tests such as PERMANOVA. We will cover concepts such
 as design- and model-based permutations and the exchangeability of samples in
@@ -37,10 +37,12 @@ constrained ordination model, to diagnostics, plotting, etc.
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/slides.pdf)
     * [Ponds example](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/constrained-ordination.html)
     * [Spring meadows example](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/spring-meadows.html)
+    * [PERMANOVA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/permanova.html)
 * [Thursday](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.pdf)
     * [Randomised Block](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/randomised-complete-block.html)
     * [Permutation test examples](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/permutation-tests-solutions.html)
+<!--
 * [Friday](https://gavinsimpson.github.io/physalia-multivariate/05-friday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/05-friday/slides.pdf)
     * [PERMANOVA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/permanova.html)
@@ -49,6 +51,7 @@ constrained ordination model, to diagnostics, plotting, etc.
     * [Co-CA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/cocorrespondence-analysis.html)
     * [Variation partitioning](https://gavinsimpson.github.io/physalia-multivariate/05-friday/variation-partitioning.html)
     * [Linear discriminant analysis](https://gavinsimpson.github.io/physalia-multivariate/05-friday/linear-discriminants.html)
+-->
 
 ## Target audience and assumed background
 
@@ -77,8 +80,7 @@ practical exercises throughout the course.
 
 ### R
 
-Please be sure to have at least version 4.2 &mdash; *and preferably version
-4.3* &mdash; of R installed. Note that R and RStudio are two different things:
+Please insure you have at version 4.4.x of R installed. Note that R and RStudio are two different things:
 it is not sufficient to just update RStudio, you also need to update R by
 installing new versions as they are released.
 
@@ -118,7 +120,7 @@ update.packages(ask = FALSE, checkBuilt = TRUE, Ncpus = cores - 1)
 
 # packages to install
 pkgs <- c("vegan", "tidyverse", "cocorresp", "permute", "here", "tibble",
-          "readxl", "janitor", "stringr", "ggrepel")
+          "readxl", "janitor", "stringr", "ggrepel", "e1071")
 
 # install those packages
 install.packages(pkgs, Ncpus = cores - 1)

@@ -1,7 +1,7 @@
 ---
 title: "Unconstrained ordination"
 author: "Gavin Simpson"
-date: "May 28, 2024"
+date: "February 11, 2025"
 output:
   xaringan::moon_reader:
     css: ['default', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css', 'slides.css']
@@ -137,7 +137,8 @@ Each of these subsequent axes is uncorrelated with previous axes &mdash; they ar
 
 # Principal Components Analysis
 
-```{r pca-animation, cache = TRUE}
+```{r pca-animation-setup, cache = TRUE}
+## For some reason this is not running via Make
 ## Create Data
 set.seed(1)
 sig <- matrix(c(1, 0.8, 0.8, 1), byrow = TRUE, ncol = 2)
@@ -235,7 +236,10 @@ anim_width <- 1000
 anim_height <- anim_width
 anim_dev <- 'png'
 anim_res <- 200
+```
 
+```{r pca-animation, eval = FALSE}
+# For some reason this won't run when called from make
 pca_anim <- animate(
     ani_plt + transition_states(angle, transition_length = 1, state_length = 0.1),
     nframes = 200, height = anim_height, width = anim_width, res = anim_res, dev = anim_dev)
@@ -269,7 +273,7 @@ proj_pc2 <- with(df, project_pcs(x1_c, x2_c, axis = 2, sol = pc))
 rot_pc1  <- with(df, rotate_pcs(proj_pc1, sol = pc))
 rot_pc2  <- with(df, rotate_pcs(proj_pc2, sol = pc))
 
-## compute prinicpal component in both coord systems
+## compute principal component in both coord systems
 pcs <- add_column(as_tibble(rbind(proj_pc1, proj_pc2)),
                   pc = rep(1:2, each = 2), .before = 1)
 pcs_rot <- as_tibble(rbind(rot_pc1, rot_pc2)) %>%
@@ -406,14 +410,14 @@ head(varechem)
 
 # Vegetation in lichen pastures &mdash; PCA
 
-PCA is fitted using `rda()`
+PCA is fitted using `pca()`
 
 * Provide a data frame of observations on one or more variables
 * To scale all variables to be &mu; = 0, &sigma;<sup>2</sup> = 1: `scale = TRUE`
 
 ```{r vare-pca-1, echo = TRUE}
-pca <- rda(decostand(varespec, method = "hellinger"), scale = TRUE)
-pca
+ord <- pca(decostand(varespec, method = "hellinger"), scale = TRUE)
+ord
 ```
 
 ---
@@ -423,7 +427,7 @@ pca
 PCA of the covariance matrix &mdash; default is `scale = FALSE`
 
 ```{r vare-pca-1b, echo = TRUE}
-rda(decostand(varespec, method = "hellinger"), scale = FALSE)
+pca(decostand(varespec, method = "hellinger"), scale = FALSE)
 ```
 
 How **vegan** scales the eigenvalues is different to *Canoco*
@@ -434,7 +438,7 @@ How **vegan** scales the eigenvalues is different to *Canoco*
 # Vegetation in lichen pastures &mdash; PCA
 
 ```{r vare-pca-1c, echo = TRUE, out.width = "95%", dev.args = list(pointsize = 14)}
-biplot(pca, scaling = "symmetric")
+biplot(ord, scaling = "symmetric")
 ```
 
 ---
@@ -450,7 +454,7 @@ biplot(pca, scaling = "symmetric")
 .col-6[
 
 ```{r vare-pca-2, echo=TRUE, fig.width=6, fig.height=6}
-biplot(pca, scaling = "symmetric")
+biplot(ord, scaling = "symmetric")
 ```
 ]
 ]
@@ -465,12 +469,12 @@ biplot(pca, scaling = "symmetric")
 Eigenvalues are the amount of variance (inertia) explained by each axis
 
 ```{r vare-pca-3, echo = TRUE}
-head(eigenvals(pca), 5)
+head(eigenvals(ord), 5)
 ```
 ]
 .col-6[
 ```{r vare-pca-4, echo = TRUE, dev.args = list(pointsize = 14), fig.height = 6, fig.width = 6}
-screeplot(pca, bstick = TRUE, type = "l",
+screeplot(ord, bstick = TRUE, type = "l",
           main = NULL)
 ```
 ]
@@ -483,7 +487,7 @@ screeplot(pca, bstick = TRUE, type = "l",
 The `summary()` method provides additional information
 
 ```{r vare-pca-5, echo = TRUE}
-summary(eigenvals(pca))
+summary(eigenvals(ord))
 ```
 
 ---
@@ -555,8 +559,8 @@ So, not very realistic, but it is surprisingly robust at times to violation of t
 .col-5[
 
 ```{r vare-ca-1, echo=TRUE, fig.width=6, fig.height=6, dev.args = list(pointsize = 14)}
-ca <- cca(varespec)
-plot(ca)
+ord_ca <- ca(varespec)
+plot(ord_ca)
 ```
 
 ]
@@ -572,9 +576,9 @@ plot(ca)
 
 ```{r vare-ca-2, echo = FALSE, fig.show = "hold", fig.height = 11/2.75, fig.width = 11, dev.args = list(pointsize = 14)}
 layout(matrix(1:3, ncol = 3))
-plot(ca, scaling = "species", main = "scaling = \"species\"")
-plot(ca, scaling = "sites", main = "scaling = \"sites\"")
-plot(ca, scaling = "symmetric", main = "scaling = \"symmetric\"")
+plot(ord_ca, scaling = "species", main = "scaling = \"species\"")
+plot(ord_ca, scaling = "sites", main = "scaling = \"sites\"")
+plot(ord_ca, scaling = "symmetric", main = "scaling = \"symmetric\"")
 layout(1)
 ```
 
@@ -634,10 +638,10 @@ How we scale scores is controlled via the `scaling` argument
 - `scaling = 1` &mdash; Focus on sites, scale site scores by $\lambda_i$
 - `scaling = 2` &mdash; Focus on species, scale species scores by $\lambda_i$
 - `scaling = 3` &mdash; Symmetric scaling, scale both scores by $\sqrt{\lambda_i}$
-- `scaling = -1` &mdash; As above, but for `rda()` get correlation scores
-- `scaling = -2` &mdash; for `cca()` multiply results by $\sqrt{(1/(1-\lambda_i))}$
+- `scaling = -1` &mdash; As above, but for `pca()` & `rda()` get correlation scores
+- `scaling = -2` &mdash; for `ca()` or `cca()` multiply results by $\sqrt{(1/(1-\lambda_i))}$
 - `scaling = -3` &mdash; this is Hill's scaling
-- `scaling < 0` &mdash; For `rda()` divide species scores by species' $\sigma$
+- `scaling < 0` &mdash; For `pca()`, `rda()` divide species scores by species' $\sigma$
 - `scaling = 0` &mdash; raw scores
 
 ---
@@ -651,9 +655,9 @@ Use the text names instead:
 * `scaling = "species"` means `scaling = 3`
 * `scaling = "symmetric"` means `scaling = 3`
 
-For PCA (`rda()`) use `correlation = TRUE` to get the correlation scores (negative scaling)
+For PCA (`pca()`) use `correlation = TRUE` to get the correlation scores (negative scaling)
 
-For CA (`cca()`)  use `hill = TRUE` to get Hill's scaling scores (negative scaling)
+For CA (`ca()`)  use `hill = TRUE` to get Hill's scaling scores (negative scaling)
 
 ---
 
@@ -662,7 +666,7 @@ For CA (`cca()`)  use `hill = TRUE` to get Hill's scaling scores (negative scali
 Don't rummage around in the objects returned by *vegan* functions &mdash; unless you know what you're doing
 
 ```{r scores-eg, echo = TRUE}
-head(scores(pca, choices = 1:3, display = "species", scaling = "species", correlation = TRUE))
+head(scores(ord, choices = 1:3, display = "species", scaling = "species", correlation = TRUE))
 ```
 
 ---
@@ -681,7 +685,7 @@ head(scores(pca, choices = 1:3, display = "species", scaling = "species", correl
 .col-6[
 
 ```{r ca_biplot, fig.width=8, fig.height=8, echo = TRUE, dev.args = list(pointsize = 14)}
-plot(ca1, choices = c(1,3),
+plot(ord_ca, choices = c(1,3),
      scaling = "symmetric")
 ```
 
@@ -750,9 +754,9 @@ $$\frac{\sum \left | \lambda^{-} \right |}{\sum \left | \lambda \right |}$$
 Default dissimilarity in `vegdist()` is Bray-Curtis
 
 ```{r pco-example, echo = TRUE}
-pco1 <- wcmdscale(vegdist(varespec), eig = TRUE)
+pco1 <- pco(vegdist(varespec), eig = TRUE)
 round(eigenvals(pco1), 3)
-pco2 <- wcmdscale(vegdist(varespec), eig = TRUE, add = "lingoes")
+pco2 <- pco(vegdist(varespec), eig = TRUE, add = "lingoes")
 round(eigenvals(pco2), 3)
 ```
 
@@ -767,13 +771,13 @@ Can plot the PCoA using `plot()` and add *species scores*
 .row[
 .col-6[
 ```{r pco-example-2, echo = TRUE, fig.show = "hide"}
-pco <- wcmdscale(vegdist(varespec), eig = TRUE)
+pco3 <- pco(vegdist(varespec), eig = TRUE)
 
 ## plot
-plot(pco)
+plot(pco3)
 
 ## get PCoA scores
-scrs <- scores(pco, choices = 1:2)
+scrs <- scores(pco3, choices = 1:2)
 
 ## take WA of PCoA scores,
 ## weight by abundance
@@ -956,7 +960,7 @@ For categorical $\boldsymbol{y}$, `envfit()` finds averages of scores for each l
 
 ```{r envfit-1, echo = TRUE, results = "hide"}
 set.seed(42)
-ev <- envfit(pca ~ ., data = varechem,
+ev <- envfit(ord ~ ., data = varechem,
              choices = 1:2,
              scaling = "symmetric",
              permutations = 1000)
@@ -966,7 +970,7 @@ ev
 or data frames
 
 ```{r envfit-2, echo = TRUE, results = "hide"}
-envfit(pca, varechem,
+envfit(ord, varechem,
        choices = 1:2, scaling = "symmetric",
        permutations = 1000)
 ```
@@ -1023,9 +1027,9 @@ plot(ev, add = FALSE) # oops bug!
 .row[
 .col-6[
 ```{r plot-envfit-2, echo = TRUE, fig.show = "hide"}
-plot(pca, display = "sites", type = "n",
+plot(ord, display = "sites", type = "n",
      scaling = "symmetric")
-points(pca, display = "sites",
+points(ord, display = "sites",
        scaling = "symmetric")
 plot(ev, add = TRUE)
 ```
@@ -1061,7 +1065,7 @@ Fitting a 10 basis function isotropic surface
 .col-6[
 
 ```{r ordisurf-1, echo = TRUE, fig.show = "hide"}
-surf <- ordisurf(pca ~ Ca,
+surf <- ordisurf(ord ~ Ca,
                  data = varechem,
                  knots = 10,
                  isotropic = TRUE,
@@ -1111,7 +1115,7 @@ To produce better plots you need to know some base graphics skills *and* make us
 
 ```{r ordipointlabel-1, echo = TRUE, fig.show = "hide"}
 set.seed(10)
-ordipointlabel(pca,
+ordipointlabel(ord,
                display = "sites",
                scaling = "symmetric")
 ```
@@ -1135,13 +1139,13 @@ Iteratively finds space to draw labels so they don't overplot
 .col-6[
 
 ```{r ordipointlabel-2, echo = TRUE, fig.show = "hide"}
-plot(pca, display = "sites",
+plot(ord, display = "sites",
      scaling = "symmetric", type = "n")
-points(pca, display = "sites",
+points(ord, display = "sites",
        scaling = "symmetric", pch = 19,
        col = "#025196")
 set.seed(10)
-ordipointlabel(pca,
+ordipointlabel(ord,
                display = "sites",
                scaling = "symmetric",
                add = TRUE)
@@ -1166,13 +1170,13 @@ ordipointlabel(pca,
 ```{r ordipointlabel-3, echo = TRUE, fig.show = "hide"}
 disp <- "species"
 scl <- "symmetric"
-plot(pca, display = disp,
+plot(ord, display = disp,
      scaling = scl, type = "n")
-points(pca, display = disp,
+points(ord, display = disp,
        scaling = scl, pch = 19,
        col = "#025196")
 set.seed(10)
-ordipointlabel(pca,
+ordipointlabel(ord,
                display = disp,
                scaling = scl,
                add = TRUE)
@@ -1197,16 +1201,16 @@ How successful `ordipointlabel()` is depends on how much you plot & how big you 
 ```{r ordipointlabel-4, echo = TRUE, fig.show = "hide"}
 disp <- c("sites", "species")
 scl <- "symmetric"
-plot(pca, display = disp,
+plot(ord, display = disp,
      scaling = scl, type = "n")
-points(pca, display = disp[1],
+points(ord, display = disp[1],
        scaling = scl, pch = 19,
        col = "#025196")
-points(pca, display = disp[2],
+points(ord, display = disp[2],
        scaling = scl, pch = 19,
        col = "#fdb338")
 set.seed(10)
-ordipointlabel(pca,
+ordipointlabel(ord,
                display = disp,
                scaling = scl,
                add = TRUE,
@@ -1235,12 +1239,13 @@ col_vec <- c("red", "blue", "orange", "grey")
 disp <- "sites"
 scl <- "symmetric"
 
-ord <- rda(decostand(dune, method="hellinger"))
+d_ord <- decostand(dune, method = "hellinger") |>
+  pca()
 
-plot(ord, type = "n", scaling = scl,
+plot(d_ord, type = "n", scaling = scl,
      display = disp)
 cols <- with(dune.env, col_vec[Management])
-points(ord, display = disp, scaling = scl,
+points(d_ord, display = disp, scaling = scl,
        pch = 19, col = cols, cex = 2)
 lvl <- with(dune.env, levels(Management))
 legend("topright", legend = lvl,
@@ -1267,15 +1272,15 @@ Convex hulls around groups of data
 disp <- "sites"
 scl <- "symmetric"
 
-plot(ord, type = "n", scaling = scl,
+plot(d_ord, type = "n", scaling = scl,
      display = disp)
-ordihull(ord, groups = dune.env$Management,
+ordihull(d_ord, groups = dune.env$Management,
          col = col_vec,
          scaling = scl, lwd = 2)
-ordispider(ord, groups = dune.env$Management,
+ordispider(d_ord, groups = dune.env$Management,
            col = col_vec,
            scaling = scl, label = TRUE)
-points(ord, display = disp, scaling = scl,
+points(d_ord, display = disp, scaling = scl,
        pch = 21, col = "red", bg = "yellow")
 ```
 
@@ -1299,20 +1304,20 @@ Draws ellipsoid hulls & standard error & deviation ellipses
 disp <- "sites"
 scl <- "symmetric"
 
-plot(ord, type = "n", scaling = scl,
+plot(d_ord, type = "n", scaling = scl,
      display = disp)
 ## ellipsoid hull
-ordiellipse(ord, groups = dune.env$Management,
+ordiellipse(d_ord, groups = dune.env$Management,
             kind = "ehull", col = col_vec,
             scaling = scl, lwd = 2)
 ## standard error of centroid  ellipse
-ordiellipse(ord, groups = dune.env$Management,
+ordiellipse(d_ord, groups = dune.env$Management,
             draw = "polygon", col = col_vec,
             scaling = scl, lwd = 2)
-ordispider(ord, groups = dune.env$Management,
+ordispider(d_ord, groups = dune.env$Management,
            col = col_vec,
            scaling = scl, label = TRUE)
-points(ord, display = disp, scaling = scl,
+points(d_ord, display = disp, scaling = scl,
        pch = 21, col = "red", bg = "yellow")
 ```
 
@@ -1337,7 +1342,7 @@ The **ggvegan** package is in development
 library('ggvegan')
 library('ggplot2')
 
-autoplot(ord)
+autoplot(d_ord)
 ```
 ]
 

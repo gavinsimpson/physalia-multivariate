@@ -3,6 +3,8 @@ title: Cluster analysis
 author: Gavin Simpson
 date: September 19, 2020
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Abstract
@@ -39,6 +41,9 @@ matrices using a variety of distance (or dissimilarity)
 coefficients. First, read in the **ponds** data set:
 
 ```{r}
+library("vegan")
+library("cluster")
+
 ponds_url <- "https://bit.ly/pondsfull"
 ponds <- read.csv(url(ponds_url))
 names(ponds)
@@ -78,7 +83,7 @@ now proceed to perform a nearest neighbour clustering of the
 `pondsenv` data,
 
 ```{r}
-env.ed <- dist(pondsenv)
+env.ed <- vegdist(pondsenv, method = "euclidean")
 pond.slink <- hclust(env.ed, method = "single")
 pond.slink
 plot(pond.slink, hang = -0.01, main = "Ponds Hydrochemistry Data",
@@ -87,7 +92,7 @@ rect.hclust(pond.slink, k = 4, border = "red")
 cor(coph.slink <- cophenetic(pond.slink), env.ed)
 ```
 
-In the first line, `dist()` is used to
+In the first line, `vegdist()` is used to
 create a Euclidean distance matrix and store it in
 `env.ed` for use later in the practical when
 different clustering techniques are compared.
@@ -184,7 +189,7 @@ abline(a = 0, b = 1)
 ```
 
 The final method applied, weighted group average clustering, is
-not implemented in tbase R.
+not implemented in base R.
 Instead, the `agnes()` function from the
 `cluster` package is used. The
 `as.hclust()` function is used to convert the output from
@@ -222,7 +227,7 @@ the main argument and print the results nicely in matrix format;
 
 ```{r}
 # install.packages("e1071")
-require(e1071)
+library("e1071")
 mem.slink <- cutree(pond.slink, k = 4)
 mem.clink <- cutree(pond.clink, k = 4)
 mem.avg <- cutree(pond.avg, k = 4)
