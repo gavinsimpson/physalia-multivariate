@@ -3,7 +3,6 @@ all: slides purl ponds meadows
 slides: slides.Rmd slides.css
 	Rscript -e 'library("rmarkdown"); render("slides.Rmd")'
 
-
 purl: slides.Rmd
 	Rscript -e "knitr::purl(\"slides.Rmd\")"
 
