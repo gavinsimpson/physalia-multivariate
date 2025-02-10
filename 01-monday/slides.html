@@ -97,6 +97,15 @@ Relative abundance expresses the abundance of each species as its proportion out
 
 &lt;img src="./resources/data-box-cropped.png" width="50%" style="display: block; margin: auto;" /&gt;
 
+???
+
+Cattell (1952) notes that the ecological data matrix can be studied from two main view points
+
+1. the relationships among the samples (objects)
+2. the relationships among the variables (species, descriptors)
+
+but other viewpoints are possible
+
 ---
 
 # Q and R mode
@@ -372,9 +381,19 @@ Chi-square distances:
 * Normalise variables;
     * gives all variables equal weight,
     * inflates the influence of rare species.
-* Double (_Wisconsin_) transformation; normalise variables then samples.
+* Double (_Wisconsin_) transformation; standardize variables then samples.
 * Noy-Meir _et al_. (1975) _J. Ecology_ **63**; 779--800
 * Faith _et al_. (1987) _Vegetatio_ **69**; 57--68
+
+???
+
+Sample normalization - In this transformation we divide the values of each row (i.e. the values of each vegetation observation) by the length of the row vector (i.e. its norm) (see Legendre &amp; Gallagher 2001). This transformation is related to the Chord and Hellinger distances. Like the sample total standardization, the sample normalization also fixes the maximum possible distance between samples.
+
+Species maximum standardization - In this transformation, we divide the values of each column (i.e. the values of each species) by its maximum. The species maximum standardization has the effect of making the maximum value of all species equal to one. Since the minimum value of most species is zero, this transformation has the effect of making the scale of abundance relative for each species. In general, the species maximum standardization reduces the weight of dominant species and increases the weight of less abundant species (van der Maarel, 1979). This transformation makes the abundance values for taxa in a sample dependent on the other samples in the data set.
+
+Sample total standardization - In this transformation we divide the values of each row (i.e. the values of each vegetation observation) by its maximum. The sample total standardization has the effect of eliminating differences in total abundance from the data set. One possible benefit is that it eliminates possible observer bias in estimating abundance. Since the sample total standardization fixes the total abundance in samples, it also fixes the maximum possible geometric distance between samples.
+
+Wisconsin double standardization - In this transformation, the abundance values are first standardized by species maximum standardization, and then by sample total standardization, and by convention multiplied by 100. Bray and Curtis (1957) employed a double standardization before ordination. In their study, tree species were measured on different scales than were shrubs and herbs (density and basal area for trees, frequency for herbs and shrubs), so that a species maximum standardization achieved a common scale. Their rationalization for the subsequent sample total standardization was that not all samples had the same number of measurements, and that the stand total standardizations achieved a more uniform basis for comparison.
 
 ---
 

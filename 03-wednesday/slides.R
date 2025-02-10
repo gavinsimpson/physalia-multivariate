@@ -257,3 +257,85 @@ plot(m4)
 m5 <- ordiR2step(lwr, scope = formula(m3), trace = FALSE)
 m5$anova
 
+
+## ----permanova-idea-plot, echo = FALSE----------------------------------------
+data(varespec)
+
+## Bray-Curtis distances between samples
+dis <- vegdist(varespec)
+
+## First 16 sites grazed, remaining 8 sites ungrazed
+groups <- factor(c(rep(1,16), rep(2,8)), labels = c("grazed","ungrazed"))
+
+## Calculate multivariate dispersions
+mod <- betadisper(dis, groups)
+plot(mod)
+
+
+## ----adonis2-by-terms---------------------------------------------------------
+data(dune, dune.env)
+adonis2(dune ~ Management * A1, data = dune.env, by = "terms")
+
+
+## ----adonis2-by-terms-flipped-------------------------------------------------
+data(dune, dune.env)
+adonis2(dune ~ A1 * Management, data = dune.env, by = "terms")
+
+
+## ----adonis2-by-margin--------------------------------------------------------
+data(dune, dune.env)
+adonis2(dune ~ Management * A1, data = dune.env, by = "margin")
+
+
+## ----adonis2-margin-2---------------------------------------------------------
+adonis2(dune ~ Management + A1, data = dune.env, by = "margin")
+
+
+## ----permanova-idea-plot, echo = FALSE----------------------------------------
+data(varespec)
+
+## Bray-Curtis distances between samples
+dis <- vegdist(varespec)
+
+## First 16 sites grazed, remaining 8 sites ungrazed
+groups <- factor(c(rep(1,16), rep(2,8)), labels = c("grazed","ungrazed"))
+
+## Calculate multivariate dispersions
+mod <- betadisper(dis, groups)
+plot(mod)
+
+
+## ----permdisp-----------------------------------------------------------------
+data(varespec)
+dis <- vegdist(varespec) # Bray-Curtis distances
+## First 16 sites grazed, remaining 8 sites ungrazed
+groups <- factor(c(rep(1,16), rep(2,8)),
+                 labels = c("grazed","ungrazed"))
+
+mod <- betadisper(dis, groups)
+mod
+
+
+## ----permdisp-plot, fig.height = 6, fig.width = 6-----------------------------
+boxplot(mod)
+
+
+## ----permdisp-anova-----------------------------------------------------------
+set.seed(25)
+permutest(mod)
+
+
+## ----permdisp-plot-it, fig.width = 6, fig.height = 6--------------------------
+plot(mod)
+
+
+## ----permdisp-anova-2---------------------------------------------------------
+set.seed(4)
+permutest(mod, pairwise = TRUE)
+
+
+## ----adonis2-by-margin-as-db-rda----------------------------------------------
+data(dune, dune.env)
+dune_dbrda <- dbrda(dune ~ Management * A1, data = dune.env,
+    distance = "bray")
+

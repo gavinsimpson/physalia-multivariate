@@ -4,7 +4,7 @@
     <title>Constrained ordination</title>
     <meta charset="utf-8" />
     <meta name="author" content="Gavin L. Simpson" />
-    <meta name="date" content="2024-05-29" />
+    <meta name="date" content="2025-02-12" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
@@ -21,7 +21,7 @@ class: inverse, middle, left, my-title-slide, title-slide
 ### Gavin L. Simpson
 ]
 .date[
-### May 29, 2024
+### February 12, 2025
 ]
 
 ---
@@ -1289,6 +1289,432 @@ m5$anova
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ```
+
+---
+class: inverse middle center big-subsection
+
+# PERMANOVA
+
+---
+
+# MANOVA
+
+MANOVA is the multivariate form of ANOVA
+
+* Multivariate response data
+* Categorical predictor variables
+
+Decompose variation in the responses into
+
+1. variation within groups
+2. variation between groups
+
+Test to see if two is unusually large relative to H&lt;sub&gt;0&lt;/sub&gt;
+
+---
+
+# PERMANOVA
+
+Doing that test requires lots of assumptions that rarely hold for ecological data
+
+PERMANOVA: Permutational multivariate analysis of variance
+
+Avoids most of these issues through the use of permutation tests
+
+Directly decomposes a dissimilarity matrix into
+
+1. variation within groups
+2. variation between groups
+
+---
+
+# PERMANOVA *sensu stricto*
+
+*vegan* has four different ways to do essentially do this kind of analysis
+
+1. `adonis()` &amp;mdash; implements Anderson (2001)
+2. `adonis2()` &amp;mdash; implements McArdle &amp; Anderson (2001)
+3. `dbrda()` &amp;mdash; implementation based on McArdle &amp; Anderson (2001)
+4. `capscale()` &amp;mdash; implements Legendre &amp; Anderson (1999)
+
+Be careful with `adonis()` as it allows only sequential tests
+
+A difference between the functions is how they treat negative eigenvalues
+
+---
+
+# The PERMANOVA idea
+
+.center[
+![](slides_files/figure-html/permanova-idea-plot-1.svg)&lt;!-- --&gt;
+]
+
+---
+
+# PERMANOA &amp;mdash; `adonis2()`
+
+
+``` r
+data(dune, dune.env)
+adonis2(dune ~ Management * A1, data = dune.env, by = "terms")
+```
+
+```
+## Permutation test for adonis under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 999
+## 
+## adonis2(formula = dune ~ Management * A1, data = dune.env, by = "terms")
+##               Df SumOfSqs      R2      F Pr(&gt;F)   
+## Management     3   1.4686 0.34161 3.2629  0.003 **
+## A1             1   0.4409 0.10256 2.9387  0.021 * 
+## Management:A1  3   0.5892 0.13705 1.3090  0.243   
+## Residual      12   1.8004 0.41878                 
+## Total         19   4.2990 1.00000                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+
+# PERMANOA &amp;mdash; `adonis2()`
+
+
+``` r
+data(dune, dune.env)
+adonis2(dune ~ A1 * Management, data = dune.env, by = "terms")
+```
+
+```
+## Permutation test for adonis under reduced model
+## Terms added sequentially (first to last)
+## Permutation: free
+## Number of permutations: 999
+## 
+## adonis2(formula = dune ~ A1 * Management, data = dune.env, by = "terms")
+##               Df SumOfSqs      R2      F Pr(&gt;F)    
+## A1             1   0.7230 0.16817 4.8187  0.001 ***
+## Management     3   1.1865 0.27600 2.6362  0.008 ** 
+## A1:Management  3   0.5892 0.13705 1.3090  0.200    
+## Residual      12   1.8004 0.41878                  
+## Total         19   4.2990 1.00000                  
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+
+# PERMANOA &amp;mdash; `adonis2()`
+
+
+``` r
+data(dune, dune.env)
+adonis2(dune ~ Management * A1, data = dune.env, by = "margin")
+```
+
+```
+## Permutation test for adonis under reduced model
+## Marginal effects of terms
+## Permutation: free
+## Number of permutations: 999
+## 
+## adonis2(formula = dune ~ Management * A1, data = dune.env, by = "margin")
+##               Df SumOfSqs      R2     F Pr(&gt;F)
+## Management:A1  3   0.5892 0.13705 1.309  0.214
+## Residual      12   1.8004 0.41878             
+## Total         19   4.2990 1.00000
+```
+
+--
+
+The interaction is the only term that isn't *marginal* to other terms; not significant
+
+---
+
+# PERMANOA &amp;mdash; `adonis2()`
+
+
+``` r
+adonis2(dune ~ Management + A1, data = dune.env, by = "margin")
+```
+
+```
+## Permutation test for adonis under reduced model
+## Marginal effects of terms
+## Permutation: free
+## Number of permutations: 999
+## 
+## adonis2(formula = dune ~ Management + A1, data = dune.env, by = "margin")
+##            Df SumOfSqs      R2      F Pr(&gt;F)   
+## Management  3   1.1865 0.27600 2.4828  0.003 **
+## A1          1   0.4409 0.10256 2.7676  0.016 * 
+## Residual   15   2.3895 0.55583                 
+## Total      19   4.2990 1.00000                 
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+
+---
+
+# The dispersion problem
+
+Anderson (2001) noted that PERMANOVA could confound *location* &amp; *dispersion* effects
+
+If one or more groups are more variable &amp;mdash; dispersed around the centroid &amp;mdash; than the others, this can result in a false detection of a difference of means &amp;mdash; a *location* effect
+
+Same problem affects *t* tests, ANOVA
+
+Warton et al (2012)
+Anderson &amp; Walsh (2013)
+Anderson *et al* (2017)
+
+---
+
+# Dispersion
+
+.center[
+![](slides_files/figure-html/permanova-idea-plot-1.svg)&lt;!-- --&gt;
+]
+
+---
+
+# Test for dispersion effects
+
+Marti Anderson (2006) developed a test for multivariate dispersions &amp;mdash; PERMDISP2
+
+1. Calculate how far each observation is from its group median (or centroid)
+2. Take the absolute values of these distances-to-medians
+3. Do an ANOVA on the absolute distances with the *groups* as covariates
+4. Test the H&lt;sub&gt;0&lt;/sub&gt; of equal absolute distances to median among groups using a permutation test
+
+In *vegan* this is `betadisper()`
+
+---
+
+# Test for dispersion effects
+
+.row[
+.col-6[
+.not-so-small[
+
+``` r
+data(varespec)
+dis &lt;- vegdist(varespec) # Bray-Curtis distances
+## First 16 sites grazed, remaining 8 sites ungrazed
+groups &lt;- factor(c(rep(1,16), rep(2,8)),
+                 labels = c("grazed","ungrazed"))
+
+mod &lt;- betadisper(dis, groups)
+mod
+```
+
+```
+## 
+## 	Homogeneity of multivariate dispersions
+## 
+## Call: betadisper(d = dis, group = groups)
+## 
+## No. of Positive Eigenvalues: 15
+## No. of Negative Eigenvalues: 8
+## 
+## Average distance to median:
+##   grazed ungrazed 
+##   0.3926   0.2706 
+## 
+## Eigenvalues for PCoA axes:
+## (Showing 8 of 23 eigenvalues)
+##  PCoA1  PCoA2  PCoA3  PCoA4  PCoA5  PCoA6  PCoA7  PCoA8 
+## 1.7552 1.1334 0.4429 0.3698 0.2454 0.1961 0.1751 0.1284
+```
+]
+]
+.col-6[
+
+``` r
+boxplot(mod)
+```
+
+![](slides_files/figure-html/permdisp-plot-1.svg)&lt;!-- --&gt;
+]
+]
+
+---
+
+# Test for dispersions
+
+.row[
+
+.col-6[
+.smaller[
+
+``` r
+set.seed(25)
+permutest(mod)
+```
+
+```
+## 
+## Permutation test for homogeneity of multivariate dispersions
+## Permutation: free
+## Number of permutations: 999
+## 
+## Response: Distances
+##           Df  Sum Sq  Mean Sq      F N.Perm Pr(&gt;F)  
+## Groups     1 0.07931 0.079306 4.6156    999  0.045 *
+## Residuals 22 0.37801 0.017182                       
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+```
+]
+]
+
+.col-6[
+
+``` r
+plot(mod)
+```
+
+![](slides_files/figure-html/permdisp-plot-it-1.svg)&lt;!-- --&gt;
+
+]
+]
+
+---
+
+# Test for dispersions
+
+
+``` r
+set.seed(4)
+permutest(mod, pairwise = TRUE)
+```
+
+```
+## 
+## Permutation test for homogeneity of multivariate dispersions
+## Permutation: free
+## Number of permutations: 999
+## 
+## Response: Distances
+##           Df  Sum Sq  Mean Sq      F N.Perm Pr(&gt;F)  
+## Groups     1 0.07931 0.079306 4.6156    999  0.036 *
+## Residuals 22 0.37801 0.017182                       
+## ---
+## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+## 
+## Pairwise comparisons:
+## (Observed p-value below diagonal, permuted p-value above diagonal)
+##           grazed ungrazed
+## grazed              0.043
+## ungrazed 0.04295
+```
+
+---
+
+# Test for locations with non-equal dispersion?
+
+Marti Anderson &amp; colleagues (2017) have proposed a solution that is related to the Berens-Fisher problem
+
+This is in Primer but not yet in *vegan*
+
+&lt;https://github.com/vegandevs/vegan/issues/344&gt;
+
+---
+class: inverse middle center big-subsection
+
+# Distance-based RDA
+
+---
+
+# Distance-based RDA
+
+Multiple models that all do something similar
+
+1. `adonis()` (deprecated)
+2. `adonis2()`
+3. `capscale()`
+4. `dbrda()`
+
+They all do essentially the same thing, but they do it differently &amp; have slightly different behaviour
+
+---
+
+# Distance-based RDA
+
+Distance-based RDA (db-RDA) is a constrained form of principal coordinates analysis (PCO)
+
+It is similar to RDA but allows for non-Euclidean dissimilarity indices
+
+In *vegan*, db-RDA is implemented in `dbrda()`
+
+---
+
+# Constrained analysis of principal coordinates
+
+`capscale()` is *another* constrained form of PCO due to Legendre &amp; Anderson (1999)
+
+It is *very* similar to `dbrda()`
+
+---
+
+# Constrained analysis of principal coordinates
+
+`capscale()` works by
+
+1. convert the response data into dissimilarities
+2. apply PCO on the dissimilarities, take the PCO sample (site) scores as *new* response data
+3. fit `rda()` to the *new* response data and predictor variables as constraints
+
+Essentially, we embed the dissimilarities in a Euclidean space using PCO, and then we use RDA on this highly transformed response data
+
+---
+
+# Distance-based RDA
+
+db-RDA foregoes step 2., and directly decomposes the dissimilarities into components explained by each term in the model
+
+Negative eigenvalues resulting from non-metric dissimilarity coefficients are handled via
+
+1. square-root transform of the dissimilarities, or
+2. adding a constant to the dissimilarities using methods `"lingoes"` (default, preferred) or `"cailliez"`
+
+db-RDA is based on the ideas in McArdle &amp; Anderson (2001)
+
+--
+
+Err&amp;hellip; isn't that what `adonis2()` was developed to do?
+
+--
+
+*Yes*, but&amp;hellip;
+
+---
+
+# Distance-based RDA
+
+`adonis2()` was a ground up redevelopment of the `adonis()` implementation and as such it retains many of the arguments and concepts of PERMANOVA, just updated to use the direct decomposition of dissimilarities
+
+`dbrda()` inherits from `rda()` and `cca()` and as a result has expanded set of capability
+
+`dbrda()` can use `Condition()` in the formula to fit partial db-RDA
+
+`Condition()` is often needed to provide correct restricted permutation tests
+
+---
+
+# Distance-based RDA
+
+The equivalent model to `adonis2()` in `dbrda()`-form is
+
+
+``` r
+data(dune, dune.env)
+dune_dbrda &lt;- dbrda(dune ~ Management * A1, data = dune.env,
+    distance = "bray")
+```
+
+because they have different default dissimilarities
 
 ---
 
