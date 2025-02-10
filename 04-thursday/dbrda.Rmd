@@ -3,6 +3,8 @@ title: Distance-based RDA
 author: Gavin Simpson
 date: November 25, 2022
 output: html_document
+editor_options: 
+  chunk_output_type: console
 ---
 
 # Effect of ploughing time on weeds
@@ -16,25 +18,25 @@ library("vegan")
 library("dplyr")
 library("readr")
 
-plough <- read_csv(url("https://bit.ly/plough-spp"), skip = 1) %>%
-    rename(label = "...1") %>%
-    select(-`...2`) %>%
-    janitor::clean_names() %>%
-    filter(!is.na(label)) %>%
+plough <- read_csv(url("https://bit.ly/plough-spp"), skip = 1) |>
+    rename(label = "...1")|>
+    select(-`...2`) |>
+    janitor::clean_names() |>
+    filter(!is.na(label)) |>
     tibble::column_to_rownames("label")
 
-plough_design <- read_csv(url("https://bit.ly/plough-design"), skip = 1) %>%
-    rename(label = "...1", ploughing_time = "Treatmnt") %>%
-    select(-`...2`) %>%
-    janitor::clean_names() %>%
-    filter(!is.na(label)) %>%
+plough_design <- read_csv(url("https://bit.ly/plough-design"), skip = 1) |>
+    rename(label = "...1", ploughing_time = "Treatmnt") |>
+    select(-`...2`) |>
+    janitor::clean_names() |>
+    filter(!is.na(label)) |>
     tibble::column_to_rownames("label")
 ```
 
 We are interested in the effect of ploughing time and wish to remove any possible effect of the blocks. We achieve this by using `block` as a covariate (in `Condition()`). Some zero abundances are recorded as `NA` values, so we must replace those with 0s before we proceed. Instead of log-transforming the species counts, we might use a non-Euclidean dissimilarity coefficient with dbRDA instead of RDA.
 
 ```{r}
-plough <- plough %>%
+plough <- plough |>
   mutate(across(che_alb:ape_spi,
     .fns = \(x) tidyr::replace_na(x, replace = 0)))
 ```
@@ -50,7 +52,7 @@ The model and tests are specified as
 
 ```{r}
 ord <- dbrda(plough ~ ploughing_time + Condition(block), data = plough_design,
-    distance = "bray", add = "lingoes")
+  distance = "bray", add = "lingoes")
 ord
 ```
 
