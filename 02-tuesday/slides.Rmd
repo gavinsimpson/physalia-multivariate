@@ -88,13 +88,13 @@ class: inverse middle center big-subsection
 
 # Unconstrained
 
-What is .text-higlight[unconstrained]?
-
+What is .text-highlight[unconstrained]?
+ß
 First we look for major variation, then relate it to environmental variation
 
 vs. *constrained* ordination, where we only want to see what can be explained by environmental variables of interest
 
-*How well do we explain the main patterns in the species data*? vs *How large are the patterns we can expain with the measured data*?
+*How well do we explain the main patterns in the species data*? vs *How large are the patterns we can explain with the measured data*?
 
 ---
 
@@ -408,29 +408,40 @@ head(varechem)
 
 ---
 
-# Vegetation in lichen pastures &mdash; PCA
+# PCA of lichen pasture soil data
 
-PCA is fitted using `pca()`
+PCA is fitted using `pca()` given a data frame of Observations
 
-* Provide a data frame of observations on one or more variables
 * To scale all variables to be &mu; = 0, &sigma;<sup>2</sup> = 1: `scale = TRUE`
 
-```{r vare-pca-1, echo = TRUE}
-ord <- pca(decostand(varespec, method = "hellinger"), scale = TRUE)
-ord
+```{r varechem-pca, echo = TRUE}
+varechem_ord <- pca(varechem, scale = TRUE)
 ```
+
+---
+
+# PCA of lichen pasture soil data
+
+PCA of the covariance matrix &mdash; default is `scale = FALSE`
+
+```{r vare-pca-1b, echo = TRUE}
+pca(varechem)
+```
+
+How **vegan** scales the eigenvalues is different to *Canoco*
 
 ---
 
 # Vegetation in lichen pastures &mdash; PCA
 
-PCA of the covariance matrix &mdash; default is `scale = FALSE`
+A transformation-based PCA ([Legendre & Gallagher 2001](https://doi.org/10.1007/s004420100716)) is where we transform the response such that when we run PCA it preserves the non-Euclidean distance between samples
 
-```{r vare-pca-1b, echo = TRUE}
-pca(decostand(varespec, method = "hellinger"), scale = FALSE)
+Here, with a *Hellinger* transformation, the PCA will reflect the hellinger distances in the original data
+
+```{r vare-pca-1, echo = TRUE}
+ord <- pca(decostand(varespec, method = "hellinger"), scale = TRUE)
+ord
 ```
-
-How **vegan** scales the eigenvalues is different to *Canoco*
 
 ---
 
@@ -652,7 +663,7 @@ Use the text names instead:
 
 * `scaling = "none"` means `scaling = 0`
 * `scaling = "sites"` means `scaling = 1`
-* `scaling = "species"` means `scaling = 3`
+* `scaling = "species"` means `scaling = 2`
 * `scaling = "symmetric"` means `scaling = 3`
 
 For PCA (`pca()`) use `correlation = TRUE` to get the correlation scores (negative scaling)

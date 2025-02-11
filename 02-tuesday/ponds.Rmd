@@ -1,7 +1,7 @@
 ---
 title: "Shallow Ponds"
 author: Gavin Simpson
-date: April 25, 2023
+date: Feb 11, 2025
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -29,14 +29,14 @@ url_diat <- "https://bit.ly/pondsdiat"
 pondsdiat <- read.csv(url(url_diat))
 ```
 
-PCA is fitted using the `rda()` function, which was designed to implement Redundancy Analysis (RDA). RDA is the constrained form of PCA so running `rda()` without any constraints yields PCA. Run a PCA of the Ponds environmental data using `rda()` and display the results. The `scale` argument to `rda()` scales the variables to zero mean and unit standard deviation. This results in a PCA on a correlation rather than covariance matrix. This is appropriate in situations where the variables are measured in different units, as is the case with the hydrochemical data analysed here. It may also be appropriate in situations where species abundance (counts etc.) are being analysed and you wish to focus on explaining variation in all species not just the most abundant ones.
+PCA is fitted using the `pca()` function. Run a PCA of the Ponds environmental data using `pca()` and display the results. The `scale` argument to `pca()` scales the variables to zero mean and unit standard deviation. This results in a PCA on a correlation rather than covariance matrix. This is appropriate in situations where the variables are measured in different units, as is the case with the hydrochemical data analysed here. It may also be appropriate in situations where species abundance (counts etc.) are being analysed and you wish to focus on explaining variation in all species not just the most abundant ones.
 
 ```{r echo=TRUE, fig.show="hide"}
-pondspca <- rda(pondsenv, scale = TRUE)
+pondspca <- pca(pondsenv, scale = TRUE)
 pondspca
 ```
 
-The output shows the results of the PCA, displaying the eigenvalues for each axis. Note that these values differ from the ones report by CANOCO, which scales the total variance (called inertia in **vegan**) to 1, `rda()` does not. To achieve a comparable set of eigenvalues simply divide each eigenvalue by the total inertia. This conveniently, is what the `summary()` method for `eigenvals()` does:
+The output shows the results of the PCA, displaying the eigenvalues for each axis. Note that these values differ from the ones report by CANOCO, which scales the total variance (called inertia in **vegan**) to 1, `pca()` does not. To achieve a comparable set of eigenvalues simply divide each eigenvalue by the total inertia. This conveniently, is what the `summary()` method for `eigenvals()` does:
 
 ```{r echo=TRUE}
 summary(eigenvals(pondspca))
@@ -47,10 +47,10 @@ summary(eigenvals(pondspca))
 
 **How much of the total variance in the environmental data is explained by axes one and two individually and cummulatively?**
 
-For a longer print out of the results of the PCA and to display the species and site scores a `summary()` method is available. This truncates the output to the first six axes but this can be changed using the `axes` argument.
+To display the species and site scores a `scores()` method is available. This truncates the output to the first six axes but this can be changed using the `choices` argument.
 
-```{r echo=TRUE,eval=FALSE}
-summary(pondspca)
+```{r echo=TRUE, eval=FALSE}
+scores(pondspca, choices = 1:6)
 ```
 
 ## The meaningful components
@@ -72,13 +72,13 @@ Compare the variances of the pieces expected under the broken-stick model with t
 **How many axes does the broken-stick distribution suggest are significant?**
 
 ## PCA Biplots
-Two types of biplot may be used to visualise the results of a PCA; a distance biplot and a correlation biplot. In this analysis of the Ponds environmental data, the focus is on the correlations between the environmental variables ("species" in common parlance, even though environmental data are being analysed!), therefore, a correlation biplot is appropriate. The type of biplot produced is determined by the scaling applied to one or both of the species and site scores. For a correlation biplot, scaling `"species"` is used, in which the scores for the $k^{th}$ species (the $k^{th}$ eigenvector) are scaled to length $\sqrt{\lambda_k}$ [^The scores for the $k^{th}$ are then proportional to the square root of the $k^{th}$ eigenvalue.], whilst the sites are left unscaled. Biplots are easily obtained using the `plot()` method of `rda()`.
+Two types of biplot may be used to visualise the results of a PCA; a distance biplot and a correlation biplot. In this analysis of the Ponds environmental data, the focus is on the correlations between the environmental variables ("species" in common parlance, even though environmental data are being analysed!), therefore, a correlation biplot is appropriate. The type of biplot produced is determined by the scaling applied to one or both of the species and site scores. For a correlation biplot, scaling `"species"` is used, in which the scores for the $k^{th}$ species (the $k^{th}$ eigenvector) are scaled to length $\sqrt{\lambda_k}$ [^The scores for the $k^{th}$ are then proportional to the square root of the $k^{th}$ eigenvalue.], whilst the sites are left unscaled. Biplots are easily obtained using the `plot()` method of `pca()`.
 
 ```{r echo=TRUE}
 plot(pondspca, scaling = "species")
 ```
 
-Species are traditionally represented by biplot arrows, which we can do for `rda()` objects using the `biplot()` method
+Species are traditionally represented by biplot arrows, which we can do for `pca()` objects using the `biplot()` method
 
 ```{r echo=TRUE}
 biplot(pondspca, scaling = "species")
@@ -104,10 +104,10 @@ Firstly, the biplot is redisplayed with the species suppressed (`display = "site
 # Correspondence Analysis
 Species often show unimodal responses to environmental gradients. PCA assumes a linear response model and as such may not be best suited to the analysis of species data exhibiting unimodal responses as PCA is unlikely to fit the data adequately. Correspondence Analysis (CA) is an indirect ordination technique that assumes an _idealised_ unimodal response in species. The response is idealised in that it assumes that species responses are symmetrical, of equal height and width and are equally spaced.
 
-A CA is performed using function `cca()`, also in package `vegan`. CA can produced unstable results when there are rare species or odd samples in the data set, therefore, rare species tend to be downweighted. Function `downweight()` provides this capability, replicating the behaviour of CANOCO.
+A CA is performed using function `ca()`, also in package `vegan`. CA can produced unstable results when there are rare species or odd samples in the data set, therefore, rare species tend to be downweighted. Function `downweight()` provides this capability, replicating the behaviour of CANOCO.
 
 ```{r echo=TRUE}
-pondsca <- cca(downweight(pondsdiat))
+pondsca <- ca(downweight(pondsdiat))
 pondsca
 
 summary(eigenvals(pondsca))
@@ -129,12 +129,11 @@ screeplot(pondsca, bstick = TRUE, type = "lines")
 
 ## CA Biplots
 
-Biplots, are generated by plotting the site and species scores obtained from CA of the species matrix. As with PCA, these scores can be scaled to focus the resulting diagram on relationships among sites (`scaling = "sites"`) or species (`scaling = "species`) or some compromise of the two (`scaling = "symmetric"`). So-called _biplot_ and _Hill's_ scaling are the two _types_ of scaling that can be applied to three scalings mentioned above. These two types dictate how information on the species data is gleaned from the resulting biplot. With biplot scaling, the biplot rule applies and is most suited for short gradients. Hill's scaling equalises the average niche breadth for all axes and allows, for long gradients, interpretation via the distance rule. The `plot()` method for `cca()` produces a biplot of the results of a CA
+Biplots, are generated by plotting the site and species scores obtained from CA of the species matrix. As with PCA, these scores can be scaled to focus the resulting diagram on relationships among sites (`scaling = "sites"`) or species (`scaling = "species`) or some compromise of the two (`scaling = "symmetric"`). So-called _biplot_ and _Hill's_ scaling are the two _types_ of scaling that can be applied to three scalings mentioned above. These two types dictate how information on the species data is gleaned from the resulting biplot. With biplot scaling, the biplot rule applies and is most suited for short gradients. Hill's scaling equalises the average niche breadth for all axes and allows, for long gradients, interpretation via the distance rule. The `plot()` method for `ca()` produces a biplot of the results of a CA
 
 ```{r echo=TRUE}
 plot(pondsca)
 ```
-
 
 **Are there outliers in the plot (species or samples)?**
 
@@ -158,7 +157,6 @@ points(pondsca, display = "sites", cex = 0.5 * site.n2)
 identify(ca.plot, what = "sites", col = "red", ps = 10)
 ```
 
-
 **Are outlying species common or rare?**
 
 **Are outlying samples dominated by a few, rare, species?**
@@ -173,7 +171,6 @@ par(oldpar)
 ```
 
 **What effect does the choice of scaling have on the ordination plots? Use the code above to display the biplots with two different scalings.**
-
 
 # Non-metric multidimensional scaling
 

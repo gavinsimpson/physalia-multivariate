@@ -84,13 +84,13 @@ class: inverse middle center big-subsection
 
 # Unconstrained
 
-What is .text-higlight[unconstrained]?
-
+What is .text-highlight[unconstrained]?
+ß
 First we look for major variation, then relate it to environmental variation
 
 vs. *constrained* ordination, where we only want to see what can be explained by environmental variables of interest
 
-*How well do we explain the main patterns in the species data*? vs *How large are the patterns we can expain with the measured data*?
+*How well do we explain the main patterns in the species data*? vs *How large are the patterns we can explain with the measured data*?
 
 ---
 
@@ -255,12 +255,57 @@ head(varechem)
 
 ---
 
+# PCA of lichen pasture soil data
+
+PCA is fitted using `pca()` given a data frame of Observations
+
+* To scale all variables to be &amp;mu; = 0, &amp;sigma;&lt;sup&gt;2&lt;/sup&gt; = 1: `scale = TRUE`
+
+
+``` r
+varechem_ord &lt;- pca(varechem, scale = TRUE)
+```
+
+---
+
+# PCA of lichen pasture soil data
+
+PCA of the covariance matrix &amp;mdash; default is `scale = FALSE`
+
+
+``` r
+pca(varechem)
+```
+
+```
+## Call: pca(X = varechem)
+## 
+## -- Model Summary --
+## 
+##               Inertia Rank
+## Total           85655     
+## Unconstrained   85655   14
+## 
+## Inertia is variance
+## 
+## -- Eigenvalues --
+## 
+## Eigenvalues for unconstrained axes:
+##   PC1   PC2   PC3   PC4   PC5   PC6   PC7   PC8   PC9  PC10  PC11  PC12  PC13 
+## 64057 16963  2425   953   716   248   196    61    23    10     2     0     0 
+##  PC14 
+##     0
+```
+
+How **vegan** scales the eigenvalues is different to *Canoco*
+
+---
+
 # Vegetation in lichen pastures &amp;mdash; PCA
 
-PCA is fitted using `pca()`
+A transformation-based PCA ([Legendre &amp; Gallagher 2001](https://doi.org/10.1007/s004420100716)) is where we transform the response such that when we run PCA it preserves the non-Euclidean distance between samples
 
-* Provide a data frame of observations on one or more variables
-* To scale all variables to be &amp;mu; = 0, &amp;sigma;&lt;sup&gt;2&lt;/sup&gt; = 1: `scale = TRUE`
+Here, with a *Hellinger* transformation, the PCA will reflect the hellinger distances in the original data
 
 
 ``` r
@@ -286,38 +331,6 @@ ord
 ## 8.603 5.134 4.576 3.714 3.245 2.779 2.626 2.221 
 ## (Showing 8 of 23 unconstrained eigenvalues)
 ```
-
----
-
-# Vegetation in lichen pastures &amp;mdash; PCA
-
-PCA of the covariance matrix &amp;mdash; default is `scale = FALSE`
-
-
-``` r
-pca(decostand(varespec, method = "hellinger"), scale = FALSE)
-```
-
-```
-## Call: pca(X = decostand(varespec, method = "hellinger"), scale = FALSE)
-## 
-## -- Model Summary --
-## 
-##               Inertia Rank
-## Total          0.3647     
-## Unconstrained  0.3647   23
-## 
-## Inertia is variance
-## 
-## -- Eigenvalues --
-## 
-## Eigenvalues for unconstrained axes:
-##     PC1     PC2     PC3     PC4     PC5     PC6     PC7     PC8 
-## 0.14586 0.07908 0.02866 0.02446 0.02209 0.01263 0.01179 0.00873 
-## (Showing 8 of 23 unconstrained eigenvalues)
-```
-
-How **vegan** scales the eigenvalues is different to *Canoco*
 
 ---
 
@@ -577,7 +590,7 @@ Use the text names instead:
 
 * `scaling = "none"` means `scaling = 0`
 * `scaling = "sites"` means `scaling = 1`
-* `scaling = "species"` means `scaling = 3`
+* `scaling = "species"` means `scaling = 2`
 * `scaling = "symmetric"` means `scaling = 3`
 
 For PCA (`pca()`) use `correlation = TRUE` to get the correlation scores (negative scaling)

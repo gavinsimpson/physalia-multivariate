@@ -1199,7 +1199,7 @@ Refer to biodiversity at different scales; $\alpha$, $\beta$, and $\gamma$
 
 * Alpha diversity, $\alpha$, is the diversity of a point location or of a single sample
 
-* Beta diversity, $\beta$, is the diversity due to multiple localities; $\beta$$ diversity is
+* Beta diversity, $\beta$, is the diversity due to multiple localities; $\beta$ diversity is
 sometimes thought of as turnover in species composition among sites, or alternatively as the number of species in a region that are not observed in a sample
 
 * Gamma diversity, $\gamma$, is the diversity of a region, or at least the diversity

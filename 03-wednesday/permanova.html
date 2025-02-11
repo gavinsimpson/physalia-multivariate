@@ -392,7 +392,7 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <pre><code>## Rows: 12 Columns: 15
-## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
 ## chr  (2): ...1, ...2
 ## dbl (13): Che alb, Pol per, Pol avi, Spe arv, Mat rec, Gna uli, Cap bur, Ste...
@@ -408,10 +408,10 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt
 <pre><code>## New names:
 ## Rows: 12 Columns: 4
 ## ── Column specification
-## ─────────────────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (4): ...1, ...2, Block, Treatmnt
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types or set
-## `show_col_types = FALSE` to quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
+## or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <p>We are interested in the effect of ploughing time and wish to remove
@@ -481,8 +481,8 @@ model</p>
 ## 
 ## adonis2(formula = plough ~ ploughing_time + block, data = plough_design, permutations = h, method = &quot;bray&quot;, add = &quot;lingoes&quot;, by = &quot;margin&quot;)
 ##                Df SumOfSqs      R2      F Pr(&gt;F)   
-## ploughing_time  2  0.29341 0.24029 3.6163  0.003 **
-## block           3  0.68427 0.56038 5.6225  0.003 **
+## ploughing_time  2  0.29341 0.24029 3.6163  0.005 **
+## block           3  0.68427 0.56038 5.6225  0.005 **
 ## Residual        6  0.24341 0.19934                 
 ## Total          11  1.22109 1.00000                 
 ## ---
@@ -535,14 +535,14 @@ meet the assumptions of the ANOVA</p>
 ## 
 ## Response: Distances
 ##           Df   Sum Sq   Mean Sq      F N.Perm Pr(&gt;F)
-## Groups     2 0.005309 0.0026544 0.1854    999  0.604
+## Groups     2 0.005309 0.0026544 0.1854    999  0.575
 ## Residuals  9 0.128831 0.0143146                     
 ## 
 ## Pairwise comparisons:
 ## (Observed p-value below diagonal, permuted p-value above diagonal)
 ##          pltime 1 pltime 2 pltime 3
-## pltime 1           0.93800    0.454
-## pltime 2  0.95708             0.316
+## pltime 1           0.92700    0.457
+## pltime 2  0.95708             0.288
 ## pltime 3  0.63784  0.51344</code></pre>
 <p>Here we asked for pairwise comparisons to investigate whether there
 are pairs of groups that have different dispersions instead of just
