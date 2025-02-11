@@ -752,10 +752,11 @@ grid-column order.</p>
 <pre><code>## New names:
 ## Rows: 40 Columns: 102
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
-## (2): ...1, ...2 dbl (100): ACHILMIL, ACHILPTA, AGROS-SP, ANGELSYL, ANTHOODO, CALAMCAN, CAPSE...
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## (2): ...1, ...2 dbl (100): ACHILMIL, ACHILPTA, AGROS-SP, ANGELSYL, ANTHOODO,
+## CALAMCAN, CAPSE...
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <pre class="r"><code>grid &lt;- read_csv(url(&quot;https://bit.ly/grid-predictors&quot;), skip = 1L,
@@ -890,10 +891,11 @@ spp &lt;- read_csv(url(&quot;https://bit.ly/ohraz-spp&quot;)) %&gt;%
 <pre><code>## New names:
 ## Rows: 96 Columns: 87
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
-## (1): ...1 dbl (86): molicaer, nardstri, festrubr, brizmed, anthodor, siegdecu, holclan...
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## (1): ...1 dbl (86): molicaer, nardstri, festrubr, brizmed, anthodor, siegdecu,
+## holclan...
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`</code></pre>
 <pre class="r"><code>molinia &lt;- spp %&gt;%
     select(label:molicaer)
@@ -909,10 +911,10 @@ env &lt;- read_csv(url(&quot;https://bit.ly/ohraz-env&quot;)) %&gt;%
 <pre><code>## New names:
 ## Rows: 96 Columns: 6
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (5): ...1, mowing, fertilizer, removal, plotid dbl (1): year
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`</code></pre>
 <p>When we test for the interactions mentioned above, we’ll use
 <code>plotid</code> as a covariate (conditioning variable) when setting
@@ -1122,10 +1124,11 @@ code than was used in the slides.</p>
 <pre><code>## New names:
 ## Rows: 568 Columns: 11
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
-## (1): ...1 dbl (10): punct-L, punct-S, march-L, march-S, hubbs-L, hubbs-S, oz-L, oz-S, ...
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## (1): ...1 dbl (10): punct-L, punct-S, march-L, march-S, hubbs-L, hubbs-S, oz-L,
+## oz-S, ...
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`</code></pre>
 <pre class="r"><code>design &lt;- read_csv(url(&quot;https://bit.ly/crayfish-design&quot;)) %&gt;%
     rename(label = &quot;...1&quot;) %&gt;%
@@ -1135,10 +1138,10 @@ code than was used in the slides.</p>
 <pre><code>## New names:
 ## Rows: 568 Columns: 8
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (8): ...1, Watershed, Stream, Reach, Run, Stream Nested, Reach Nested, R...
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`</code></pre>
 <p>Repeat the exercise from the slides, testing the different levels of
 the hierarchical scales of variation in crayfish species abundance.</p>
@@ -1453,10 +1456,11 @@ a useful option.</p>
 <pre><code>## New names:
 ## Rows: 12 Columns: 15
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
-## (2): ...1, ...2 dbl (13): Che alb, Pol per, Pol avi, Spe arv, Mat rec, Gna uli, Cap bur, Ste...
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## (2): ...1, ...2 dbl (13): Che alb, Pol per, Pol avi, Spe arv, Mat rec, Gna uli,
+## Cap bur, Ste...
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <pre class="r"><code>plough_design &lt;- read_csv(url(&quot;https://bit.ly/plough-design&quot;), skip = 1) %&gt;%
@@ -1468,10 +1472,10 @@ a useful option.</p>
 <pre><code>## New names:
 ## Rows: 12 Columns: 4
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (4): ...1, ...2, Block, Treatmnt
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <p>We are interested in the effect of ploughing time and wish to remove
@@ -1604,10 +1608,10 @@ e40_spp &lt;- read_csv(url(&quot;https://bit.ly/e40-spp&quot;), skip = 1L) %&gt;
 <pre><code>## New names:
 ## Rows: 32 Columns: 105
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; dbl
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; dbl
 ## (105): ...1, ...2, agroscap, anthoodo, arctouva, aulacpal, betulpen, bet...
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <pre class="r"><code>e40_design &lt;- read_csv(url(&quot;https://bit.ly/e40-design&quot;), skip = 1L) %&gt;%
@@ -1618,10 +1622,10 @@ e40_spp &lt;- read_csv(url(&quot;https://bit.ly/e40-spp&quot;), skip = 1L) %&gt;
 <pre><code>## New names:
 ## Rows: 32 Columns: 5
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (3): N, P, Block dbl (2): ...1, ...2
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <p>The levels of <code>N</code> are</p>

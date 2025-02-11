@@ -1,7 +1,7 @@
 ---
 title: Distance-based RDA
 author: Gavin Simpson
-date: November 25, 2022
+date: February 11, 2025
 output: html_document
 editor_options: 
   chunk_output_type: console
@@ -19,7 +19,7 @@ library("dplyr")
 library("readr")
 
 plough <- read_csv(url("https://bit.ly/plough-spp"), skip = 1) |>
-    rename(label = "...1")|>
+    rename(label = "...1") |>
     select(-`...2`) |>
     janitor::clean_names() |>
     filter(!is.na(label)) |>

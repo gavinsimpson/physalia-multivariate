@@ -80,7 +80,7 @@ plot(ponds.cca)
 Perform a CA of the ponds diatom data:
 
 ```{r echo=TRUE,eval=TRUE}
-ponds.ca <- cca(diat)
+ponds.ca <- ca(diat)
 ponds.ca
 ```
 

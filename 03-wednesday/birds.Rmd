@@ -20,15 +20,15 @@ birds_url <- "https://bit.ly/maed-birds"
 
 birds <- read_csv(birds_url, na = "", skip = 1)
 
-birds_spp <- birds %>%
-    mutate(across(AegiCaud:OriOri, ~ replace_na(.x, 0))) %>%
+birds_spp <- birds |>
+    mutate(across(AegiCaud:OriOri, ~ replace_na(.x, 0))) |>
     column_to_rownames("...1")
 birds_spp <- birds_spp[, 1:36]
 
-birds_env <- birds %>%
-    select(c("...1", Altit:Expos)) %>%
+birds_env <- birds |>
+    select(c("...1", Altit:Expos)) |>
     mutate(Rocks = factor(Rocks), Expos = factor(Expos),
-    across(Forest:Slope, ~ ordered(.x))) %>%
+    across(Forest:Slope, ~ ordered(.x))) |>
     column_to_rownames("...1")
 ```
 

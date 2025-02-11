@@ -389,10 +389,10 @@ library(&quot;dplyr&quot;)
 library(&quot;readr&quot;)
 
 # load the data
-spp &lt;- read_csv(&quot;https://bit.ly/meadows-species&quot;) %&gt;%
-    rename(&quot;sample_id&quot; = &quot;...1&quot;) %&gt;%
+spp &lt;- read_csv(&quot;https://bit.ly/meadows-species&quot;) |&gt;
+    rename(&quot;sample_id&quot; = &quot;...1&quot;) |&gt;
     tibble::column_to_rownames(&quot;sample_id&quot;)
-env &lt;- read_csv(&quot;https://bit.ly/meadows-env&quot;) %&gt;%
+env &lt;- read_csv(&quot;https://bit.ly/meadows-env&quot;) |&gt;
     rename(&quot;sample_id&quot; = &quot;...1&quot;)</code></pre>
 <p>We can look at the number of species, samples, and environmental
 variables:</p>
@@ -406,7 +406,7 @@ variables:</p>
 ## [13] &quot;Corg&quot;      &quot;pH&quot;        &quot;conduct&quot;   &quot;slope&quot;</code></pre>
 <p>We need to log-transform the ion concentration values, but not the
 other variables</p>
-<pre class="r"><code>env &lt;- env %&gt;%
+<pre class="r"><code>env &lt;- env |&gt;
     mutate(across(Ca:Cl, .fns = log10))</code></pre>
 <p>It is easier to do this in the data than in the formula for the
 ordination model, but of course you could do this in the formula too. It

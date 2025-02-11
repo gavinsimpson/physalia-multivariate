@@ -382,36 +382,36 @@ a useful option.</p>
 ##     intersect, setdiff, setequal, union</code></pre>
 <pre class="r"><code>library(&quot;readr&quot;)
 
-plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) %&gt;%
-    rename(label = &quot;...1&quot;) %&gt;%
-    select(-`...2`) %&gt;%
-    janitor::clean_names() %&gt;%
-    filter(!is.na(label)) %&gt;%
+plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) |&gt;
+    rename(label = &quot;...1&quot;) |&gt;
+    select(-`...2`) |&gt;
+    janitor::clean_names() |&gt;
+    filter(!is.na(label)) |&gt;
     tibble::column_to_rownames(&quot;label&quot;)</code></pre>
 <pre><code>## New names:
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <pre><code>## Rows: 12 Columns: 15
-## ── Column specification ────────────────────────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
 ## chr  (2): ...1, ...2
 ## dbl (13): Che alb, Pol per, Pol avi, Spe arv, Mat rec, Gna uli, Cap bur, Ste...
 ## 
 ## ℹ Use `spec()` to retrieve the full column specification for this data.
 ## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
-<pre class="r"><code>plough_design &lt;- read_csv(url(&quot;https://bit.ly/plough-design&quot;), skip = 1) %&gt;%
-    rename(label = &quot;...1&quot;, ploughing_time = &quot;Treatmnt&quot;) %&gt;%
-    select(-`...2`) %&gt;%
-    janitor::clean_names() %&gt;%
-    filter(!is.na(label)) %&gt;%
+<pre class="r"><code>plough_design &lt;- read_csv(url(&quot;https://bit.ly/plough-design&quot;), skip = 1) |&gt;
+    rename(label = &quot;...1&quot;, ploughing_time = &quot;Treatmnt&quot;) |&gt;
+    select(-`...2`) |&gt;
+    janitor::clean_names() |&gt;
+    filter(!is.na(label)) |&gt;
     tibble::column_to_rownames(&quot;label&quot;)</code></pre>
 <pre><code>## New names:
 ## Rows: 12 Columns: 4
 ## ── Column specification
-## ──────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (4): ...1, ...2, Block, Treatmnt
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types
-## or set `show_col_types = FALSE` to quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
+## the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <p>We are interested in the effect of ploughing time and wish to remove
@@ -423,7 +423,7 @@ recorded as <code>NA</code> values, so we must replace those with 0s
 before we proceed. Instead of log-transforming the species counts, we
 might use a non-Euclidean dissimilarity coefficient with PERMANOVA
 instead of RDA.</p>
-<pre class="r"><code>plough &lt;- plough %&gt;%
+<pre class="r"><code>plough &lt;- plough |&gt;
     mutate(across(che_alb:ape_spi, .fns = tidyr::replace_na, replace = 0))</code></pre>
 <pre><code>## Warning: There was 1 warning in `mutate()`.
 ## ℹ In argument: `across(che_alb:ape_spi, .fns = tidyr::replace_na, replace = 0)`.
@@ -453,7 +453,7 @@ blocks.</p>
 ## 
 ## adonis2(formula = plough ~ ploughing_time, data = plough_design, permutations = h, method = &quot;bray&quot;, add = &quot;lingoes&quot;)
 ##          Df SumOfSqs      R2      F Pr(&gt;F)   
-## Model     2  0.29341 0.24029 1.4233  0.006 **
+## Model     2  0.29341 0.24029 1.4233  0.005 **
 ## Residual  9  0.92768 0.75971                 
 ## Total    11  1.22109 1.00000                 
 ## ---
@@ -481,8 +481,8 @@ model</p>
 ## 
 ## adonis2(formula = plough ~ ploughing_time + block, data = plough_design, permutations = h, method = &quot;bray&quot;, add = &quot;lingoes&quot;, by = &quot;margin&quot;)
 ##                Df SumOfSqs      R2      F Pr(&gt;F)   
-## ploughing_time  2  0.29341 0.24029 3.6163  0.005 **
-## block           3  0.68427 0.56038 5.6225  0.005 **
+## ploughing_time  2  0.29341 0.24029 3.6163  0.004 **
+## block           3  0.68427 0.56038 5.6225  0.004 **
 ## Residual        6  0.24341 0.19934                 
 ## Total          11  1.22109 1.00000                 
 ## ---
@@ -535,14 +535,14 @@ meet the assumptions of the ANOVA</p>
 ## 
 ## Response: Distances
 ##           Df   Sum Sq   Mean Sq      F N.Perm Pr(&gt;F)
-## Groups     2 0.005309 0.0026544 0.1854    999  0.575
+## Groups     2 0.005309 0.0026544 0.1854    999  0.609
 ## Residuals  9 0.128831 0.0143146                     
 ## 
 ## Pairwise comparisons:
 ## (Observed p-value below diagonal, permuted p-value above diagonal)
 ##          pltime 1 pltime 2 pltime 3
-## pltime 1           0.92700    0.457
-## pltime 2  0.95708             0.288
+## pltime 1           0.93700    0.454
+## pltime 2  0.95708             0.311
 ## pltime 3  0.63784  0.51344</code></pre>
 <p>Here we asked for pairwise comparisons to investigate whether there
 are pairs of groups that have different dispersions instead of just

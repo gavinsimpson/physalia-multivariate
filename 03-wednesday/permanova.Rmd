@@ -18,25 +18,25 @@ library("vegan")
 library("dplyr")
 library("readr")
 
-plough <- read_csv(url("https://bit.ly/plough-spp"), skip = 1) %>%
-    rename(label = "...1") %>%
-    select(-`...2`) %>%
-    janitor::clean_names() %>%
-    filter(!is.na(label)) %>%
+plough <- read_csv(url("https://bit.ly/plough-spp"), skip = 1) |>
+    rename(label = "...1") |>
+    select(-`...2`) |>
+    janitor::clean_names() |>
+    filter(!is.na(label)) |>
     tibble::column_to_rownames("label")
 
-plough_design <- read_csv(url("https://bit.ly/plough-design"), skip = 1) %>%
-    rename(label = "...1", ploughing_time = "Treatmnt") %>%
-    select(-`...2`) %>%
-    janitor::clean_names() %>%
-    filter(!is.na(label)) %>%
+plough_design <- read_csv(url("https://bit.ly/plough-design"), skip = 1) |>
+    rename(label = "...1", ploughing_time = "Treatmnt") |>
+    select(-`...2`) |>
+    janitor::clean_names() |>
+    filter(!is.na(label)) |>
     tibble::column_to_rownames("label")
 ```
 
 We are interested in the effect of ploughing time and wish to remove any possible effect of the blocks. We cannot achieve this by using `block` as a covariate (in `Condition()`) when we estimate the model using PERMANOVA. Instead we will have to include `block` in our model as a variable. Some zero abundances are recorded as `NA` values, so we must replace those with 0s before we proceed. Instead of log-transforming the species counts, we might use a non-Euclidean dissimilarity coefficient with PERMANOVA instead of RDA.
 
 ```{r}
-plough <- plough %>%
+plough <- plough |>
     mutate(across(che_alb:ape_spi, .fns = tidyr::replace_na, replace = 0))
 ```
 

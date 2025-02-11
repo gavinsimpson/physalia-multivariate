@@ -26,14 +26,14 @@ birds_url <- "https://bit.ly/maed-birds"
 
 birds <- read_csv(birds_url, na = "", skip = 1)
 
-birds_spp <- birds %>%
-    mutate(across(AegiCaud:OriOri, ~ replace_na(.x, 0))) %>%
+birds_spp <- birds |>
+    mutate(across(AegiCaud:OriOri, ~ replace_na(.x, 0))) |>
     column_to_rownames("...1")
 birds_spp <- birds_spp[, 1:36]
 
-birds_env <- birds %>%
-    select(c("...1", Altit:Expos)) %>%
-    mutate(Rocks = factor(Rocks), Expos = factor(Expos)) %>%
+birds_env <- birds |>
+    select(c("...1", Altit:Expos)) |>
+    mutate(Rocks = factor(Rocks), Expos = factor(Expos)) |>
     column_to_rownames("...1")
 ```
 
@@ -59,7 +59,7 @@ The variables are:
 They treat the data as "compositional" (despite them being the average number of breeding pairs averaged over 4 visits to each sampling location).
 
 ```{r}
-birds_pca <- rda(birds_spp)
+birds_pca <- pca(birds_spp)
 
 birds_pca
 
@@ -77,7 +77,7 @@ ordisurf(birds_pca ~ Altit, data = birds_env, add = TRUE)
 # How I might have approached this
 
 ```{r}
-birds_ca <- cca(birds_spp)
+birds_ca <- ca(birds_spp)
 
 birds_ca
 
@@ -95,7 +95,7 @@ ordisurf(birds_ca ~ Altit, data = birds_env, add = TRUE)
 or
 
 ```{r}
-birds_h <- rda(decostand(birds_spp, method = "hellinger"))
+birds_h <- pca(decostand(birds_spp, method = "hellinger"))
 
 birds_h
 

@@ -1,4 +1,4 @@
-all: slides purl ponds meadows permanova
+all: slides purl ponds meadows permanova dbrda
 
 slides: slides.Rmd slides.css
 	Rscript -e 'library("rmarkdown"); render("slides.Rmd")'
@@ -14,3 +14,6 @@ meadows: spring-meadows.Rmd
 
 permanova: permanova.Rmd
 	Rscript -e "rmarkdown::render(\"permanova.Rmd\")"
+
+dbrda: dbrda.Rmd
+	Rscript -e "rmarkdown::render(\"dbrda.Rmd\")"

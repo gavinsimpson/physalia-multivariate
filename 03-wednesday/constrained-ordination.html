@@ -457,14 +457,19 @@ of water.</strong></p>
 <div id="comparison-with-unconstrained-methods" class="section level2">
 <h2>Comparison with unconstrained methods</h2>
 <p>Perform a CA of the ponds diatom data:</p>
-<pre class="r"><code>ponds.ca &lt;- cca(diat)
+<pre class="r"><code>ponds.ca &lt;- ca(diat)
 ponds.ca</code></pre>
-<pre><code>## Call: cca(X = diat)
+<pre><code>## Call: ca(X = diat)
+## 
+## -- Model Summary --
 ## 
 ##               Inertia Rank
 ## Total           5.812     
 ## Unconstrained   5.812   29
-## Inertia is scaled Chi-square 
+## 
+## Inertia is scaled Chi-square
+## 
+## -- Eigenvalues --
 ## 
 ## Eigenvalues for unconstrained axes:
 ##    CA1    CA2    CA3    CA4    CA5    CA6    CA7    CA8 
