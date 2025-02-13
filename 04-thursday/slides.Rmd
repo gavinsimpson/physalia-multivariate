@@ -41,7 +41,6 @@ theme_set(theme_minimal(base_size = 16, base_family = 'Fira Sans'))
 * Restricted permutation tests
 * PERMANOVA
 * Distance-based RDA
-* Diagnostics
 
 ---
 class: inverse middle center subsection
