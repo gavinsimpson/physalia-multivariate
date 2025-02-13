@@ -214,14 +214,14 @@ Post (1986) carried out an experiment to investigate the effect of time of ploug
 Traditionally, a multivariate ANOVA could have been used to analyses data like this. However, as there are more species (response variables; 13) than there are samples (12), MANOVA cannot be used. Instead, RDA is a useful option.
 
 ```{r plough-load}
-plough <- read_csv(url("https://bit.ly/plough-spp")) %>%
+plough <- read_csv(url("https://bit.ly/plough-spp"), skip = 1) %>%
     rename(label = "...1") %>%
     select(-`...2`) %>%
     janitor::clean_names() %>%
     filter(!is.na(label)) %>%
     column_to_rownames("label")
 
-plough_design <- read_csv(url("https://bit.ly/plough-design")) %>%
+plough_design <- read_csv(url("https://bit.ly/plough-design"), skip = 1) %>%
     rename(label = "...1") %>%
     select(-`...2`) %>%
     janitor::clean_names() %>%

@@ -95,7 +95,7 @@ summary(pstat)
 ```
 ## 
 ##       statistic    SES   mean lower median  upper Pr(perm)  
-## Model    1.4441 1.9481 1.0473       1.0337 1.4214    0.043 *
+## Model    1.4441 2.0201 1.0382       1.0142 1.4168     0.04 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -283,8 +283,8 @@ Source: Dave Burke, Wikimedia CC BY
 .col-6[
 
 
-```r
-set.seed(4)
+``` r
+set.seed(11)
 h &lt;- how(within = Within(type = "grid",
                          ncol = 3, nrow = 3))
 perm &lt;- shuffle(9, control = h)
@@ -293,9 +293,9 @@ matrix(perm, ncol = 3)
 
 ```
 ##      [,1] [,2] [,3]
-## [1,]    1    4    7
-## [2,]    2    5    8
-## [3,]    3    6    9
+## [1,]    9    3    6
+## [2,]    7    1    4
+## [3,]    8    2    5
 ```
 .center[
 &lt;img src="./resources/Toroidal_coord.png" width="1365" /&gt;
@@ -563,9 +563,9 @@ env &lt;- transform(env, year = as.numeric(as.character(year)))
 # Restricted permutations | Ohraz
 
 
-```r
+``` r
 c1 &lt;- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
-(h &lt;- how(within = Within(type = "free"), plots = Plots(strata = env$plotid, type = "none")))
+(h &lt;- how(within = Within(type = "free"),plots = Plots(strata = env$plotid, type = "none")))
 ```
 
 ```
@@ -594,15 +594,15 @@ c1 &lt;- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Conditi
 # Restricted permutations | Ohraz
 
 
-```r
+``` r
 set.seed(42)
 anova(c1, permutations = h, model = "reduced")
 ```
 
 ```
 ## Permutation test for rda under reduced model
-## Plots: env$plotid, plot permutation: free
-## Permutation: none
+## Plots: env$plotid, plot permutation: none
+## Permutation: free
 ## Number of permutations: 199
 ## 
 ## Model: rda(formula = spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
@@ -618,7 +618,7 @@ anova(c1, permutations = h, model = "reduced")
 # Restricted permutations | Ohraz
 
 
-```r
+``` r
 set.seed(24)
 anova(c1, permutations = h, model = "reduced", by = "axis")
 ```
@@ -626,16 +626,16 @@ anova(c1, permutations = h, model = "reduced", by = "axis")
 ```
 ## Permutation test for rda under reduced model
 ## Forward tests for axes
-## Plots: env$plotid, plot permutation: free
-## Permutation: none
+## Plots: env$plotid, plot permutation: none
+## Permutation: free
 ## Number of permutations: 199
 ## 
 ## Model: rda(formula = spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
 ##          Df Variance       F Pr(&gt;F)   
 ## RDA1      1    89.12 14.4173  0.005 **
-## RDA2      1    34.28  5.5458  0.005 **
-## RDA3      1    26.52  4.2900  0.025 * 
-## RDA4      1     8.94  1.4458  0.485   
+## RDA2      1    34.28  5.5458  0.330   
+## RDA3      1    26.52  4.2900  0.330   
+## RDA4      1     8.94  1.4458  0.330   
 ## Residual 90   556.30                  
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
@@ -652,7 +652,7 @@ class: inverse middle center subsection
 
 Variation in communities may exist at various scales, sometimes hierarchically
 
-A first step in understanding this variation is to test for its exisistence
+A first step in understanding this variation is to test for its existence
 
 In this example from Leps &amp; Smilauer (2014) uses crayfish data from Spring River, Arkansas/Missouri, USA, collected by Dr. Camille Flinders.
 
@@ -681,8 +681,8 @@ names(design) &lt;- c("Watershed", "Stream", "Reach", "Run",
 A number of samples have 0 crayfish, which excludes unimodal methods
 
 
-```r
-m.pca &lt;- rda(crayfish)
+``` r
+m.pca &lt;- pca(crayfish)
 summary(eigenvals(m.pca))
 ```
 

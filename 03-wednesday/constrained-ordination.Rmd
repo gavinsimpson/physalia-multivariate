@@ -55,13 +55,16 @@ The formula means the diatom data matrix `diat` is modelled by everything in the
 
 **What proportion of the variance remains un-explained?**
 
-The `summary()` method provides further, detailed results of the CCA:
+The `scores()` method provides further, detailed results of the CCA:
 
 ```{r echo=TRUE,eval=FALSE}
-summary(ponds.cca)
+wanted <- c("wa", "lc", "species", "bp", "cn")
+scrs <- scores(ponds.cca, display = wanted)
+scrs |> str()
+scrs$biplot
 ```
 
-**Why are there two sets of site scores?**
+**Why are there two sets of site scores (labelled "sites" and "constraints"?**
 
 **Look at the biplot scores in the summary output. Suggest which variables are important on CCA axes 1 and on CCA axis 2?**
 
@@ -100,10 +103,10 @@ plot(ponds.cca, scaling = 1)
 
 ## Interpreting the CCA results
 
-There is a lot more that can be done to interpret the results of the CCA and explore relationships between the diatom species and the environmental variables, as well as determining model performance for the CCA itelf.
+There is a lot more that can be done to interpret the results of the CCA and explore relationships between the diatom species and the environmental variables, as well as determining model performance for the CCA itself.
 
 ## Outliers?
-One useful diagnostic for the configuration is to identify outlier or "odd" sites or species. Plotting the Hills's $N_2$ values for both species and samples can help visualise outliers. We can produce biplots using $N_2$ values for species and sites easily in **R** using `renyi()` in **vegan**. First we calculate the $N_2$ values for sites and species:
+One useful diagnostic for the configuration is to identify outlier or "odd" sites or species. Plotting the Hill's $N_2$ values for both species and samples can help visualise outliers. We can produce biplots using $N_2$ values for species and sites easily in **R** using `renyi()` in **vegan**. First we calculate the $N_2$ values for sites and species:
 
 ```{r echo=TRUE,eval=TRUE}
 diat.n2 <- renyi(t(diat), scales = 2, hill = TRUE)

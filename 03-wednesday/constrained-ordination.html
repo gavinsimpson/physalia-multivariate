@@ -437,10 +437,14 @@ data?</strong></p>
 environmental variables?</strong></p>
 <p><strong>What proportion of the variance remains
 un-explained?</strong></p>
-<p>The <code>summary()</code> method provides further, detailed results
+<p>The <code>scores()</code> method provides further, detailed results
 of the CCA:</p>
-<pre class="r"><code>summary(ponds.cca)</code></pre>
-<p><strong>Why are there two sets of site scores?</strong></p>
+<pre class="r"><code>wanted &lt;- c(&quot;wa&quot;, &quot;lc&quot;, &quot;species&quot;, &quot;bp&quot;, &quot;cn&quot;)
+scrs &lt;- scores(ponds.cca, display = wanted)
+scrs |&gt; str()
+scrs$biplot</code></pre>
+<p><strong>Why are there two sets of site scores (labelled “sites” and
+“constraints”?</strong></p>
 <p><strong>Look at the biplot scores in the summary output. Suggest
 which variables are important on CCA axes 1 and on CCA axis
 2?</strong></p>
@@ -497,12 +501,12 @@ plots?</strong></p>
 <p>There is a lot more that can be done to interpret the results of the
 CCA and explore relationships between the diatom species and the
 environmental variables, as well as determining model performance for
-the CCA itelf.</p>
+the CCA itself.</p>
 </div>
 <div id="outliers" class="section level2">
 <h2>Outliers?</h2>
 <p>One useful diagnostic for the configuration is to identify outlier or
-“odd” sites or species. Plotting the Hills’s <span class="math inline">\(N_2\)</span> values for both species and samples
+“odd” sites or species. Plotting the Hill’s <span class="math inline">\(N_2\)</span> values for both species and samples
 can help visualise outliers. We can produce biplots using <span class="math inline">\(N_2\)</span> values for species and sites easily
 in <strong>R</strong> using <code>renyi()</code> in
 <strong>vegan</strong>. First we calculate the <span class="math inline">\(N_2\)</span> values for sites and species:</p>

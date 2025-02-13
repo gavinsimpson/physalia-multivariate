@@ -41,7 +41,7 @@ shuffle(10, control = how(within = Within(type = "series")))
 
 
 ## ----set-up-toroidal----------------------------------------------------------
-set.seed(4)
+set.seed(11)
 h <- how(within = Within(type = "grid",
                          ncol = 3, nrow = 3))
 perm <- shuffle(9, control = h)
@@ -116,15 +116,15 @@ env <- transform(env, year = as.numeric(as.character(year)))
 
 ## ----worked-example-devel-2---------------------------------------------------
 c1 <- rda(spp ~ year + year:mowing + year:fertilizer + year:removal + Condition(plotid), data = env)
-(h <- how(within = Within(type = "free"), plots = Plots(strata = env$plotid, type = "none")))
+(h <- how(within = Within(type = "free"),plots = Plots(strata = env$plotid, type = "none")))
 
 
-## ----worked-example-devel-2a--------------------------------------------------
+## ----worked-example-devel-2a, dependson=-1------------------------------------
 set.seed(42)
 anova(c1, permutations = h, model = "reduced")
 
 
-## ----worked-example-devel-2b--------------------------------------------------
+## ----worked-example-devel-2b, dependson=-2------------------------------------
 set.seed(24)
 anova(c1, permutations = h, model = "reduced", by = "axis")
 
@@ -141,7 +141,7 @@ names(design) <- c("Watershed", "Stream", "Reach", "Run",
 
 
 ## ----crayfish-unconstrained---------------------------------------------------
-m.pca <- rda(crayfish)
+m.pca <- pca(crayfish)
 summary(eigenvals(m.pca))
 
 
