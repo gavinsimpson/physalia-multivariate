@@ -392,7 +392,7 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) |&gt
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <pre><code>## Rows: 12 Columns: 15
-## ── Column specification ──────────────────────────────────────────────────────────
+## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
 ## chr  (2): ...1, ...2
 ## dbl (13): Che alb, Pol per, Pol avi, Spe arv, Mat rec, Gna uli, Cap bur, Ste...
@@ -408,10 +408,9 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) |&gt
 <pre><code>## New names:
 ## Rows: 12 Columns: 4
 ## ── Column specification
-## ────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (4): ...1, ...2, Block, Treatmnt
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify
-## the column types or set `show_col_types = FALSE` to quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <p>We are interested in the effect of ploughing time and wish to remove
@@ -466,7 +465,7 @@ ord</code></pre>
 ## 
 ## Model: dbrda(formula = plough ~ ploughing_time + Condition(block), data = plough_design, distance = &quot;bray&quot;, add = &quot;lingoes&quot;)
 ##          Df SumOfSqs      F Pr(&gt;F)   
-## Model     2  0.29341 3.6163  0.003 **
+## Model     2  0.29341 3.6163  0.006 **
 ## Residual  6  0.24341                 
 ## ---
 ## Signif. codes:  0 &#39;***&#39; 0.001 &#39;**&#39; 0.01 &#39;*&#39; 0.05 &#39;.&#39; 0.1 &#39; &#39; 1</code></pre>
