@@ -6,16 +6,16 @@ https://www.physalia-courses.org/
 
 ### Gavin Simpson
 
-#### 10th &ndash; 13th February, 2025
+#### 4th &ndash; 7th May, 2026
 
 ## Overview
 
 The R statistical language has enjoyed wide and rapid adoption by many
 ecologists, and is used across many ecological subdisciplines for statistical
 analyses and the production of publication-quality figures. For community
-ecologists using R, one of the most-used, and useful, add-on packages is vegan,
+ecologists using R, one of the most-used, and useful, add-on packages is *vegan*,
 which provides a wide range of functionality covering inter alia ordination,
-diversity analysis, and ecological simulation. This workshop will offer
+diversity analysis, and ecological simulation. This course offers
 participants a practical introduction to some of the most useful functions
 available within vegan. We will focus on the use of ordination methods and on 
 the use of restricted permutations to test a range of experimental designs.
@@ -27,7 +27,13 @@ as design- and model-based permutations and the exchangeability of samples in
 tests. We will also discuss the use of vegan to go beyond simply fitting a
 constrained ordination model, to diagnostics, plotting, etc.
 
+New for the May 2026 running of the course is an expansion of the content on
+applying the methods to high-throughput data such as shotgun sequencing
+(metabarcoding) and metagenomics.
+
 ## Slides
+
+*Content is from the February 2025 running of the course and will be updated in May, 2026*
 
 * [Monday](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.pdf)
