@@ -37,6 +37,9 @@ applying the methods to high-throughput data such as shotgun sequencing
 
 * [Monday](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.pdf)
+    * [Cluster analysis exercise](https://gavinsimpson.github.io/physalia-multivariate/01-monday/cluster-analysis.html)
+    * [Vltava example](https://gavinsimpson.github.io/physalia-multivariate/01-monday/vltava.html)
+    * [Tatry example](https://gavinsimpson.github.io/physalia-multivariate/01-monday/tatry.html)
 * [Tuesday](https://gavinsimpson.github.io/physalia-multivariate/02-tuesday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/02-tuesday/slides.pdf)
 * [Wednesday](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/slides.html)
