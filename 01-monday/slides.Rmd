@@ -2,7 +2,7 @@
 title: "Multivariate data"
 subtitle: "Dissimilarity, clustering, diversity"
 author: "Gavin Simpson"
-date: "February 10, 2024"
+date: "May 4, 2026"
 output:
   xaringan::moon_reader:
     css: ['default', 'https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css', 'slides.css']
@@ -1462,6 +1462,79 @@ Be careful though as this is a random process &mdash; what if you took a differe
 Repeat that many times and then as your dissimilarity $d_{ij}$, take the average of the many $d_{ij}^*$ values you generated above
 
 See also the help page for other suggestions `?avgdist`
+---
+
+# Compositional data
+
+Aitchison's *logratio* approach
+
+Classic statistical treatment for compositional data
+
+Compositional data are $D$ dimensional observations that lie on a $d = D - 1$ dimensional simplex
+
+Compositional data are defiend by a sample total
+
+Proportions of *sand*, *silt*, & *clay*; 3 dimensional data but once you know two of them, the third value is fixed
+
+---
+
+# Compositional data &mdash; transformations
+
+Many compositional transformations based on ratios of logs or *logratios*
+
+Two commonly encountered ones are
+
+* Additive logratio (ALR) transformation
+
+* Centred logratio (CLR) transformation
+
+---
+
+# Compositional data &mdash; ALR
+
+$$\text{ALR}(j) | \text{ref} = \log \left( \frac{x_j}{x_{\text{ref}}} \right) \; j \in \{1, \dots, D\}$$
+
+There are $D$ possible ALR transformations, depending on the choice of *reference* composition / part ($x_{\text{ref}}$)
+
+Choose one of the variables in the simplex as the reference part against which all other variables are normalised
+
+The reference part can affect the success of the transformation; choose a reference part that varies little across the samples
+
+In wide data, $p \gg n$, it is often the case that a suitable low-variance reference can be found
+
+---
+
+# Compositional data &mdash; CLR
+
+Instead of defining a reference, the CLR normalises by the **geometric** mean of the data for the $i$ th sample
+
+$$\text{CLR}(j) = \log(x_j / g(\mathbf{x})), \; j \in \{1, \dots, D\}$$
+
+The *geometric* mean of the $i$ th observation is the mean of
+
+$$\frac{1}{D} \sum_{j=1}^D \log(x_{ji})$$
+
+The CLR has the nice property that Euclidean distances among samples that are CLR transformed are equal to the distances using all possible logratios &mdash; *isometric*
+
+---
+
+# Compositional data transformations
+
+A problem with the ALR and CLR transformations occurs when $x_{ij} = 0$
+
+To address, any 0s are replaced by a *pseudocount*, some small value that is specified by the user
+
+Typically the pseudocount is the smallest non-zero value in the observed data
+
+---
+
+# Compositional data transformations
+
+Now available in *vegan* via `decostand()`
+
+* `method = "alr", pseudocount = 1`
+
+* `method = "clr", pseudocount = 1`
 
 ---
 

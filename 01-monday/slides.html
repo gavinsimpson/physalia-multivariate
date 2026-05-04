@@ -4,7 +4,7 @@
     <title>Multivariate data</title>
     <meta charset="utf-8" />
     <meta name="author" content="Gavin Simpson" />
-    <meta name="date" content="2024-02-10" />
+    <meta name="date" content="2026-05-04" />
     <script src="libs/header-attrs/header-attrs.js"></script>
     <link href="libs/remark-css/default.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css" />
@@ -24,7 +24,7 @@ class: inverse, middle, left, my-title-slide, title-slide
 ### Gavin Simpson
 ]
 .date[
-### February 10, 2024
+### May 4, 2026
 ]
 
 ---
@@ -95,7 +95,7 @@ Relative abundance expresses the abundance of each species as its proportion out
 
 # Data box
 
-&lt;img src="./resources/data-box-cropped.png" width="50%" style="display: block; margin: auto;" /&gt;
+&lt;img src="./resources/data-box-cropped.png" alt="" width="50%" style="display: block; margin: auto;" /&gt;
 
 ???
 
@@ -263,7 +263,7 @@ Gower's coefficient
 
 # Double zero problem
 
-&lt;img src="./resources/response-curve.png" width="90%" style="display: block; margin: auto;" /&gt;
+&lt;img src="./resources/response-curve.png" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -1168,7 +1168,7 @@ R &lt;- renyi(BCI[k,])
 plot(R)
 ```
 
-&lt;img src="slides_files/figure-html/diversity-5-1.svg" width="80%" /&gt;
+&lt;img src="slides_files/figure-html/diversity-5-1.svg" alt="" width="80%" /&gt;
 
 ---
 
@@ -1341,7 +1341,7 @@ In 1 we would C is downregulated &amp; A, B, D, &amp; E are upregulated
 
 .col-4[
 
-&lt;img src="resources/chap7-rnaseq-normalization-1.png" width="667" /&gt;
+![](resources/chap7-rnaseq-normalization-1.png)&lt;!-- --&gt;
 
 .smaller[Holmes &amp; Huber (2019) Modern Statistics for Modern Biology]
 ]
@@ -1383,7 +1383,7 @@ The _rlog_ transformation is ~ variance stabilizing, but handles highly varying 
 
 Comparison of three transformations
 
-&lt;img src="resources/chap7-rnaseq-meansd-1.png" width="2667" /&gt;
+![](resources/chap7-rnaseq-meansd-1.png)&lt;!-- --&gt;
 
 .smaller[Holmes &amp; Huber (2019) Modern Statistics for Modern Biology]
 
@@ -1431,6 +1431,79 @@ Be careful though as this is a random process &amp;mdash; what if you took a dif
 Repeat that many times and then as your dissimilarity `\(d_{ij}\)`, take the average of the many `\(d_{ij}^*\)` values you generated above
 
 See also the help page for other suggestions `?avgdist`
+---
+
+# Compositional data
+
+Aitchison's *logratio* approach
+
+Classic statistical treatment for compositional data
+
+Compositional data are `\(D\)` dimensional observations that lie on a `\(d = D - 1\)` dimensional simplex
+
+Compositional data are defiend by a sample total
+
+Proportions of *sand*, *silt*, &amp; *clay*; 3 dimensional data but once you know two of them, the third value is fixed
+
+---
+
+# Compositional data &amp;mdash; transformations
+
+Many compositional transformations based on ratios of logs or *logratios*
+
+Two commonly encountered ones are
+
+* Additive logratio (ALR) transformation
+
+* Centred logratio (CLR) transformation
+
+---
+
+# Compositional data &amp;mdash; ALR
+
+`$$\text{ALR}(j) | \text{ref} = \log \left( \frac{x_j}{x_{\text{ref}}} \right) \; j \in \{1, \dots, D\}$$`
+
+There are `\(D\)` possible ALR transformations, depending on the choice of *reference* composition / part (`\(x_{\text{ref}}\)`)
+
+Choose one of the variables in the simplex as the reference part against which all other variables are normalised
+
+The reference part can affect the success of the transformation; choose a reference part that varies little across the samples
+
+In wide data, `\(p \gg n\)`, it is often the case that a suitable low-variance reference can be found
+
+---
+
+# Compositional data &amp;mdash; CLR
+
+Instead of defining a reference, the CLR normalises by the **geometric** mean of the data for the `\(i\)` th sample
+
+`$$\text{CLR}(j) = \log(x_j / g(\mathbf{x})), \; j \in \{1, \dots, D\}$$`
+
+The *geometric* mean of the `\(i\)` th observation is the mean of
+
+`$$\frac{1}{D} \sum_{j=1}^D \log(x_{ji})$$`
+
+The CLR has the nice property that Euclidean distances among samples that are CLR transformed are equal to the distances using all possible logratios &amp;mdash; *isometric*
+
+---
+
+# Compositional data transformations
+
+A problem with the ALR and CLR transformations occurs when `\(x_{ij} = 0\)`
+
+To address, any 0s are replaced by a *pseudocount*, some small value that is specified by the user
+
+Typically the pseudocount is the smallest non-zero value in the observed data
+
+---
+
+# Compositional data transformations
+
+Now available in *vegan* via `decostand()`
+
+* `method = "alr", pseudocount = 1`
+
+* `method = "clr", pseudocount = 1`
 
 ---
 
@@ -1452,10 +1525,10 @@ D. Borcard, *et al*, 2018. Numerical Ecology with R. Springer
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "github",
-"highlightLines": true,
-"countIncrementalSlides": false,
-"ratio": "16:9"
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false,
+  "ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
