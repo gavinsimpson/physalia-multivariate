@@ -43,7 +43,7 @@ applying the methods to high-throughput data such as shotgun sequencing
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/slides.pdf)
     * [Ponds example](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/constrained-ordination.html)
     * [Spring meadows example](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/spring-meadows.html)
-    * [PERMANOVA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/permanova.html)
+    * [PERMANOVA](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/permanova.html)
 * [Thursday](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.pdf)
     * [Randomised Block](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/randomised-complete-block.html)
