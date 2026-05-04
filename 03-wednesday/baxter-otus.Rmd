@@ -1,0 +1,194 @@
+---
+title: Baxter microbiome example
+author: Gavin Simpson (Based on Greenacre)
+date: April 29, 2026
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup-options, echo = FALSE, results = "hide", message = FALSE}
+options(htmltools.dir.version = FALSE)
+knitr::opts_chunk$set(cache = TRUE, dev = 'svg', echo = TRUE, message = FALSE, warning = FALSE, fig.height=6, fig.width = 1.777777*6)
+```
+
+In this example, we will use a data set from Baxter *et al* (2016; *Genome Medicine*), who investigated the use of non-invasive tests for colorectal cancer. They studied the microbiomes of a number of patients and investigated whether there were detectable differences in microbial composition in stool samples between patients with cancer, versus adenomas, versus healthy individuals.
+
+Load the packages we will use and the OTU data:
+
+```{r load-baxter}
+# load vegan, dplyr
+library("vegan")
+library("dplyr")
+
+# load the data
+baxter <- read.table(
+  "https://raw.githubusercontent.com/michaelgreenacre/CODAinPractice/master/Baxter_OTU_table.txt",
+  header = TRUE
+  )
+```
+
+We need to remove the first three columns of the data as provided:
+
+```{r}
+baxter <- baxter |>
+  as_tibble() |>
+  select(-c(label:numOtus))
+```
+
+There are 490 samples and 335 OTUs in the data:
+
+```{r}
+dim(baxter)
+```
+
+The associated meta data are loaded using
+
+```{r}
+meta <- read.table(
+  "https://raw.githubusercontent.com/michaelgreenacre/CODAinPractice/master/Baxter_Metadata.txt",
+  header = TRUE
+) |> as_tibble()
+
+dim(meta)
+names(meta)
+meta
+```
+
+The data represent one of three types of cell (variable `dx`):
+
+* `normal`,
+* `cancer`, and
+* `adenoma` (benign)
+
+We need to convert ths variable to a factor so it can be used in the ordination method. We also centre and standardize the `Age` variable
+
+```{r}
+meta <- meta |>
+  mutate(
+    dx = factor(dx),
+    std_Age = (Age - mean(Age)) / sd(Age)
+  )
+```
+
+The species data are counts of the OTUs. We will look at two ordination methods in this brief example:
+
+* CCA on the fourth-root transformed percentage abundances, and
+
+* RDA on the CLR-transformed percentage abundances.
+
+## CCA
+
+We begin by converting the data to proportions
+
+```{r}
+baxter_prop <- baxter |> decostand(method = "total")
+```
+
+and then to stabilise the variance of the data we could use a square root transform, but we follow Greenacre (2021; *Annual Review of Statistics and its Applications*) and use a quarter root transformation
+
+```{r}
+baxter_qroot <- baxter_prop^0.25
+```
+
+The aim of this brief example is to explore the effects of `dx` (diagnosis) and `std_Age` on the OTU composition. We can fit this model using
+
+```{r}
+baxter_cca <- cca(baxter_qroot ~ dx + std_Age, data = meta)
+```
+
+If we plot these data, we notice a considerable outlier, sample 371:
+
+```{r}
+plot(baxter_cca, display = "sites", type = "text")
+```
+
+We can delete this observation and refit the model
+
+```{r}
+baxter_qroot <- baxter_qroot[-371, ]
+meta <- meta[-371, ]
+baxter_cca <- cca(baxter_qroot ~ dx + std_Age, data = meta)
+```
+
+```{r}
+plot(baxter_cca, display = "sites", type = "text")
+```
+
+The two covariates in the model explain a relatively small amount of the variation in the OTUs
+
+```{r}
+baxter_cca
+```
+
+but such small proportions of variation explained are not necessarily an issue; with such a large number of taxa, even 490 samples are very sparsely scattered around the 335 dimensional space represented by the OTUs.
+
+We can use the `anova()` method to test the overall model
+```{r}
+set.seed(2026-4-29)
+anova(baxter_cca, parallel = 4)
+```
+the individual axes of the CCA
+```{r}
+set.seed(2026-4-29)
+anova(baxter_cca, by = "axis", parallel = 4)
+```
+and the marginal effects of the covariates
+```{r}
+set.seed(2026-4-29)
+anova(baxter_cca, by = "margin", parallel = 4)
+```
+
+To visualise the effects of the covariates, we can use a couple of *vegan*'s plotting commands
+
+```{r}
+baxter_cca |> plot(
+  display = c("sites", "bp", "cn"),
+  scaling = "sites"
+)
+ordiellipse(
+  baxter_cca, meta$dx,
+  kind = "se", conf = 0.95,
+  col = palette.colors(3),
+  scaling = "sites", lwd = 2, label = TRUE
+)
+```
+
+It's not an especially pretty plot, but we see that the first axis captures the contrast between cancerous and normal/adenoma samples, while the second axis reflects the age of the patient.
+
+### CLR transformation
+
+To look at the CLR transformation, we start with the original data, `baxter` and use `decostand()` to apply the transformation. We use a pseudocount of 1.
+
+```{r}
+pseudo <- min(baxter_prop[baxter_prop > 0])
+baxter_clr <- baxter_prop |>
+  decostand(method = "clr", pseudocount = pseudo)
+baxter_clr <- baxter_clr[-371, ]
+```
+
+We fit the same model as we did with CCA:
+
+```{r}
+baxter_rda <- rda(baxter_clr ~ dx + std_Age, data = meta)
+```
+
+and apply the same tests; for brevity, I just show the results for the marginal effects:
+```{r}
+set.seed(2026-4-29)
+anova(baxter_rda, by = "margin", parallel = 4)
+```
+
+A plot that is superficially the same as the one we achieved using CCA is obtained from the RDA results:
+```{r}
+baxter_rda |> plot(
+  display = c("sites", "bp", "cn"),
+  scaling = "sites"
+)
+ordiellipse(
+  baxter_rda, meta$dx,
+  kind = "se", conf = 0.95,
+  col = palette.colors(3),
+  scaling = "sites", lwd = 2, label = TRUE
+)
+```
