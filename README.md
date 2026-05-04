@@ -50,15 +50,14 @@ applying the methods to high-throughput data such as shotgun sequencing
     * [Permutation test examples](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/permutation-tests-solutions.html)
 
 
-* [Other topics](https://gavinsimpson.github.io/physalia-multivariate/05-friday/slides.html)
-    * [PDF](https://gavinsimpson.github.io/physalia-multivariate/05-friday/slides.pdf)
-    * [PERMANOVA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/permanova.html)
-    * [dbRDA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/dbrda.html)
-    * [PRC](https://gavinsimpson.github.io/physalia-multivariate/05-friday/prc.html)
-    * [Co-CA](https://gavinsimpson.github.io/physalia-multivariate/05-friday/cocorrespondence-analysis.html)
-    * [Variation partitioning](https://gavinsimpson.github.io/physalia-multivariate/05-friday/variation-partitioning.html)
-    * [Linear discriminant analysis](https://gavinsimpson.github.io/physalia-multivariate/05-friday/linear-discriminants.html)
--->
+* [Other topics](https://gavinsimpson.github.io/physalia-multivariate/05-other/slides.html)
+    * [PDF](https://gavinsimpson.github.io/physalia-multivariate/05-other/slides.pdf)
+    * [PERMANOVA](https://gavinsimpson.github.io/physalia-multivariate/05-other/permanova.html)
+    * [dbRDA](https://gavinsimpson.github.io/physalia-multivariate/05-other/dbrda.html)
+    * [PRC](https://gavinsimpson.github.io/physalia-multivariate/05-other/prc.html)
+    * [Co-CA](https://gavinsimpson.github.io/physalia-multivariate/05-other/cocorrespondence-analysis.html)
+    * [Variation partitioning](https://gavinsimpson.github.io/physalia-multivariate/05-other/variation-partitioning.html)
+    * [Linear discriminant analysis](https://gavinsimpson.github.io/physalia-multivariate/05-other/linear-discriminants.html)
 
 ## Target audience and assumed background
 
