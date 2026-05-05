@@ -171,8 +171,8 @@ If we want to use `ggplot()` to reproduce the plot where we coloured the sample 
 
 ```{r}
 # fortify the different scores into separate data frames
-site_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric", display = "sites")
-spp_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric", display = "species")
+site_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric", layers = "sites")
+spp_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric", layers = "species")
 ```
 
 
@@ -205,7 +205,7 @@ If the data are in different orders, we will need the sample labels *within* bot
 ```{r}
 # note we scramble the `dune.env` data to illustrate the point
 site_scrs <- fortify(ord, axes = 1:2, scaling = "symmetric",
-                     display = "sites") |>
+                     layers = "sites") |>
   left_join(tibble::rownames_to_column(dune.env[sample(nrow(dune.env)), ]),
             by = c("label" = "rowname"))
 ```
