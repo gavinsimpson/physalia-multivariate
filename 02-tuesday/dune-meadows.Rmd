@@ -153,7 +153,7 @@ head(ford, 4)
 Now we can produce a version of the plot we made earlier, but now using `ggplot()`
 
 ```{r}
-ggplot(ford, aes(x = PC1, y = PC2)) +
+ggplot(ford, aes(x = pc1, y = pc2)) +
   geom_hline(yintercept = 0, colour = "steelblue", alpha = 0.5) +
   geom_vline(xintercept = 0, colour = "steelblue", alpha = 0.5) +
   geom_point(data = dplyr::filter(ford, score == "sites")) +
@@ -186,7 +186,7 @@ site_scrs <- site_scrs |>
 Now we can rerun the code above, but mapping the `Management` variable to the colour channel for the layer plotting the sample points
 
 ```{r}
-ggplot(ford, aes(x = PC1, y = PC2)) +
+ggplot(ford, aes(x = pc1, y = pc2)) +
   geom_hline(yintercept = 0, colour = "steelblue", alpha = 0.5) +
   geom_vline(xintercept = 0, colour = "steelblue", alpha = 0.5) +
   geom_point(data = site_scrs,
