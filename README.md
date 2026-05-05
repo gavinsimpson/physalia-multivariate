@@ -33,8 +33,6 @@ applying the methods to high-throughput data such as shotgun sequencing
 
 ## Slides
 
-*Content is from the February 2025 running of the course and will be updated in May, 2026*
-
 * [Monday](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/01-monday/slides.pdf)
     * [Cluster analysis exercise](https://gavinsimpson.github.io/physalia-multivariate/01-monday/cluster-analysis.html)

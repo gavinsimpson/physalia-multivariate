@@ -89,7 +89,7 @@ class: inverse middle center big-subsection
 # Unconstrained
 
 What is .text-highlight[unconstrained]?
-ß
+
 First we look for major variation, then relate it to environmental variation
 
 vs. *constrained* ordination, where we only want to see what can be explained by environmental variables of interest
@@ -352,7 +352,6 @@ ggplot(df_rot, aes(x = x1_c, y = x2_c)) +
 
 # Principal Components Analysis
 
-
 .center[![:scale 64%](resources/pca-anim.gif)]
 
 ---
@@ -389,7 +388,7 @@ head(varespec[,1:6], n = 5)
 
 Data are cover values of 44 understorey species recorded at 24 locations in lichen pastures within dry *Pinus sylvestris* forests
 
-This arrangement is back-to-front if you are used to OTU like data
+This arrangement is back-to-front if you are used to OTU/ASV like data
 
 ---
 
@@ -410,9 +409,23 @@ head(varechem)
 
 # PCA of lichen pasture soil data
 
-PCA is fitted using `pca()` given a data frame of Observations
+PCA is fitted using function `pca()` given a data frame of observations
 
-* To scale all variables to be &mu; = 0, &sigma;<sup>2</sup> = 1: `scale = TRUE`
+We can do PCA on two versions of the data $Y$
+
+1. PCA of the covariance matrix of $Y$, with `scale = FALSE`, is the default, or
+
+2. PCA of the correlation matrix of $Y$, with `scale = TRUE`.
+
+PCA of the covariance matrix requires all observations are in the same units, and magnitudes dominate
+
+---
+
+# PCA of lichen pasture soil data
+
+Soil property variables for the lichen pastures data are measured in different units, so PCA of the correlation matrix of $Y$ is advisable
+
+Scale all variables to be &mu; = 0, &sigma;<sup>2</sup> = 1 random variables with `scale = TRUE`
 
 ```{r varechem-pca, echo = TRUE}
 varechem_ord <- pca(varechem, scale = TRUE)
@@ -432,23 +445,70 @@ How **vegan** scales the eigenvalues is different to *Canoco*
 
 ---
 
+# Vegetation in lichen pastures &mdash; tb-PCA
+
+PCA is not generally recommended for species composition data
+
+Transformation-based PCA ([Legendre & Gallagher 2001](https://doi.org/10.1007/s004420100716)) is a viable option
+
+Transform the response such that when we run PCA it preserves the non-Euclidean distance between samples
+
+---
+
+# Vegetation in lichen pastures &mdash; tb-PCA
+
+$$d_{ij}^{\text{Hellinger}} = \sqrt{\sum_{k = 1}^{m} \left ( \sqrt{\frac{y_{ik}}{y_{i+}}} - \sqrt{\frac{y_{jk}}{y_{j+}}}\right )^2}$$
+
+Notice this looks like the Euclidean distance
+
+$$d_{ij}^{\text{Euclidean}} = \sqrt{\sum_{k = 1}^{m} \left ( y_{ik} - y_{jk}\right )^2}$$
+
+on transformed data: to percentages by division by $y_{i+}$, then square-root transform
+
+---
+
+# Vegetation in lichen pastures &mdash; tb-PCA
+
+Therefore, if we transform the data first, when we run that transformed data through PCA, the distance preserved is no longer the Euclidean distance but some other distance
+
+With Hellinger transformation, the distance preserved is the Hellinger distance
+
+---
+
+# Vegetation in lichen pastures &mdash; tb-PCA
+
+
+Recommended transformations
+
+1. Hellinger transformation $y^{\prime}_{ij} = \sqrt{\frac{y_{ij}}{y_{i+}}}$, and
+
+2. Chi-square distance transformation $y^{\prime}_{ij} = \sqrt{y_{++}}\frac{y_{ij}}{y_{i+}\sqrt{y_{+j}}}$
+
+3. Chord transformation $y^{\prime}_{ij} = \frac{y_{ij}}{\sqrt{\sum_{j=1}^m y_{ij}^2}}$
+
+With Chi-square transformation followed by PCA of $Y^{\prime}$ we get something close to CA of $Y$
+
+Not exactly the same as CA of $Y$ because CA is a *weighted* method
+
+---
+
 # Vegetation in lichen pastures &mdash; PCA
 
-A transformation-based PCA ([Legendre & Gallagher 2001](https://doi.org/10.1007/s004420100716)) is where we transform the response such that when we run PCA it preserves the non-Euclidean distance between samples
-
-Here, with a *Hellinger* transformation, the PCA will reflect the hellinger distances in the original data
+A transformation-based PCA with a *Hellinger* transformation, the PCA will reflect the hellinger distances in the original data
 
 ```{r vare-pca-1, echo = TRUE}
-ord <- pca(decostand(varespec, method = "hellinger"), scale = TRUE)
+ord <- decostand(varespec, method = "hellinger") |> # apply transform
+  pca(scale = TRUE)                                 # apply PCA
 ord
 ```
 
 ---
 
-
 # Vegetation in lichen pastures &mdash; PCA
 
-```{r vare-pca-1c, echo = TRUE, out.width = "95%", dev.args = list(pointsize = 14)}
+Visualise ordinations with a biplot or joint plot
+
+```{r vare-pca-1c, echo = TRUE, out.width = "85%", fig.align="center", dev.args = list(pointsize = 14)}
 biplot(ord, scaling = "symmetric")
 ```
 
@@ -475,17 +535,25 @@ biplot(ord, scaling = "symmetric")
 # Eigenvalues &lambda;
 
 .row[
-.col-6[
+.col-7[
 
 Eigenvalues are the amount of variance (inertia) explained by each axis
 
+"Important" axes are ones that explain more variation than null model
+
+Null model is the broken stick distribution
+
+Plot &lambda; for each axis on a *screeplot*
+
 ```{r vare-pca-3, echo = TRUE}
-head(eigenvals(ord), 5)
+eigenvals(ord) |> head(5)
 ```
 ]
-.col-6[
+.col-5[
 ```{r vare-pca-4, echo = TRUE, dev.args = list(pointsize = 14), fig.height = 6, fig.width = 6}
-screeplot(ord, bstick = TRUE, type = "l",
+screeplot(ord,
+          bstick = TRUE,
+          type = "l",
           main = NULL)
 ```
 ]
@@ -498,7 +566,7 @@ screeplot(ord, bstick = TRUE, type = "l",
 The `summary()` method provides additional information
 
 ```{r vare-pca-5, echo = TRUE}
-summary(eigenvals(ord))
+eigenvals(ord) |> summary()
 ```
 
 ---
@@ -510,7 +578,7 @@ class: inverse middle center subsection
 
 # Correspondence Analysis
 
-Correspondence analysis (CA) is very similar to PCA &mdash; a weighted form of PCA
+Correspondence analysis (CA) is *in princple* very similar to PCA &mdash; a weighted form of PCA
 
 The row and column sums are used as weights and this has the effect of turning the analysis into one of relative composition
 
@@ -522,22 +590,24 @@ These nonlinear response are assumed to unimodal Gaussian curves, all with equal
 
 # Correspondence Analysis
 
-```{r}
-gaussresp <- function(x,u) { exp(-(x-u)^2/2) }
+CA assumes a "species packing model"
+
+```{r out.width="90%", fig.align="center"}
+gaussresp <- function(x, u) exp(-(x - u)^2 / 2)
 n_opt <- 20
 x <- seq(0, 6, length = 100) ## The gradient
 u <- seq(-2, 8, len = n_opt) ## The optima
 pack <- outer(x, u, gaussresp)
-pack <- as.data.frame(pack) %>%
-    setNames(nm = paste0("spp", seq_len(n_opt))) %>%
-    as_tibble() %>%
-    add_column(x = x, .before = 1) %>%
-    pivot_longer(cols = -x, names_to = "species", values_to = "abundance")
+pack <- as.data.frame(pack) |>
+  setNames(nm = paste0("spp", seq_len(n_opt))) |>
+  as_tibble() |>
+  add_column(x = x, .before = 1) |>
+  pivot_longer(cols = -x, names_to = "species", values_to = "abundance")
 
 ggplot(pack, aes(x = x, y = abundance, colour = species)) +
-    geom_line() +
-    theme(legend.position = "none") +
-    labs(x = "Gradient", y = "Abundance")
+  geom_line() +
+  theme(legend.position = "none") +
+  labs(x = "Gradient", y = "Abundance")
 ```
 
 ---
@@ -1367,38 +1437,38 @@ autoplot(d_ord)
 
 # Any love for *ggplot*?
 
-The **ggvegan** package is in development
+The **ggvegan** package is in development but has had its first release to CRAN
 
 ```{r install-ggvegan, eval = FALSE, echo = TRUE}
-# Install src from github
-remotes::install_github("gavinsimpson/ggvegan")
-# or binary from R-universe:
+# Install from CRAN
+install.packages("ggvegan")
+# Install development version binary from R-universe:
 # Enable repository from gavinsimpson
 options(repos = c(
   gavinsimpson = 'https://gavinsimpson.r-universe.dev',
   CRAN = 'https://cloud.r-project.org'))
 # Download and install ggvegan in R
-install.packages('ggvegan')
+install.packages("ggvegan")
 ```
 
 ---
 
-# ggvegan
+# ggvegan &mdash; `fortify()`
 
 .row[
 .col-6[
 ```{r ggvegan-2, echo = TRUE, fig.show = "hide"}
 ford <- fortify(ord, axes = 1:2)
-## not yet a tibble
-head(ford, 4)
+
+head(ford, 4) # returns scores as tibble
 
 blue <- "#025196"
-filter(ford, score == "sites") %>%
-    ggplot(aes(x = PC1, y = PC2)) +
-    geom_hline(yintercept = 0, colour = blue) +
-    geom_vline(xintercept = 0, colour = blue) +
-    geom_point() +
-    coord_fixed()
+filter(ford, score == "sites") |>
+  ggplot(aes(x = pc1, y = pc2)) +
+  geom_hline(yintercept = 0, colour = blue) +
+  geom_vline(xintercept = 0, colour = blue) +
+  geom_point() +
+  coord_fixed()
 ```
 ]
 
@@ -1407,3 +1477,11 @@ filter(ford, score == "sites") %>%
 ```
 ]
 ]
+
+---
+
+# ggvegan &mdash; `autoplot()`
+
+```{r ggvegan-3, echo=TRUE, out.width="90%", fig.align="center"}
+autoplot(ord, scaling = "symmetric")
+```

@@ -85,7 +85,7 @@ class: inverse middle center big-subsection
 # Unconstrained
 
 What is .text-highlight[unconstrained]?
-ß
+
 First we look for major variation, then relate it to environmental variation
 
 vs. *constrained* ordination, where we only want to see what can be explained by environmental variables of interest
@@ -156,7 +156,6 @@ Each of these subsequent axes is uncorrelated with previous axes &amp;mdash; the
 
 # Principal Components Analysis
 
-
 .center[![:scale 64%](resources/pca-anim.gif)]
 
 ---
@@ -218,7 +217,7 @@ head(varespec[,1:6], n = 5)
 
 Data are cover values of 44 understorey species recorded at 24 locations in lichen pastures within dry *Pinus sylvestris* forests
 
-This arrangement is back-to-front if you are used to OTU like data
+This arrangement is back-to-front if you are used to OTU/ASV like data
 
 ---
 
@@ -257,9 +256,23 @@ head(varechem)
 
 # PCA of lichen pasture soil data
 
-PCA is fitted using `pca()` given a data frame of Observations
+PCA is fitted using function `pca()` given a data frame of observations
 
-* To scale all variables to be &amp;mu; = 0, &amp;sigma;&lt;sup&gt;2&lt;/sup&gt; = 1: `scale = TRUE`
+We can do PCA on two versions of the data `\(Y\)`
+
+1. PCA of the covariance matrix of `\(Y\)`, with `scale = FALSE`, is the default, or
+
+2. PCA of the correlation matrix of `\(Y\)`, with `scale = TRUE`.
+
+PCA of the covariance matrix requires all observations are in the same units, and magnitudes dominate
+
+---
+
+# PCA of lichen pasture soil data
+
+Soil property variables for the lichen pastures data are measured in different units, so PCA of the correlation matrix of `\(Y\)` is advisable
+
+Scale all variables to be &amp;mu; = 0, &amp;sigma;&lt;sup&gt;2&lt;/sup&gt; = 1 random variables with `scale = TRUE`
 
 
 ``` r
@@ -278,17 +291,14 @@ pca(varechem)
 ```
 
 ```
-## Call: pca(X = varechem)
 ## 
-## -- Model Summary --
+## Call: pca(X = varechem)
 ## 
 ##               Inertia Rank
 ## Total           85655     
 ## Unconstrained   85655   14
 ## 
 ## Inertia is variance
-## 
-## -- Eigenvalues --
 ## 
 ## Eigenvalues for unconstrained axes:
 ##   PC1   PC2   PC3   PC4   PC5   PC6   PC7   PC8   PC9  PC10  PC11  PC12  PC13 
@@ -301,30 +311,73 @@ How **vegan** scales the eigenvalues is different to *Canoco*
 
 ---
 
+# Vegetation in lichen pastures &amp;mdash; tb-PCA
+
+PCA is not generally recommended for species composition data
+
+Transformation-based PCA ([Legendre &amp; Gallagher 2001](https://doi.org/10.1007/s004420100716)) is a viable option
+
+Transform the response such that when we run PCA it preserves the non-Euclidean distance between samples
+
+---
+
+# Vegetation in lichen pastures &amp;mdash; tb-PCA
+
+`$$d_{ij}^{\text{Hellinger}} = \sqrt{\sum_{k = 1}^{m} \left ( \sqrt{\frac{y_{ik}}{y_{i+}}} - \sqrt{\frac{y_{jk}}{y_{j+}}}\right )^2}$$`
+
+Notice this looks like the Euclidean distance
+
+`$$d_{ij}^{\text{Euclidean}} = \sqrt{\sum_{k = 1}^{m} \left ( y_{ik} - y_{jk}\right )^2}$$`
+
+on transformed data: to percentages by division by `\(y_{i+}\)`, then square-root transform
+
+---
+
+# Vegetation in lichen pastures &amp;mdash; tb-PCA
+
+Therefore, if we transform the data first, when we run that transformed data through PCA, the distance preserved is no longer the Euclidean distance but some other distance
+
+With Hellinger transformation, the distance preserved is the Hellinger distance
+
+---
+
+# Vegetation in lichen pastures &amp;mdash; tb-PCA
+
+
+Recommended transformations
+
+1. Hellinger transformation `\(y^{\prime}_{ij} = \sqrt{\frac{y_{ij}}{y_{i+}}}\)`, and
+
+2. Chi-square distance transformation `\(y^{\prime}_{ij} = \sqrt{y_{++}}\frac{y_{ij}}{y_{i+}\sqrt{y_{+j}}}\)`
+
+3. Chord transformation `\(y^{\prime}_{ij} = \frac{y_{ij}}{\sqrt{\sum_{j=1}^m y_{ij}^2}}\)`
+
+With Chi-square transformation followed by PCA of `\(Y^{\prime}\)` we get something close to CA of `\(Y\)`
+
+Not exactly the same as CA of `\(Y\)` because CA is a *weighted* method
+
+---
+
 # Vegetation in lichen pastures &amp;mdash; PCA
 
-A transformation-based PCA ([Legendre &amp; Gallagher 2001](https://doi.org/10.1007/s004420100716)) is where we transform the response such that when we run PCA it preserves the non-Euclidean distance between samples
-
-Here, with a *Hellinger* transformation, the PCA will reflect the hellinger distances in the original data
+A transformation-based PCA with a *Hellinger* transformation, the PCA will reflect the hellinger distances in the original data
 
 
 ``` r
-ord &lt;- pca(decostand(varespec, method = "hellinger"), scale = TRUE)
+ord &lt;- decostand(varespec, method = "hellinger") |&gt; # apply transform
+  pca(scale = TRUE)                                 # apply PCA
 ord
 ```
 
 ```
-## Call: pca(X = decostand(varespec, method = "hellinger"), scale = TRUE)
 ## 
-## -- Model Summary --
+## Call: pca(X = decostand(varespec, method = "hellinger"), scale = TRUE)
 ## 
 ##               Inertia Rank
 ## Total              44     
 ## Unconstrained      44   23
 ## 
 ## Inertia is correlations
-## 
-## -- Eigenvalues --
 ## 
 ## Eigenvalues for unconstrained axes:
 ##   PC1   PC2   PC3   PC4   PC5   PC6   PC7   PC8 
@@ -334,15 +387,16 @@ ord
 
 ---
 
-
 # Vegetation in lichen pastures &amp;mdash; PCA
+
+Visualise ordinations with a biplot or joint plot
 
 
 ``` r
 biplot(ord, scaling = "symmetric")
 ```
 
-&lt;img src="slides_files/figure-html/vare-pca-1c-1.svg" width="95%" /&gt;
+&lt;img src="slides_files/figure-html/vare-pca-1c-1.svg" alt="" width="85%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -370,13 +424,19 @@ biplot(ord, scaling = "symmetric")
 # Eigenvalues &amp;lambda;
 
 .row[
-.col-6[
+.col-7[
 
 Eigenvalues are the amount of variance (inertia) explained by each axis
 
+"Important" axes are ones that explain more variation than null model
+
+Null model is the broken stick distribution
+
+Plot &amp;lambda; for each axis on a *screeplot*
+
 
 ``` r
-head(eigenvals(ord), 5)
+eigenvals(ord) |&gt; head(5)
 ```
 
 ```
@@ -384,10 +444,12 @@ head(eigenvals(ord), 5)
 ## 8.602826 5.133623 4.575623 3.713926 3.244925
 ```
 ]
-.col-6[
+.col-5[
 
 ``` r
-screeplot(ord, bstick = TRUE, type = "l",
+screeplot(ord,
+          bstick = TRUE,
+          type = "l",
           main = NULL)
 ```
 
@@ -403,7 +465,7 @@ The `summary()` method provides additional information
 
 
 ``` r
-summary(eigenvals(ord))
+eigenvals(ord) |&gt; summary()
 ```
 
 ```
@@ -435,7 +497,7 @@ class: inverse middle center subsection
 
 # Correspondence Analysis
 
-Correspondence analysis (CA) is very similar to PCA &amp;mdash; a weighted form of PCA
+Correspondence analysis (CA) is *in princple* very similar to PCA &amp;mdash; a weighted form of PCA
 
 The row and column sums are used as weights and this has the effect of turning the analysis into one of relative composition
 
@@ -447,7 +509,9 @@ These nonlinear response are assumed to unimodal Gaussian curves, all with equal
 
 # Correspondence Analysis
 
-![](slides_files/figure-html/unnamed-chunk-1-1.svg)&lt;!-- --&gt;
+CA assumes a "species packing model"
+
+&lt;img src="slides_files/figure-html/unnamed-chunk-1-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
 
 ---
 
@@ -539,17 +603,14 @@ ca1
 ```
 
 ```
-## Call: cca(X = varespec)
 ## 
-## -- Model Summary --
+## Call: cca(X = varespec)
 ## 
 ##               Inertia Rank
 ## Total           2.083     
 ## Unconstrained   2.083   23
 ## 
 ## Inertia is scaled Chi-square
-## 
-## -- Eigenvalues --
 ## 
 ## Eigenvalues for unconstrained axes:
 ##    CA1    CA2    CA3    CA4    CA5    CA6    CA7    CA8 
@@ -928,10 +989,10 @@ A goodness of fit statistic `\(g_i\)` can be computed for the observations; defi
 ```
 
 ```
-##  [1] 0.0008559796 0.0014569292 0.0006071222 0.0010337685 0.0008109554
-##  [6] 0.0006932209 0.0009813765 0.0007284320 0.0007316829 0.0009052744
-## [11] 0.0004102242 0.0004846332 0.0008688444 0.0011563520 0.0013120348
-## [16] 0.0007051008 0.0008226499 0.0005374015 0.0008933316 0.0006139805
+##  [1] 0.0008465706 0.0014496074 0.0005970345 0.0010590591 0.0008307856
+##  [6] 0.0006913388 0.0010005024 0.0007252496 0.0007141225 0.0009208506
+## [11] 0.0003878840 0.0004951200 0.0008869459 0.0011635470 0.0013137452
+## [16] 0.0006894673 0.0008147213 0.0005572943 0.0008889747 0.0006099458
 ```
 
 ``` r
@@ -939,7 +1000,7 @@ sum(g^2)
 ```
 
 ```
-## [1] 1.513378e-05
+## [1] 1.522324e-05
 ```
 
 ``` r
@@ -947,7 +1008,7 @@ sol$stress^2
 ```
 
 ```
-## [1] 1.513378e-05
+## [1] 1.522324e-05
 ```
 
 ``` r
@@ -1471,50 +1532,52 @@ autoplot(d_ord)
 
 # Any love for *ggplot*?
 
-The **ggvegan** package is in development
+The **ggvegan** package is in development but has had its first release to CRAN
 
 
 ``` r
-# Install src from github
-remotes::install_github("gavinsimpson/ggvegan")
-# or binary from R-universe:
+# Install from CRAN
+install.packages("ggvegan")
+# Install development version binary from R-universe:
 # Enable repository from gavinsimpson
 options(repos = c(
   gavinsimpson = 'https://gavinsimpson.r-universe.dev',
   CRAN = 'https://cloud.r-project.org'))
 # Download and install ggvegan in R
-install.packages('ggvegan')
+install.packages("ggvegan")
 ```
 
 ---
 
-# ggvegan
+# ggvegan &amp;mdash; `fortify()`
 
 .row[
 .col-6[
 
 ``` r
 ford &lt;- fortify(ord, axes = 1:2)
-## not yet a tibble
-head(ford, 4)
+
+head(ford, 4) # returns scores as tibble
 ```
 
 ```
-##     score    label        PC1         PC2
-## 1 species Callvulg -0.2093899  0.09675599
-## 2 species Empenigr  0.4144765  0.14879137
-## 3 species Rhodtome  0.6697053 -0.16259319
-## 4 species Vaccmyrt  0.6187605 -0.18139933
+## # A tibble: 4 × 4
+##   score   label       pc1     pc2
+##   &lt;fct&gt;   &lt;chr&gt;     &lt;dbl&gt;   &lt;dbl&gt;
+## 1 species Callvulg -0.209  0.0968
+## 2 species Empenigr  0.414  0.149 
+## 3 species Rhodtome  0.670 -0.163 
+## 4 species Vaccmyrt  0.619 -0.181
 ```
 
 ``` r
 blue &lt;- "#025196"
-filter(ford, score == "sites") %&gt;%
-    ggplot(aes(x = PC1, y = PC2)) +
-    geom_hline(yintercept = 0, colour = blue) +
-    geom_vline(xintercept = 0, colour = blue) +
-    geom_point() +
-    coord_fixed()
+filter(ford, score == "sites") |&gt;
+  ggplot(aes(x = pc1, y = pc2)) +
+  geom_hline(yintercept = 0, colour = blue) +
+  geom_vline(xintercept = 0, colour = blue) +
+  geom_point() +
+  coord_fixed()
 ```
 ]
 
@@ -1522,15 +1585,26 @@ filter(ford, score == "sites") %&gt;%
 ![](slides_files/figure-html/ggvegan-2-1.svg)&lt;!-- --&gt;
 ]
 ]
+
+---
+
+# ggvegan &amp;mdash; `autoplot()`
+
+
+``` r
+autoplot(ord, scaling = "symmetric")
+```
+
+&lt;img src="slides_files/figure-html/ggvegan-3-1.svg" alt="" width="90%" style="display: block; margin: auto;" /&gt;
     </textarea>
 <style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "github",
-"highlightLines": true,
-"countIncrementalSlides": false,
-"ratio": "16:9"
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false,
+  "ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));
