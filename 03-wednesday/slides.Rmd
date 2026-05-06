@@ -855,6 +855,149 @@ m5$anova
 ---
 class: inverse middle center big-subsection
 
+# Microbiome
+
+---
+
+# Implications
+
+Size factors can be used in GLMs etc to normalize samples via as `offset()` term in the formula
+
+For ordination we can't easily use the size factors
+
+Need to use _vst_ or _rlog_ instead
+
+_rlog_ creates data that can't be used in CCA, so if you use it, RDA or db-RDA are the ordination methods to use
+
+---
+
+# Practicalities
+
+```{r eval = FALSE}
+# install.packages("BiocManager")
+# BiocManager::install("DESeq2")
+library("DESeq2")
+
+dds_asv <- DESeqDataSetFromMatrix(
+  countData = orig_asv, # response count data
+  colData = meta_data,  # other data including predictors
+  design = ~ treatment  # experimental design
+
+)
+
+## Make sure that the control is the reference level
+dds_asv$treatment <- relevel(dds_asv$treatment, ref = "CON")
+
+# compute the regularized log transform
+rld <- rlog(dds_asv, blind = FALSE)
+# ...or compute the variance stabilizing transform
+vst <- vst(dds_asv, blind = FALSE)
+
+# extract rlog transformed data & get ready to go into *vegan*
+cts <- t(assay(rld)) # or t(assay(rld)), t() transposes data
+cts_df <- as.data.frame(cts) # want a data frame
+```
+
+---
+
+# Rarefied counts
+
+Can take a random draw $n^{\prime}$ out of the $N$ individuals in a sample in proportion to species abundances
+
+This yields rarefied counts which some people then go on to analyse
+
+Be careful though as this is a random process &mdash; what if you took a different random sample?
+
+---
+
+# Rarefied counts
+
+`avgdist()` in *vegan* tries to get around this by
+
+1. taking a random draw to get rarefied counts
+2. computing dissimilarity between smaples on basis of rarefied count
+
+Repeat that many times and then as your dissimilarity $d_{ij}$, take the average of the many $d_{ij}^*$ values you generated above
+
+See also the help page for other suggestions `?avgdist`
+
+---
+
+# Compositional data
+
+Aitchison's *logratio* approach
+
+Classic statistical treatment for compositional data
+
+Compositional data are $D$ dimensional observations that lie on a $d = D - 1$ dimensional simplex
+
+Compositional data are defiend by a sample total
+
+Proportions of *sand*, *silt*, & *clay*; 3 dimensional data but once you know two of them, the third value is fixed
+
+---
+
+# Compositional data &mdash; transformations
+
+Many compositional transformations based on ratios of logs or *logratios*
+
+Two commonly encountered ones are
+
+* Additive logratio (ALR) transformation
+
+* Centred logratio (CLR) transformation
+
+---
+
+# Compositional data &mdash; ALR
+
+$$\text{ALR}(j) | \text{ref} = \log \left( \frac{x_j}{x_{\text{ref}}} \right) \; j \in \{1, \dots, D\}$$
+
+There are $D$ possible ALR transformations, depending on the choice of *reference* composition / part ($x_{\text{ref}}$)
+
+Choose one of the variables in the simplex as the reference part against which all other variables are normalised
+
+The reference part can affect the success of the transformation; choose a reference part that varies little across the samples
+
+In wide data, $p \gg n$, it is often the case that a suitable low-variance reference can be found
+
+---
+
+# Compositional data &mdash; CLR
+
+Instead of defining a reference, the CLR normalises by the **geometric** mean of the data for the $i$ th sample
+
+$$\text{CLR}(j) = \log(x_j / g(\mathbf{x})), \; j \in \{1, \dots, D\}$$
+
+The *geometric* mean of the $i$ th observation is the mean of
+
+$$\frac{1}{D} \sum_{j=1}^D \log(x_{ji})$$
+
+The CLR has the nice property that Euclidean distances among samples that are CLR transformed are equal to the distances using all possible logratios &mdash; *isometric*
+
+---
+
+# Compositional data transformations
+
+A problem with the ALR and CLR transformations occurs when $x_{ij} = 0$
+
+To address, any 0s are replaced by a *pseudocount*, some small value that is specified by the user
+
+Typically the pseudocount is the smallest non-zero value in the observed data
+
+---
+
+# Compositional data transformations
+
+Now available in *vegan* via `decostand()`
+
+* `method = "alr", pseudocount = 1`
+
+* `method = "clr", pseudocount = 1`
+
+---
+class: inverse middle center big-subsection
+
 # PERMANOVA
 
 ---
@@ -1147,6 +1290,8 @@ Err&hellip; isn't that what `adonis2()` was developed to do?
 
 `Condition()` is often needed to provide correct restricted permutation tests
 
+In the development version of *vegan* `adonis2()` can now use `Condition()`
+
 ---
 
 # Distance-based RDA
@@ -1156,7 +1301,7 @@ The equivalent model to `adonis2()` in `dbrda()`-form is
 ```{r adonis2-by-margin-as-db-rda}
 data(dune, dune.env)
 dune_dbrda <- dbrda(dune ~ Management * A1, data = dune.env,
-    distance = "bray")
+  distance = "bray")
 ```
 
 because they have different default dissimilarities

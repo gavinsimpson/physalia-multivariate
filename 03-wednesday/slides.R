@@ -258,6 +258,31 @@ m5 <- ordiR2step(lwr, scope = formula(m3), trace = FALSE)
 m5$anova
 
 
+## ----eval = FALSE-------------------------------------------------------------
+# # install.packages("BiocManager")
+# # BiocManager::install("DESeq2")
+# library("DESeq2")
+# 
+# dds_asv <- DESeqDataSetFromMatrix(
+#   countData = orig_asv, # response count data
+#   colData = meta_data,  # other data including predictors
+#   design = ~ treatment  # experimental design
+# 
+# )
+# 
+# ## Make sure that the control is the reference level
+# dds_asv$treatment <- relevel(dds_asv$treatment, ref = "CON")
+# 
+# # compute the regularized log transform
+# rld <- rlog(dds_asv, blind = FALSE)
+# # ...or compute the variance stabilizing transform
+# vst <- vst(dds_asv, blind = FALSE)
+# 
+# # extract rlog transformed data & get ready to go into *vegan*
+# cts <- t(assay(rld)) # or t(assay(rld)), t() transposes data
+# cts_df <- as.data.frame(cts) # want a data frame
+
+
 ## ----permanova-idea-plot, echo = FALSE----------------------------------------
 data(varespec)
 
@@ -337,5 +362,5 @@ permutest(mod, pairwise = TRUE)
 ## ----adonis2-by-margin-as-db-rda----------------------------------------------
 data(dune, dune.env)
 dune_dbrda <- dbrda(dune ~ Management * A1, data = dune.env,
-    distance = "bray")
+  distance = "bray")
 

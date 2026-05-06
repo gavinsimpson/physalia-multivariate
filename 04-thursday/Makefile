@@ -1,4 +1,4 @@
-all: slides purl random permutations solutions
+all: slides purl random permutations solutions pdf
 
 slides: slides.Rmd slides.css
 	Rscript -e "rmarkdown::render(\"slides.Rmd\")"
@@ -14,3 +14,6 @@ solutions: permutation-tests-solutions.Rmd
 
 permutations: permutation-tests.Rmd
 	Rscript -e "rmarkdown::render(\"permutation-tests.Rmd\")"
+
+pdf: slides.html
+  Rscript -e "renderthis::to_pdf(from = \"slides.Rmd\")"
