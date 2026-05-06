@@ -50,7 +50,7 @@ applying the methods to high-throughput data such as shotgun sequencing
     * [PERMANOVA](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/permanova.html)
     * [dbRDA](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/dbrda.html)
     * [birds activity](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/birds.html)
-    * [Microbiome example](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/baxter.html)
+    * [Microbiome example](https://gavinsimpson.github.io/physalia-multivariate/03-wednesday/baxter-otus.html)
 * [Thursday](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.pdf)
     * [Randomised Block](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/randomised-complete-block.html)
