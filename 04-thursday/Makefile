@@ -15,5 +15,5 @@ solutions: permutation-tests-solutions.Rmd
 permutations: permutation-tests.Rmd
 	Rscript -e "rmarkdown::render(\"permutation-tests.Rmd\")"
 
-pdf: slides.html
-  Rscript -e "renderthis::to_pdf(from = \"slides.Rmd\")"
+pdf: slides.Rmd slides.html
+	Rscript -e "renderthis::to_pdf(from = \"slides.Rmd\")"

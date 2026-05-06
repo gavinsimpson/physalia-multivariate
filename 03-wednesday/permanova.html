@@ -391,7 +391,7 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) |&gt
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <pre><code>## Rows: 12 Columns: 15
-## ── Column specification ──────────────────────────────────────────────────────────────────────────────────────────────────────────────
+## ── Column specification ───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────
 ## Delimiter: &quot;,&quot;
 ## chr  (2): ...1, ...2
 ## dbl (13): Che alb, Pol per, Pol avi, Spe arv, Mat rec, Gna uli, Cap bur, Ste...
@@ -407,10 +407,10 @@ plough &lt;- read_csv(url(&quot;https://bit.ly/plough-spp&quot;), skip = 1) |&gt
 <pre><code>## New names:
 ## Rows: 12 Columns: 4
 ## ── Column specification
-## ────────────────────────────────────────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
+## ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────── Delimiter: &quot;,&quot; chr
 ## (4): ...1, ...2, Block, Treatmnt
-## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types or set `show_col_types = FALSE` to
-## quiet this message.
+## ℹ Use `spec()` to retrieve the full column specification for this data. ℹ Specify the column types or set `show_col_types = FALSE` to quiet this
+## message.
 ## • `` -&gt; `...1`
 ## • `` -&gt; `...2`</code></pre>
 <p>We are interested in the effect of ploughing time and wish to remove
@@ -540,8 +540,8 @@ meet the assumptions of the ANOVA</p>
 ## Pairwise comparisons:
 ## (Observed p-value below diagonal, permuted p-value above diagonal)
 ##          pltime 1 pltime 2 pltime 3
-## pltime 1           0.93100    0.447
-## pltime 2  0.95708             0.308
+## pltime 1           0.93800    0.456
+## pltime 2  0.95708             0.307
 ## pltime 3  0.63784  0.51344</code></pre>
 <p>Here we asked for pairwise comparisons to investigate whether there
 are pairs of groups that have different dispersions instead of just

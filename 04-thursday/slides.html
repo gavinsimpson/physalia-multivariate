@@ -92,7 +92,7 @@ summary(pstat)
 ```
 ## 
 ##       statistic    SES   mean lower median  upper Pr(perm)  
-## Model    1.4441 2.0682 1.0344       1.0196 1.3821     0.03 *
+## Model    1.4441 2.0552 1.0371       1.0175 1.4011    0.033 *
 ## ---
 ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
 ## 
@@ -709,7 +709,7 @@ plot(ev.pca, labels = levels(design$Watershed), add = FALSE)
 layout(1)
 ```
 .center[
-&lt;img src="slides_files/figure-html/crayfish-pca-plot-1.svg" width="75%" /&gt;
+&lt;img src="slides_files/figure-html/crayfish-pca-plot-1.svg" alt="" width="75%" /&gt;
 ]
 
 ---
@@ -981,10 +981,10 @@ ctrl &lt;- how(nperm = 499, within = Within(type = "free"),
 <script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
 <script src="macros.js"></script>
 <script>var slideshow = remark.create({
-"highlightStyle": "github",
-"highlightLines": true,
-"countIncrementalSlides": false,
-"ratio": "16:9"
+  "highlightStyle": "github",
+  "highlightLines": true,
+  "countIncrementalSlides": false,
+  "ratio": "16:9"
 });
 if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
   window.dispatchEvent(new Event('resize'));

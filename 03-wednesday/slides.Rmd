@@ -1,7 +1,7 @@
 ---
 title: "Constrained ordination"
 author: Gavin L. Simpson
-date: "February 12, 2025"
+date: "May 6, 2026"
 fontsize: 10pt
 classoption: "compress, aspectratio=169"
 bibliography: "resources/vegan-refs.bib"
