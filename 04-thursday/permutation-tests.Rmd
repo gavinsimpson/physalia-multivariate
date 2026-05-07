@@ -250,7 +250,7 @@ log_plough <- log1p(plough)
 
 # A multivariate experiment with fixed factors
 
-This example uses a data set of Swedish pine forest undergrowth assemblages that were experimentally manipulated through the addition of nitrogen `N` and phosphorus `P`. There are 32 samples in 4 complete, randomized bloacks of 8 plots each. In each block, all combinations of 4 levels of nitrogen `N` (applied as ammonium nitrate) and 2 levels of phosphorus `P` (applied as compound PK fertilizer) were applied.
+This example uses a data set of Swedish pine forest undergrowth assemblages that were experimentally manipulated through the addition of nitrogen `N` and phosphorus `P`. There are 32 samples in 4 complete, randomized blocks of 8 plots each. In each block, all combinations of 4 levels of nitrogen `N` (applied as ammonium nitrate) and 2 levels of phosphorus `P` (applied as compound PK fertilizer) were applied.
 
 ```{r e40-load}
 e40_spp <- read_csv(url("https://bit.ly/e40-spp"), skip = 1L) %>%
