@@ -11,7 +11,7 @@
 
 <meta name="author" content="Gavin Simpson" />
 
-<meta name="date" content="2024-05-30" />
+<meta name="date" content="2026-05-07" />
 
 <title>Permutation tests</title>
 
@@ -352,16 +352,80 @@ display: none;
 
 <h1 class="title toc-ignore">Permutation tests</h1>
 <h4 class="author">Gavin Simpson</h4>
-<h4 class="date">May 30, 2024</h4>
+<h4 class="date">May 7, 2026</h4>
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#abstract" id="toc-abstract">Abstract</a>
+<ul>
+<li><a href="#loading-the-packages-youll-need" id="toc-loading-the-packages-youll-need">Loading the packages you’ll
+need</a></li>
+</ul></li>
+<li><a href="#ectomycorrhizal-fungi" id="toc-ectomycorrhizal-fungi">Ectomycorrhizal fungi</a>
+<ul>
+<li><a href="#testing-the-effects-of-whole-plot-variables" id="toc-testing-the-effects-of-whole-plot-variables">Testing the effects
+of whole-plot variables</a></li>
+<li><a href="#testing-the-effect-of-split-plot-variables" id="toc-testing-the-effect-of-split-plot-variables">Testing the effect
+of split-plot variables</a></li>
+</ul></li>
+<li><a href="#testing-a-spatial-design" id="toc-testing-a-spatial-design">Testing a spatial design</a>
+<ul>
+<li><a href="#plots-in-a-rectangular-spatial-layout" id="toc-plots-in-a-rectangular-spatial-layout">Plots in a rectangular
+spatial layout</a></li>
+</ul></li>
+<li><a href="#ohraz-example" id="toc-ohraz-example">Ohraz
+example</a></li>
+<li><a href="#hierarchical-effects-of-crayfish" id="toc-hierarchical-effects-of-crayfish">Hierarchical effects of
+crayfish</a></li>
+<li><a href="#effect-of-ploughing-time-on-weeds" id="toc-effect-of-ploughing-time-on-weeds">Effect of ploughing time on
+weeds</a></li>
+<li><a href="#a-multivariate-experiment-with-fixed-factors" id="toc-a-multivariate-experiment-with-fixed-factors">A multivariate
+experiment with fixed factors</a></li>
+</ul>
+</div>
 
 <div id="abstract" class="section level1">
 <h1>Abstract</h1>
 <p>Below, you’ll find several examples of experimental designs or other
 multivariate data sets that we wish to test using constrained ordination
 methods and restricted permutation (Monte Carlo) tests.</p>
+<div id="loading-the-packages-youll-need" class="section level2">
+<h2>Loading the packages you’ll need</h2>
+<p>Start by loading the packages you will need to complete <em>all</em>
+of the examples. Not all packages are needed for each example, but we
+load them all now, so that it is easy for you to pick and choose from
+the examples that you want to work with.</p>
+<pre class="r"><code>library(&quot;vegan&quot;)</code></pre>
+<pre><code>## Loading required package: permute</code></pre>
+<pre class="r"><code>library(&quot;permute&quot;)
+library(&quot;readr&quot;)
+library(&quot;tidyr&quot;)
+library(&quot;dplyr&quot;)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(&quot;tibble&quot;)
+library(&quot;forcats&quot;)
+library(&quot;stringr&quot;)</code></pre>
+<p>Below, a series of examples are described, with (hopefully) just
+enough information for you to be able to think about how to fit a model
+to test a stated hypothesis, and also how to design the correct
+permutation test using <code>how()</code>. It might help to sketch out
+the experimental design in rough form, and use different colours for the
+treatments as you colour in the blocks/plots/samples as I did in the
+slides; think about whether a treatment varies at the sample level or at
+the plot level.</p>
+<p>If you are stuck, or just want to know how to analyse a particular
+example, you can look at the <a href="https://gavinsimpson.github.io/physalia-multivariate/04-thursday/permutation-tests-solutions.html">solutions
+file</a>.</p>
+</div>
 </div>
 <div id="ectomycorrhizal-fungi" class="section level1">
 <h1>Ectomycorrhizal fungi</h1>
@@ -387,25 +451,7 @@ treatments were replicated 4 times each, hence in the younger stands we
 have 12 plots (4 replicates by 3 treatments), while in the oldest stands
 we have 8 plots each (4 replicates by 2 treatments). Within stands,
 treatments were randomized.</p>
-<pre class="r"><code>library(&quot;vegan&quot;)</code></pre>
-<pre><code>## Loading required package: permute</code></pre>
-<pre class="r"><code>library(&quot;permute&quot;)
-library(&quot;readr&quot;)
-library(&quot;tidyr&quot;)
-library(&quot;dplyr&quot;)</code></pre>
-<pre><code>## 
-## Attaching package: &#39;dplyr&#39;</code></pre>
-<pre><code>## The following objects are masked from &#39;package:stats&#39;:
-## 
-##     filter, lag</code></pre>
-<pre><code>## The following objects are masked from &#39;package:base&#39;:
-## 
-##     intersect, setdiff, setequal, union</code></pre>
-<pre class="r"><code>library(&quot;tibble&quot;)
-library(&quot;forcats&quot;)
-library(&quot;stringr&quot;)
-
-fungi &lt;- read_csv(url(&quot;https://bit.ly/fungi-spp&quot;), skip = 1L,
+<pre class="r"><code>fungi &lt;- read_csv(url(&quot;https://bit.ly/fungi-spp&quot;), skip = 1L,
     col_types = &quot;-cddddddddddddddddddddddddddddddddddd&quot;) %&gt;%
     mutate(across(Amangemm:Xerosubt, ~ replace_na(.x, 0))) %&gt;%
         select(-(Ncarp:Nspec)) %&gt;%

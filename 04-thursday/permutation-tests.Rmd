@@ -1,13 +1,35 @@
 ---
 title: Permutation tests
 author: Gavin Simpson
-date: May 30, 2024
-output: html_document
+date: May 7, 2026
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
 ---
 
 # Abstract
 
 Below, you'll find several examples of experimental designs or other multivariate data sets that we wish to test using constrained ordination methods and restricted permutation (Monte Carlo) tests.
+
+## Loading the packages you'll need
+
+Start by loading the packages you will need to complete *all* of the examples. Not all packages are needed for each example, but we load them all now, so that it is easy for you to pick and choose from the examples that you want to work with.
+
+```{r load-packages}
+library("vegan")
+library("permute")
+library("readr")
+library("tidyr")
+library("dplyr")
+library("tibble")
+library("forcats")
+library("stringr")
+```
+
+Below, a series of examples are described, with (hopefully) just enough information for you to be able to think about how to fit a model to test a stated hypothesis, and also how to design the correct permutation test using `how()`. It might help to sketch out the experimental design in rough form, and use different colours for the treatments as you colour in the blocks/plots/samples as I did in the slides; think about whether a treatment varies at the sample level or at the plot level.
+
+If you are stuck, or just want to know how to analyse a particular example, you can look at the [solutions file](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/permutation-tests-solutions.html).
 
 # Ectomycorrhizal fungi
 
@@ -22,15 +44,6 @@ In this example we will study the effect of sod-cutting and sod-addition on the 
 Treatment `A` (sod addition) was not done in the oldest two stands (`St5` and `St6`) as these were the oldest stands and already had thick layers of humus and litter. The treatments were replicated 4 times each, hence in the younger stands we have 12 plots (4 replicates by 3 treatments), while in the oldest stands we have 8 plots each (4 replicates by 2 treatments). Within stands, treatments were randomized.
 
 ```{r}
-library("vegan")
-library("permute")
-library("readr")
-library("tidyr")
-library("dplyr")
-library("tibble")
-library("forcats")
-library("stringr")
-
 fungi <- read_csv(url("https://bit.ly/fungi-spp"), skip = 1L,
     col_types = "-cddddddddddddddddddddddddddddddddddd") %>%
     mutate(across(Amangemm:Xerosubt, ~ replace_na(.x, 0))) %>%
@@ -121,7 +134,6 @@ For this example we'll look only at the effect of pH on wetland plant abundance 
 ## Plots in a rectangular spatial layout
 
 ```{r}
-
 grid_veg <- read_csv(url("https://bit.ly/grid-veg"),
     skip = 1L) %>%
     mutate(across(ACHILMIL:`POPUL-SP`, ~ replace_na(.x, 0))) %>%
@@ -168,7 +180,6 @@ Test 1 of the hypotheses
 
 
 ```{r ohraz}
-
 spp <- read_csv(url("https://bit.ly/ohraz-spp")) %>%
     rename(label = "...1") %>%
     janitor::clean_names()
