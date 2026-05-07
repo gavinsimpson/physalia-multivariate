@@ -4,6 +4,7 @@ all:
 	cd ./02-tuesday && make $@
 	cd ./03-wednesday && make $@
 	cd ./04-thursday && make $@
+	cd ./05-friday && make $@
 
 .PHONY : slides
 slides:
@@ -11,6 +12,7 @@ slides:
 	cd ./02-tuesday && make $@
 	cd ./03-wednesday && make $@
 	cd ./04-thursday && make $@
+	cd ./05-friday && make $@
 
 .PHONY : purl
 purl:
@@ -18,4 +20,4 @@ purl:
 	cd ./02-tuesday && make $@
 	cd ./03-wednesday && make $@
 	cd ./04-thursday && make $@
-
+	cd ./05-friday && make $@
