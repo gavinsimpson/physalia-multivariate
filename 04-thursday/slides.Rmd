@@ -349,7 +349,7 @@ Using `mirror = TRUE` then can double (time series, linear transects) or quadrup
 
 Restricted severely reduce the size of the set of permutations
 
-As the minimum *p* value obtainable is $1 / np$ where $np$ is number of allowed permutations (including the observed) this can impact the ability to detect signal/pattern
+As the minimum *p* value obtainable is $1 / n_{p}$ where $n_{p}$ is number of allowed permutations (including the observed) this can impact the ability to detect signal/pattern
 
 If we don't want mirroring
 

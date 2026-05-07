@@ -15,40 +15,6 @@ data(varechem)
 theme_set(theme_minimal(base_size = 16, base_family = 'Fira Sans'))
 
 
-## ----adonis2-by-margin-as-db-rda----------------------------------------------
-data(dune, dune.env)
-dune_dbrda <- dbrda(dune ~ Management * A1, data = dune.env,
-    method = "bray")
-
-
-## -----------------------------------------------------------------------------
-spp <- read_csv(url("https://bit.ly/ohraz-spp")) %>%
-    rename(label = "...1") %>%
-    janitor::clean_names()
-
-molinia <- spp %>%
-    select(label:molicaer)
-
-spp <- spp %>%
-    select(-molicaer) %>%
-    column_to_rownames("label")
-
-env <- read_csv(url("https://bit.ly/ohraz-env")) %>%
-    rename(label = "...1") %>%
-    mutate(across(c(mowing:removal, plotid), ~ factor(.x))) %>%
-    column_to_rownames("label")
-
-
-## ----worked-example-devel-2-with-dbrda----------------------------------------
-ohraz_dbrda <- dbrda(spp ~ year +
-    year:mowing + year:fertilizer + year:removal +
-    Condition(plotid), data = env, method = "bray", add = "lingoes")
-h <- how(within = Within(type = "free"),
-    plots = Plots(strata = env$plotid, type = "none"))
-set.seed(42)
-anova(ohraz_dbrda, permutations = h, model = "reduced")
-
-
 ## ----load-cocorresp-data------------------------------------------------------
 library("cocorresp")
 data(beetles)

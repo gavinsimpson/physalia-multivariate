@@ -1,4 +1,4 @@
-all: slides birds ponds dune
+all: slides birds ponds dune pdf
 
 slides: slides.Rmd slides.css
 	Rscript -e 'library("rmarkdown"); render("slides.Rmd")'
@@ -11,3 +11,6 @@ birds: birds.Rmd
 
 dune: dune-meadows.Rmd
 	Rscript -e "rmarkdown::render(\"dune-meadows.Rmd\")"
+
+pdf: slides.Rmd slides.html
+	Rscript -e "renderthis::to_pdf(from = \"slides.Rmd\")"

@@ -1,4 +1,4 @@
-all: slides purl examples
+all: slides purl pdf examples
 examples: coca prc varpart lda
 
 slides: slides.Rmd slides.css
@@ -18,3 +18,7 @@ varpart: variation-partitioning.Rmd
 
 lda: linear-discriminants.Rmd
 	Rscript -e "rmarkdown::render(\"linear-discriminants.Rmd\")"
+
+pdf: slides.Rmd slides.html
+	Rscript -e "renderthis::to_pdf(from = \"slides.Rmd\")"
+
