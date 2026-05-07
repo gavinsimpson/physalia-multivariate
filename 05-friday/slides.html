@@ -701,6 +701,10 @@ Rarely will I choose PERMANOVA, dbRDA, NMDS, over PCA/RDA
 
 For omics data, especially microbiome data (16S sequencing, metagenomics), where you have large variation in the number of reads across samples, we will typically need to treat the data compositionally (relative proportions or %); CCA, tb-RDA (RDA after Hellinger transform, or RDA after ALR or CLR transform)
 
+---
+
+# Overview
+
 If you want to model the abundances (raw PCA, RDA) then you will need to account for the differences in effort between samples:
 
 * *vst*
@@ -717,6 +721,10 @@ We use Permutation Tests to test effects in ordination models
 Often you will need to fit several different models to test the various hypotheses you have for a given data set
 
 Think very carefully about any groupings there are in the data; almost invariably you will need to use a restricted permutation test, especially in an experimental setting
+
+---
+
+# Overview
 
 To figure out what needs to be permuted and what needs to held fixed, it helps to sketch out the design, even if only crudely, using colours of the individuals to indicate the different levels of your treatments &amp;mdash; look at whether the colours vary *within* plots or blocks or *between* plots (and blocks, but if blocks, you can't treat them as blocks, they need to be plots and permuted)
     </textarea>
