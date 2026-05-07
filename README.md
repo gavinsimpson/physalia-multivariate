@@ -54,7 +54,8 @@ applying the methods to high-throughput data such as shotgun sequencing
 * [Thursday](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.html)
     * [PDF](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/slides.pdf)
     * [Randomised Block](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/randomised-complete-block.html)
-    * [Permutation test examples](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/permutation-tests-solutions.html)
+    * [Permutation test examples](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/permutation-tests.html)
+    * [Permutation test solutions](https://gavinsimpson.github.io/physalia-multivariate/04-thursday/permutation-tests-solutions.html)
 
 
 * [Other topics](https://gavinsimpson.github.io/physalia-multivariate/05-other/slides.html)
