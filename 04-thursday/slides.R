@@ -24,7 +24,8 @@ summary(pstat)
 
 
 ## ----permustats-2, fig.width = 6, fig.height = 6------------------------------
-densityplot(pstat)
+library("ggvegan")
+autoplot(pstat, plot = "density")
 
 
 ## ----cca-anova----------------------------------------------------------------
